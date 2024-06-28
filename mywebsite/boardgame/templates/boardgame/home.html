@@ -1,0 +1,47 @@
+<html>
+    <head> 
+        <title>Welcome</title>
+    </head>
+
+    <body>
+        <h1>Welcome to Board Game Meet!</h1> 
+        <div>
+            Join a community and discover new board games, meet new friends, <br>
+            and participate in exciting events. <br />
+            <strong>{{ boldmessage }}</strong><br /> </div>
+        <div>
+
+        <div>
+            <h2>Featured Groups</h2>
+            {% if groups %}
+                <ul>
+                    {% for group in groups %}
+                        <li>
+                            <a href="{% url 'group_profile' group.slug %}">{{ group.name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <strong>There are no groups present.</strong>
+            {% endif %}
+        </div>
+        <div>
+            <h2>Featured Events</h2>
+            {% if events %}
+                <ul>
+                    {% for event in events %}
+                    <li>
+                        <a href="{% url 'event_profile' event.id %}">{{ event.title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <strong>There are no events present.</strong>
+            {% endif %}
+        </div>  
+        <br>         
+        <div>
+            <a href="/boardgame/about/">About Board Game Meetup</a><br /> 
+        </div> 
+     </body>
+    </html>
