@@ -1,4 +1,4 @@
-
+<!-- group_profile.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,9 +9,20 @@
     <h1>{{ group.name }}</h1>
     <p>Description: {{ group.description }}</p>
     <p>Location: {{ group.location }}</p>
-    <!-- Add more details as needed -->
+
+    <!-- Debug Output -->
+    <p>Is Admin: {{ is_admin }}</p>
+
+    <!-- Show Create Event button if user is group admin of this group -->
+    {% if is_admin %}
+        <a href="{% url 'create_event' group.slug %}" class="btn btn-primary">Create Event</a>
+    {% else %}
+        <strong>Join Event button</strong>
+    {% endif %}
+
+    <!-- Link back to home -->
+    <div>
+        <a href="{% url 'home' %}">Back to Home</a>
+    </div>
 </body>
-<div>
-    <a href="{% url 'home' %}">Back to Home</a>
-</div>
 </html>

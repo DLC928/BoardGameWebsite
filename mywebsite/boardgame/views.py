@@ -1,6 +1,7 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
-from boardgame.models import Group,Event
+from boardgame.models import Group,Event,GroupMembers
+from .forms import GroupForm, EventForm
 
 
 # Create your views here.
@@ -19,19 +20,59 @@ def home(request):
 def group_profile(request, group_slug):
     # Retrieve the group object using the slug
     group = get_object_or_404(Group, slug=group_slug)
+
+    is_admin = GroupMembers.objects.filter(user=request.user, group=group, is_admin=True).exists()
+
     # Pass the group object to the template
     context = {
-        'group': group
+        'group': group,
+        'is_admin': is_admin
     }
     return render(request, 'boardgame/group_profile.html', context)
 
-def event_profile(request, event_id):
+
+def event_details(request, event_id):
     event = get_object_or_404(Event, id=event_id)
+    attendees = event.attendees.all() 
+
     context = {
-        'event': event
+        'event': event,
+        'attendees': attendees
     }
-    return render(request, 'boardgame/event_profile.html', context)
+    return render(request, 'boardgame/event_details.html', context)
 
 
-def v1(request):
-    return HttpResponse("View 1!")
+
+def create_group(request):
+    if request.method == 'POST':
+        form = GroupForm(request.POST)
+        if form.is_valid():
+            group = form.save(commit=False)
+            group.save()
+            
+            # Add the current user as a member of the group and mark them as admin
+            GroupMembers.objects.create(user=request.user, group=group, is_admin=True)
+            return redirect('group_profile', group_slug=group.slug)
+    else:
+        form = GroupForm()
+    return render(request, 'boardgame/create_group.html', {'form': form})
+
+
+
+def create_event(request, group_slug):
+    group = get_object_or_404(Group, slug=group_slug)
+    if request.method == 'POST':
+        form = EventForm(request.POST)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.group = group  # Associate the event with the group
+            event.save()
+            return redirect('group_profile', group_slug=group_slug)
+    else:
+        form = EventForm()
+
+    context = {
+        'form': form,
+        'group': group,
+    }
+    return render(request, 'boardgame/create_event.html', context)

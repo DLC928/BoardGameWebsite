@@ -1,10 +1,12 @@
-<html>
+{% extends 'boardgame/base.html' %}
+{% load static %}
+{% block content %}
     <head> 
         <title>Welcome</title>
+        <link rel="stylesheet" type ="text/css" href="{% static 'boardgame/style.css' %}">
+        <img src="{% static 'boardgame/images/boardgamehome.jpeg' %}" alt="Board Game Home" />
     </head>
-
-    <body>
-        <h1>Welcome to Board Game Meet!</h1> 
+        <h1 class = "test" >Welcome to Board Game Meet!</h1> 
         <div>
             Join a community and discover new board games, meet new friends, <br>
             and participate in exciting events. <br />
@@ -31,7 +33,7 @@
                 <ul>
                     {% for event in events %}
                     <li>
-                        <a href="{% url 'event_profile' event.id %}">{{ event.title }}</a>
+                        <a href="{% url 'event_details' event.id %}">{{ event.title }}</a>
                     </li>
                     {% endfor %}
                 </ul>
@@ -44,4 +46,4 @@
             <a href="/boardgame/about/">About Board Game Meetup</a><br /> 
         </div> 
      </body>
-    </html>
+{% endblock %}

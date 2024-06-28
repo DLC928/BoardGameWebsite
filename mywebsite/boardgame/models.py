@@ -2,8 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 
-# Profile model to store additional user information
-class Profile(models.Model):
+# UserProfile model to store additional user information
+class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
 
@@ -24,6 +24,7 @@ class Group(models.Model):
             super(Group, self).save(*args, **kwargs)
         if not self.slug:
             self.slug = f"{slugify(self.name)}-{self.id}"
+            self.save()  # Save again to update slug
         super(Group, self).save(*args, **kwargs)
 
     def __str__(self):

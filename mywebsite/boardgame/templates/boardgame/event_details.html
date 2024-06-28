@@ -11,8 +11,17 @@
     <p>Date/Time: {{ event.date_time }}</p>
     <p>Location: {{ event.location }}</p>
     <!-- Add more details as needed -->
+
+    <h2>Attendees:</h2>
+    <ul>
+        {% for attendee in attendees %}
+        <li>{{ attendee.username }}</li>
+        {% endfor %}
+    </ul>
+
     <div>
         <a href="{% url 'home' %}">Back to Home</a>
     </div>
 </body>
 </html>
+
