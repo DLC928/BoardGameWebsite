@@ -9,5 +9,6 @@ urlpatterns = [
     path('event/<int:event_id>/', views.event_details, name='event_details'),
     path('create_group', views.create_group, name='create_group'),
     path('group/<slug:group_slug>/create_event/', views.create_event, name='create_event'),
+    #path('event/<int:event_id>/nominate/', views.nominate_game, name='nominate_game'),
     
 ]

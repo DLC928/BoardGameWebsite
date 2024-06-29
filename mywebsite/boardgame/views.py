@@ -68,22 +68,18 @@ def create_event(request, group_slug):
 def event_details(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     attendees = event.attendees.all()
-    is_attending = attendees.filter(id=request.user.id).exists()
+    is_attending = attendees.filter(id=request.user.id).exists() #check to see if current user is attending
 
-    if request.method == 'POST':
-        if 'join' in request.POST:
+    if request.method == 'POST': # used when a form has been submitted, meaning someone clicked button 
+        if 'join' in request.POST: # based on button name in html page
             if not is_attending:
-                EventAttendance.objects.create(user=request.user, event=event)
-                messages.success(request, "You have successfully joined the event.")
-            else:
-                messages.info(request, "You are already attending this event.")
+                EventAttendance.objects.create(user=request.user, event=event) #create() will create and save object in one step
         elif 'leave' in request.POST:
             if is_attending:
                 EventAttendance.objects.filter(user=request.user, event=event).delete()
-                messages.success(request, "You have successfully left the event.")
-            else:
-                messages.info(request, "You are not attending this event.")
-
+        elif 'nominate_game' in request.POST:
+            if is_attending:
+                pass # will bring to game nominate form later
         return redirect('event_details', event_id=event_id)
 
     context = {

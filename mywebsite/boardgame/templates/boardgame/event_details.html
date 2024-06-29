@@ -5,33 +5,46 @@
     <title>{{ event.title }}</title>
 </head>
 <body>
-    <h1>{{ event.title }}</h1>
-    <p>Description: {{ event.description }}</p>
-    <p>Date/Time: {{ event.date_time }}</p>
-    <p>Location: {{ event.location }}</p>
-    
-    <h2>Attendees:</h2>
-    <ul>
-        {% for attendee in attendees %}
-        <li>{{ attendee.username }}</li>
-        {% endfor %}
-    </ul>
-
-    <div>
-        {% if user.is_authenticated %}
-            <form method="post" action="">
-                {% csrf_token %}
-                {% if is_attending %}
-                    <button type="submit" name="leave">Leave Event</button>
+    <br/>
+    <div class="card">
+        <div class="card-header">
+            Event
+        </div>
+        <div class="card-body">
+          <strong class="card-title">{{ event.title }}</strong>
+          <p class="card-text">
+            <li>Description: {{ event.description }}</li>
+            <li>Date/Time: {{ event.date_time }}</li>
+            <li>Location: {{ event.location }}</li>
+            <br/>
+        
+            <strong>Attendees:</strong>
+            <ul>
+                {% for attendee in attendees %}
+                <li>{{ attendee.username }}</li>
+                {% endfor %}
+            </ul>
+        
+            <div>
+                {% if user.is_authenticated %}
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        {% if is_attending %}
+                            <button type="submit" name="leave">Leave Event</button>
+                             <!-- Nominate Game button, visible only if attending -->
+                             <button type="button">Nominate Game</button>
+                        {% else %}
+                            <button type="submit" name="join">Join Event</button>
+                        {% endif %}
+                    </form>
                 {% else %}
-                    <button type="submit" name="join">Join Event</button>
+                    <p>You must <a href="{% url 'login' %}">login</a> first to join the event.</p>
                 {% endif %}
-            </form>
-        {% else %}
-            <p>You must <a href="{% url 'login' %}">login</a> first to join the event.</p>
-        {% endif %}
-    </div>
-
+            </div>
+        
+          </p>
+        </div>
+      </div>
     <div>
         <a href="{% url 'home' %}">Back to Home</a>
     </div>
