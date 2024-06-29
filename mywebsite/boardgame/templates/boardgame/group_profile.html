@@ -1,11 +1,6 @@
-<!-- group_profile.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ group.name }}</title>
-</head>
-<body>
+{% extends 'boardgame/base.html' %}
+
+{% block content %}
     <h1>{{ group.name }}</h1>
     <p>Description: {{ group.description }}</p>
     <p>Location: {{ group.location }}</p>
@@ -24,5 +19,4 @@
     <div>
         <a href="{% url 'home' %}">Back to Home</a>
     </div>
-</body>
-</html>
+{% endblock %}

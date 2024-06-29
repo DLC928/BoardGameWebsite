@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
 from django.http import HttpResponse
-from boardgame.models import Group,Event,GroupMembers
+from boardgame.models import Group,Event,GroupMembers,EventAttendance
 from .forms import GroupForm, EventForm
 
 
@@ -20,27 +21,13 @@ def home(request):
 def group_profile(request, group_slug):
     # Retrieve the group object using the slug
     group = get_object_or_404(Group, slug=group_slug)
-
     is_admin = GroupMembers.objects.filter(user=request.user, group=group, is_admin=True).exists()
-
     # Pass the group object to the template
     context = {
         'group': group,
         'is_admin': is_admin
     }
     return render(request, 'boardgame/group_profile.html', context)
-
-
-def event_details(request, event_id):
-    event = get_object_or_404(Event, id=event_id)
-    attendees = event.attendees.all() 
-
-    context = {
-        'event': event,
-        'attendees': attendees
-    }
-    return render(request, 'boardgame/event_details.html', context)
-
 
 
 def create_group(request):
@@ -76,3 +63,34 @@ def create_event(request, group_slug):
         'group': group,
     }
     return render(request, 'boardgame/create_event.html', context)
+
+
+def event_details(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    attendees = event.attendees.all()
+    is_attending = attendees.filter(id=request.user.id).exists()
+
+    if request.method == 'POST':
+        if 'join' in request.POST:
+            if not is_attending:
+                EventAttendance.objects.create(user=request.user, event=event)
+                messages.success(request, "You have successfully joined the event.")
+            else:
+                messages.info(request, "You are already attending this event.")
+        elif 'leave' in request.POST:
+            if is_attending:
+                EventAttendance.objects.filter(user=request.user, event=event).delete()
+                messages.success(request, "You have successfully left the event.")
+            else:
+                messages.info(request, "You are not attending this event.")
+
+        return redirect('event_details', event_id=event_id)
+
+    context = {
+        'event': event,
+        'attendees': attendees,
+        'is_attending': is_attending,
+    }
+    return render(request, 'boardgame/event_details.html', context)
+
+

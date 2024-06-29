@@ -1,8 +1,7 @@
-
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'boardgame/base.html' %}
+{% load static %}
+{% block content %}
 <head>
-    <meta charset="UTF-8">
     <title>{{ event.title }}</title>
 </head>
 <body>
@@ -10,8 +9,7 @@
     <p>Description: {{ event.description }}</p>
     <p>Date/Time: {{ event.date_time }}</p>
     <p>Location: {{ event.location }}</p>
-    <!-- Add more details as needed -->
-
+    
     <h2>Attendees:</h2>
     <ul>
         {% for attendee in attendees %}
@@ -20,8 +18,22 @@
     </ul>
 
     <div>
+        {% if user.is_authenticated %}
+            <form method="post" action="">
+                {% csrf_token %}
+                {% if is_attending %}
+                    <button type="submit" name="leave">Leave Event</button>
+                {% else %}
+                    <button type="submit" name="join">Join Event</button>
+                {% endif %}
+            </form>
+        {% else %}
+            <p>You must <a href="{% url 'login' %}">login</a> first to join the event.</p>
+        {% endif %}
+    </div>
+
+    <div>
         <a href="{% url 'home' %}">Back to Home</a>
     </div>
 </body>
-</html>
-
+{% endblock %}

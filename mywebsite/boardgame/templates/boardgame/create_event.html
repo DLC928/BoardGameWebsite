@@ -1,13 +1,20 @@
 {% extends 'boardgame/base.html' %}
+{% load static %}
 
 {% block content %}
-<center>
-    <h1>Create new event</h1>
-<br/><br/>
-<form action="{% url 'create_event' group.slug %}" method="POST">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit" class="btn btn-secondary">
-</form>
-</center>
+    <script src="{% url 'js-catlog' %}"></script>
+    <script src="{% static '/admin/js/core.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'admin/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">
+
+    <div class="container">
+        <h1 class="text-center">Create new event</h1>
+        <br><br>
+        <form action="{% url 'create_event' group.slug %}" method="POST">
+            {% csrf_token %}
+            {{ form.media }}
+            {{ form }}
+            <input type="submit" value="Submit" class="btn btn-secondary">
+        </form>
+    </div>
 {% endblock %}
