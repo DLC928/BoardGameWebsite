@@ -121,7 +121,9 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'boardgame', 'static', 'boardgame'),
 ]
 
+GOOGLE_API_KEY = "AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU"
 
+BASE_COUNTRY = "UK"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

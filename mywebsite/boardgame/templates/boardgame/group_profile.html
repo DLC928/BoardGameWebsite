@@ -10,12 +10,13 @@
 
     <!-- Show Create Event button if user is group admin of this group -->
     {% if is_admin %}
-        <a href="{% url 'create_event' group.slug %}" class="btn btn-primary">Create Event</a>
+    <a href="{% url 'create_event' group.slug %}" class="btn btn-secondary">Create Event</a>
     {% else %}
         <strong>Join Event button</strong>
     {% endif %}
 
     <!-- Link back to home -->
+    <br/><br/>
     <div>
         <a href="{% url 'home' %}">Back to Home</a>
     </div>

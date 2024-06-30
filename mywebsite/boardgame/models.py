@@ -50,8 +50,9 @@ class Event(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     date_time = models.DateTimeField()
-    location = models.CharField(max_length=255)
+    location = models.ForeignKey('EventLocation', on_delete=models.CASCADE)
     attendees = models.ManyToManyField(User, through='EventAttendance')
+
 
     def __str__(self):
         return f"{self.title} by {self.group.name}"
@@ -69,6 +70,18 @@ class EventAttendance(models.Model):
     def __str__(self):
         return f"{self.user.username} attending {self.event.title}"
 
+class EventLocation(models.Model):
+    name = models.CharField(max_length=255)
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=100)
+    postcode = models.CharField(max_length=20)
+    country = models.CharField(max_length=20)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+    
 # Game model to store game details
 class Game(models.Model):
     name = models.CharField(max_length=100)

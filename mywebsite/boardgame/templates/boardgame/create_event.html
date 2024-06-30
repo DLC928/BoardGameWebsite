@@ -10,11 +10,27 @@
     <div class="container">
         <h1 class="text-center">Create new event</h1>
         <br><br>
-        <form action="{% url 'create_event' group.slug %}" method="POST">
+        <form id="eventForm" action="{% url 'create_event' group.slug %}" method="POST">
             {% csrf_token %}
             {{ form.media }}
             {{ form }}
+            <button type="button" class="btn btn-primary" onclick="toggleLocationForm()">Add Location</button>
+            <div id="locationForm" style="display: none;">
+                <h3>Event Location</h3>
+                {{ location_form.as_p }}
+            </div>
             <input type="submit" value="Submit" class="btn btn-secondary">
         </form>
     </div>
+
+    <script>
+        function toggleLocationForm() {
+            var locationForm = document.getElementById('locationForm');
+            if (locationForm.style.display === 'none') {
+                locationForm.style.display = 'block';
+            } else {
+                locationForm.style.display = 'none';
+            }
+        }
+    </script>
 {% endblock %}

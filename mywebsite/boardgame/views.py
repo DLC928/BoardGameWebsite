@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.http import HttpResponse
 from boardgame.models import Group,Event,GroupMembers,EventAttendance
-from .forms import GroupForm, EventForm
+from .forms import GroupForm, EventForm, EventLocationForm
 
 
 # Create your views here.
@@ -44,26 +44,29 @@ def create_group(request):
         form = GroupForm()
     return render(request, 'boardgame/create_group.html', {'form': form})
 
-
-
 def create_event(request, group_slug):
     group = get_object_or_404(Group, slug=group_slug)
     if request.method == 'POST':
-        form = EventForm(request.POST)
-        if form.is_valid():
-            event = form.save(commit=False)
+        event_form = EventForm(request.POST)
+        location_form = EventLocationForm(request.POST)
+        
+        if event_form.is_valid() and location_form.is_valid():
+            location = location_form.save()
+            event = event_form.save(commit=False)
             event.group = group  # Associate the event with the group
+            event.location = location  # Associate the event with the location
             event.save()
             return redirect('group_profile', group_slug=group_slug)
     else:
-        form = EventForm()
+        event_form = EventForm()
+        location_form = EventLocationForm()
 
     context = {
-        'form': form,
+        'form': event_form,
+        'location_form': location_form,
         'group': group,
     }
     return render(request, 'boardgame/create_event.html', context)
-
 
 def event_details(request, event_id):
     event = get_object_or_404(Event, id=event_id)
