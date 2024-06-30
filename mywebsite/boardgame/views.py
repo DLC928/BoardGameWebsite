@@ -68,7 +68,12 @@ def create_event(request, group_slug):
 def event_details(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     attendees = event.attendees.all()
+    nominations = event.nominations.all()
     is_attending = attendees.filter(id=request.user.id).exists() #check to see if current user is attending
+
+    for nomination in nominations:
+        print(nomination)  # Print each nomination object to inspect its attributes
+        print(nomination.name)
 
     if request.method == 'POST': # used when a form has been submitted, meaning someone clicked button 
         if 'join' in request.POST: # based on button name in html page
@@ -83,6 +88,7 @@ def event_details(request, event_id):
         'event': event,
         'attendees': attendees,
         'is_attending': is_attending,
+        'nominations': nominations,
     }
     return render(request, 'boardgame/event_details.html', context)
 

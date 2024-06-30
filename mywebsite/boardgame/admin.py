@@ -8,17 +8,22 @@ class EventAttendanceInline(admin.TabularInline):
     model = EventAttendance
     extra = 1  # Display one extra blank form by default
 
-class EventAdmin(admin.ModelAdmin):
-    inlines = [EventAttendanceInline]
-    # Other admin options for Event model display
+class GameNominationInline(admin.TabularInline):
+    model = GameNomination
+    extra = 1  # Display one extra blank form by default
 
+
+class EventAdmin(admin.ModelAdmin):
+    inlines = [EventAttendanceInline,GameNominationInline]
+
+
+admin.site.register(GameNomination)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Game)
-admin.site.register(Group, GroupAdmin)  # Register Group with GroupAdmin configuration
+admin.site.register(Group, GroupAdmin)  
 admin.site.register(EventAttendance)
 admin.site.register(EventLocation)
 admin.site.register(GroupMembers)
 admin.site.register(UserProfile)
-admin.site.register(GameNomination)
 admin.site.register(GameSignup)
     
