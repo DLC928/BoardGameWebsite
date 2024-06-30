@@ -32,7 +32,7 @@
                         {% if is_attending %}
                             <button type="submit" name="leave">Leave Event</button>
                              <!-- Nominate Game button, visible only if attending -->
-                             <button type="button">Nominate Game</button>
+                             <a href="{% url 'nominate_game' event.id %}" class="btn btn-secondary">Nominate Game</a>
                         {% else %}
                             <button type="submit" name="join">Join Event</button>
                         {% endif %}

@@ -1,11 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from django.http import HttpResponse
-from boardgame.models import Group,Event,GroupMembers,EventAttendance
-from .forms import GroupForm, EventForm, EventLocationForm
+from boardgame.models import Group,Event,GroupMembers,EventAttendance,GameNomination
+from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm
 
-
-# Create your views here.
 
 def home(request):
     group_list = Group.objects.all().order_by('name')
@@ -15,9 +11,9 @@ def home(request):
         'groups': group_list,
         'events': event_list
     }
-    # Render the response and send it back!
     return render(request, 'boardgame/home.html', context=context_dict)
 
+# ---------------------------GROUPS---------------------------
 def group_profile(request, group_slug):
     # Retrieve the group object using the slug
     group = get_object_or_404(Group, slug=group_slug)
@@ -44,6 +40,7 @@ def create_group(request):
         form = GroupForm()
     return render(request, 'boardgame/create_group.html', {'form': form})
 
+# ---------------------------EVENTS---------------------------
 def create_event(request, group_slug):
     group = get_object_or_404(Group, slug=group_slug)
     if request.method == 'POST':
@@ -80,9 +77,6 @@ def event_details(request, event_id):
         elif 'leave' in request.POST:
             if is_attending:
                 EventAttendance.objects.filter(user=request.user, event=event).delete()
-        elif 'nominate_game' in request.POST:
-            if is_attending:
-                pass # will bring to game nominate form later
         return redirect('event_details', event_id=event_id)
 
     context = {
@@ -93,3 +87,26 @@ def event_details(request, event_id):
     return render(request, 'boardgame/event_details.html', context)
 
 
+def nominate_game(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    
+    if request.method == 'POST':
+        form = GameDetailForm(request.POST)
+        if form.is_valid():
+            game = form.save(commit=False)
+            game.name = request.POST.get('name')
+            game.description = request.POST.get('description')
+            game.min_players = request.POST.get('min_players')
+            game.max_players = request.POST.get('max_players')
+            game.min_playtime = request.POST.get('min_playtime')
+            game.max_playtime = request.POST.get('max_playtime')
+            game.age = request.POST.get('age')
+            game.weight = request.POST.get('weight')
+            game.save()
+            
+            GameNomination.objects.create(game=game, event=event, nominator=request.user)
+            return redirect('event_details', event_id=event_id)
+    else:
+        form = GameDetailForm()
+    
+    return render(request, 'boardgame/nominate_game.html', {'form': form, 'event': event})

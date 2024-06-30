@@ -1,0 +1,111 @@
+{% block content %}
+<form action="{% url 'nominate_game' event_id=event.id %}" method="POST">
+    {% csrf_token %}
+    <div id="search-game">
+        <input type="text" name="game_name" class="game-autocomplete" placeholder="Search for a game...">
+    </div>
+    <div id="game-details" style="display: none;">
+        <p>Game Details:</p>
+        <input type="hidden" name="game_id" id="game-id">
+        <label for="game-name-detail">Name:</label>
+        <input type="text" name="name" id="game-name-detail" placeholder="Game Name">
+        <br>
+        <label for="description">Description:</label>
+        <textarea name="description" id="description" rows="4" placeholder="Description"></textarea>
+        <br>
+        <label for="min-players">Min Players:</label>
+        <input type="number" name="min_players" id="min-players" placeholder="Min Players">
+        <br>
+        <label for="max-players">Max Players:</label>
+        <input type="number" name="max_players" id="max-players" placeholder="Max Players">
+        <br>
+        <label for="min-playtime">Min Playing Time:</label>
+        <input type="number" name="min_playtime" id="min-playtime" placeholder="Min Playing Time">
+        <br>
+        <label for="max-playtime">Max Playing Time:</label>
+        <input type="number" name="max_playtime" id="max-playtime" placeholder="Max Playing Time">
+        <br>
+        <label for="age">Age:</label>
+        <input type="number" name="age" id="age" placeholder="Age">
+        <br>
+        <label for="weight">Weight:</label>
+        <input type="text" name="weight" id="weight" placeholder="Weight">
+    </div>
+    <input type="submit" value="Nominate Game" class="btn btn-secondary">
+    <button type="button" id="manual-entry-btn">Manually Add Game Details</button>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+  <!-- Load jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Load jQuery UI -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+
+  <script>
+    $(document).ready(function() {
+      $('.game-autocomplete').autocomplete({
+        source: function(request, response) {
+          $.ajax({
+            url: '/api/search-games/',
+            method: 'GET',
+            data: { query: request.term },
+            success: function(data) {
+              response($.map(data, function(item) {
+                return {
+                  label: item.name,
+                  value: item.name,
+                  id: item.id
+                };
+              }));
+            },
+            error: function(err) {
+              console.error('Error fetching game data:', err);
+            }
+          });
+        },
+        minLength: 3,
+        select: function(event, ui) {
+          // Set the input value to the selected game's name
+          $(this).val(ui.item.value);
+
+          // Set the hidden input value to the selected game's ID
+          $('#game-id').val(ui.item.id);
+
+          // Fetch game details using the game ID
+          $.ajax({
+            url: '/api/game-details/',
+            method: 'GET',
+            data: { game_id: ui.item.id },
+            success: function(data) {
+              // Populate game details in the form fields
+              $('#game-name-detail').val(data.name);
+              $('#description').val(data.description);
+              $('#min-players').val(data.min_players);
+              $('#max-players').val(data.max_players);
+              $('#min-playtime').val(data.min_playtime);  
+            $('#max-playtime').val(data.max_playtime);  
+              $('#age').val(data.age);
+              $('#weight').val(data.weight);
+
+              // Show game details section
+              $('#game-details').show();
+            },
+            error: function(err) {
+              console.error('Error fetching game details:', err);
+            }
+          });
+
+          return false; // Prevent the default action
+        }
+      });
+
+      // Manually add game details button functionality
+      $('#manual-entry-btn').click(function() {
+        $('#game-details').show();
+      });
+    });
+  </script>
+{% endblock %}

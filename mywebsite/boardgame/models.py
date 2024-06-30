@@ -82,19 +82,24 @@ class EventLocation(models.Model):
     def __str__(self):
         return self.name
     
-# Game model to store game details
+# Game model to store game details from BGG
 class Game(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    play_time = models.CharField(max_length=100)
-    player_count = models.CharField(max_length=100)
-    difficulty_rating = models.FloatField()
+    name = models.CharField(max_length=200)
+    min_players = models.PositiveIntegerField(blank=True, null=True)
+    max_players = models.PositiveIntegerField(blank=True, null=True)
+    min_playtime = models.PositiveIntegerField(blank=True, null=True)
+    max_playtime = models.PositiveIntegerField(blank=True, null=True)
+    age =models.PositiveIntegerField(blank=True, null=True)
+    weight = models.CharField(max_length=10, blank=True, null=True) 
+    description = models.TextField(blank=True, null=True)
+    thumbnail = models.URLField(blank=True, null=True)
+
 
     def __str__(self):
         return self.name
 
 # Nomination model to handle the relationship between events and games
-class Nomination(models.Model):
+class GameNomination(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     nominator = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -105,3 +110,14 @@ class Nomination(models.Model):
 
     def __str__(self):
         return f"{self.game.name} nominated for {self.event.title}"
+
+class GameSignup(models.Model):
+    nomination = models.ForeignKey(GameNomination, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date_signed_up = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('nomination', 'user')
+
+    def __str__(self):
+        return f"{self.user.username} signed up for {self.nomination.game.name} at {self.nomination.event.title}"

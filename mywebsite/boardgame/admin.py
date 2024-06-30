@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Event, Game, Group, EventAttendance, GroupMembers, UserProfile, Nomination, EventLocation
+from .models import Event, Game, Group, EventAttendance, GroupMembers, UserProfile, GameNomination, EventLocation, GameSignup
 
 class GroupAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
@@ -19,6 +19,6 @@ admin.site.register(EventAttendance)
 admin.site.register(EventLocation)
 admin.site.register(GroupMembers)
 admin.site.register(UserProfile)
-admin.site.register(Nomination)
-
+admin.site.register(GameNomination)
+admin.site.register(GameSignup)
     

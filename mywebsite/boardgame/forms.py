@@ -1,5 +1,5 @@
 from django import forms 
-from .models import Group,Event, EventLocation
+from .models import Group,Event, EventLocation, Game
 from django.contrib.admin.widgets import  AdminDateWidget, AdminTimeWidget, AdminSplitDateTime
 
 # Create a group form
@@ -31,3 +31,22 @@ class EventLocationForm(forms.ModelForm):
             'latitude': forms.HiddenInput(),
             'longitude': forms.HiddenInput(),
         }
+
+class GameDetailForm(forms.ModelForm):
+    class Meta:
+        model = Game
+        fields = ['name', 'min_players', 'max_players', 'min_playtime', 'max_playtime', 'age', 'weight', 'description', 'thumbnail']
+        widgets = {
+            'name': forms.TextInput(attrs={'autocomplete': 'off', 'class': 'game-autocomplete'}),
+            'min_players': forms.NumberInput(),
+            'max_players': forms.NumberInput(),
+            'min_playtime': forms.NumberInput(),
+            'max_playtime': forms.NumberInput(),
+            'age': forms.NumberInput(),
+            'weight': forms.Textarea(),
+            'description': forms.Textarea(),
+            'thumbnail': forms.URLInput(),
+        }
+
+
+        
