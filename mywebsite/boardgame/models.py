@@ -43,6 +43,22 @@ class GroupMembers(models.Model):
 
     def __str__(self):
         return f"{self.user.username} in {self.group.name}"
+    
+# Game model to store game details from BGG
+class Game(models.Model):
+    name = models.CharField(max_length=200)
+    min_players = models.PositiveIntegerField(blank=True, null=True)
+    max_players = models.PositiveIntegerField(blank=True, null=True)
+    min_playtime = models.PositiveIntegerField(blank=True, null=True)
+    max_playtime = models.PositiveIntegerField(blank=True, null=True)
+    age =models.PositiveIntegerField(blank=True, null=True)
+    weight = models.CharField(max_length=10, blank=True, null=True) 
+    description = models.TextField(blank=True, null=True)
+    thumbnail = models.URLField(blank=True, null=True)
+
+
+    def __str__(self):
+        return self.name    
 
 # Event model
 class Event(models.Model):
@@ -52,7 +68,7 @@ class Event(models.Model):
     date_time = models.DateTimeField()
     location = models.ForeignKey('EventLocation', on_delete=models.CASCADE)
     attendees = models.ManyToManyField(User, through='EventAttendance')
-
+    nominations = models.ManyToManyField(Game, through='GameNomination')
 
     def __str__(self):
         return f"{self.title} by {self.group.name}"
@@ -81,22 +97,7 @@ class EventLocation(models.Model):
 
     def __str__(self):
         return self.name
-    
-# Game model to store game details from BGG
-class Game(models.Model):
-    name = models.CharField(max_length=200)
-    min_players = models.PositiveIntegerField(blank=True, null=True)
-    max_players = models.PositiveIntegerField(blank=True, null=True)
-    min_playtime = models.PositiveIntegerField(blank=True, null=True)
-    max_playtime = models.PositiveIntegerField(blank=True, null=True)
-    age =models.PositiveIntegerField(blank=True, null=True)
-    weight = models.CharField(max_length=10, blank=True, null=True) 
-    description = models.TextField(blank=True, null=True)
-    thumbnail = models.URLField(blank=True, null=True)
 
-
-    def __str__(self):
-        return self.name
 
 # Nomination model to handle the relationship between events and games
 class GameNomination(models.Model):
