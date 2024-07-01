@@ -39,7 +39,7 @@ def search_games(request):
 
 
 @csrf_exempt
-def game_details(request):
+def load_game_details(request):
     game_id = request.GET.get('game_id', '')
 
     if game_id:

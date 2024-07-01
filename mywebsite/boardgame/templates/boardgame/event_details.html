@@ -46,6 +46,11 @@
                         <b>Difficulty:</b> {{ nomination.weight }} /5
                         <br /> <br />
                         <b>Sign up spots:</b>
+                        <br/><br/>
+                        <a href="{% url 'game_details' event.id nomination.id %}" class="btn btn-secondary btn-sm">View Details</a>
+                        {% if user.is_authenticated and is_attending %}
+                        <a href="#" class="btn btn-primary btn-sm">Sign up</a>
+                        {% endif %}
                     </p>
                 </div>
             </div>

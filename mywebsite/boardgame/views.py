@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from boardgame.models import Group,Event,GroupMembers,EventAttendance,GameNomination
+from boardgame.models import Group,Event,GroupMembers,EventAttendance,GameNomination,Game
 from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm
 
 
@@ -77,10 +77,6 @@ def event_details(request, event_id):
     nominations = event.nominations.all()
     is_attending = attendees.filter(id=request.user.id).exists() #check to see if current user is attending
 
-    for nomination in nominations:
-        print(nomination)  # Print each nomination object to inspect its attributes
-        print(nomination.name)
-
     if request.method == 'POST': # used when a form has been submitted, meaning someone clicked button 
         if 'join' in request.POST: # based on button name in html page
             if not is_attending:
@@ -131,3 +127,14 @@ def nominate_game(request, event_id):
         form = GameDetailForm()
     
     return render(request, 'boardgame/nominate_game.html', {'form': form, 'event': event})
+
+
+def game_details(request, event_id, game_id):
+    event = get_object_or_404(Event, id=event_id)
+    game = get_object_or_404(Game, id=game_id)
+    
+    context = {
+        'event': event,
+        'game': game,
+    }
+    return render(request, 'boardgame/game_details.html', context)
