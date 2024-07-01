@@ -31,7 +31,7 @@
                 {{ event.date_time }}<br/>
                 {{ event.description }}
                   <br/><br/>
-                <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event Details</a>
+                <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Events Details</a>
                 {% endfor %}
             {% else %}
             <p>No events found.</p>

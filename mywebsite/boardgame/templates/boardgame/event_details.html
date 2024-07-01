@@ -1,55 +1,74 @@
 {% extends 'boardgame/base.html' %}
 {% load static %}
 {% block content %}
-<head>
-    <title>{{ event.title }}</title>
-</head>
+
 <body>
-    <br/>
-    <div class="card">
-        <div class="card-header">
-            Event
-        </div>
-        <div class="card-body">
-          <strong class="card-title">{{ event.title }}</strong>
-          <p class="card-text">
-            <li>Description: {{ event.description }}</li>
-            <li>Date/Time: {{ event.date_time }}</li>
-            <li>Location: {{ event.location }}</li>
-            <br/>
-        
-            <strong>Attendees:</strong>
-            <ul>
-                {% for attendee in attendees %}
-                <li>{{ attendee.username }}</li>
-                {% endfor %}
-            </ul>
-            <strong>Nominated Games:</strong>
-            <ul>
-                {% for nomination in nominations %}
-                <li>{{ nomination.name }}</li>
-                {% endfor %}
-            </ul>            
-            <div>
-                {% if user.is_authenticated %}
-                    <form method="post" action="">
-                        {% csrf_token %}
-                        {% if is_attending %}
-                            <button type="submit" name="leave">Leave Event</button>
-                             <!-- Nominate Game button, visible only if attending -->
-                             <a href="{% url 'nominate_game' event.id %}" class="btn btn-secondary">Nominate Game</a>
-                        {% else %}
-                            <button type="submit" name="join">Join Event</button>
-                        {% endif %}
-                    </form>
-                {% else %}
-                    <p>You must <a href="{% url 'login' %}">login</a> first to join the event.</p>
-                {% endif %}
+
+    <head>
+        <title>{{ event.title }}</title>
+    </head>
+    <h1>{{ event.title }}</h1>
+    <p>Description: {{ event.description }}</p>
+    <p>Date/Time: {{ event.date_time }}</p>
+    <p>Location: {{ event.location }}</p>
+
+    <div>
+        {% if user.is_authenticated %}
+        <form method="post" action="">
+            {% csrf_token %}
+            {% if is_attending %}
+            <button type="submit"  class="btn btn-secondary btn-sm" name="leave">Leave Event</button>
+            <!-- Nominate Game button, visible only if attending -->
+            <a href="{% url 'nominate_game' event.id %}" class="btn btn-secondary btn-sm">Nominate Game</a>
+            {% else %}
+            <button type="submit" class="btn btn-secondary btn-sm" name="join">Join Event </button>
+            {% endif %}
+        </form>
+        {% else %}
+        <p>You must <a href="{% url 'login' %}">login</a> first to join the event.</p>
+        {% endif %}
+    </div>
+    <br /> <br />
+   <h3>Nominated Games</h3> 
+   <br/>
+    <div class="row">
+        {% for nomination in nominations %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h4>{{ nomination.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <b>Description:</b> {{ nomination.description|truncatewords:25|striptags|safe }}... <a href="#">See
+                            Details</a>
+                        <br /> <br />
+                        <b>Difficulty:</b> {{ nomination.weight }} /5
+                        <br /> <br />
+                        <b>Sign up spots:</b>
+                    </p>
+                </div>
             </div>
-        
-          </p>
         </div>
-      </div>
+        {% endfor %}
+    </div>
+    <br /> <br />
+    <div class="col-sm-4">
+        <div class="card">
+            <div class="card-header">
+                Attendees
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                <ul>
+                    {% for attendee in attendees %}
+                    <li>{{ attendee.username }}</li>
+                    {% endfor %}
+                </ul>
+                </p>
+            </div>
+        </div>
+    </div>
     <div>
         <a href="{% url 'home' %}">Back to Home</a>
     </div>
