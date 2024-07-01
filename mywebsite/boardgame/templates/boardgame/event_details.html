@@ -32,32 +32,32 @@
     <h3>Nominated Games</h3>
     <br />
     <div class="row">
-        {% for nomination in nominations %}
+        {% for nomination in event.gamenomination_set.all %}
         <div class="col-md-4 mb-3">
             <div class="card">
                 <div class="card-header">
-                    <h4>{{ nomination.name }}</h4>
+                    <h4>{{ nomination.game.name }}</h4>
                 </div>
                 <div class="card-body">
                     <p class="card-text">
-                        <b>Description:</b> {{ nomination.description|truncatewords:25|striptags|safe }}... <a
-                            href="{% url 'game_details' event.id nomination.id %}">See
-                            Details</a>
-                        <br /> <br />
-                        <b>Difficulty:</b> {{ nomination.weight }} /5
-                        <br /> <br />
+                        <b>Description:</b> {{ nomination.game.description|truncatewords:25|striptags|safe }}... <a
+                            href="{% url 'game_details' event.id nomination.game.id %}">See Details</a>
+                        <br /><br />
+                        <b>Difficulty:</b> {{ nomination.game.weight }} /5
+                        <br /><br />
+                        <b>Nominated by:</b> {{ nomination.nominator.username }}
+                        <br /><br />
                         <b>Sign up spots:</b>
                         <br /><br />
-                        <a href="{% url 'game_details' event.id nomination.id %}" class="btn btn-secondary btn-sm">View
-                            Details</a>
+                        <a href="{% url 'game_details' event.id nomination.game.id %}" class="btn btn-secondary btn-sm">View Details</a>
                         {% if user.is_authenticated and is_attending %}
-                        <a href="#" class="btn btn-primary btn-sm">Sign up</a>
+                            <a href="#" class="btn btn-primary btn-sm">Sign up</a>
                         {% endif %}
                     </p>
                 </div>
             </div>
         </div>
-        {% endfor %}
+    {% endfor %}
     </div>
     <br /> <br />
     <div class="col-sm-4">
