@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from boardgame.models import Group,Event,GroupMembers,EventAttendance,GameNomination,Game
+from boardgame.models import GameSignup, Group,Event,GroupMembers,EventAttendance,GameNomination,Game
 from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm
 
 
@@ -128,13 +128,41 @@ def nominate_game(request, event_id):
     
     return render(request, 'boardgame/nominate_game.html', {'form': form, 'event': event})
 
-
 def game_details(request, event_id, game_id):
     event = get_object_or_404(Event, id=event_id)
     game = get_object_or_404(Game, id=game_id)
-    
+    game_nomination = get_object_or_404(GameNomination, event=event, game=game)
+    is_attending = event.attendees.filter(id=request.user.id).exists()
+
+    # Check if the user has already signed up for this game
+    is_signed_up = GameSignup.objects.filter(nomination=game_nomination, user=request.user).exists()
+
+    # Calculate remaining sign-up slots
+    signed_up_count = GameSignup.objects.filter(nomination=game_nomination).count()
+    remaining_slots = game.max_players - signed_up_count
+
+    # Retrieve the list of players signed up for this game
+    game_signup_set = GameSignup.objects.filter(nomination=game_nomination)
+
+    if request.method == 'POST':
+        if 'sign_up' in request.POST:
+            if not is_signed_up:
+                # Create a new GameSignup entry for the current user
+                GameSignup.objects.create(nomination=game_nomination, user=request.user)
+        elif 'leave' in request.POST:
+            if is_signed_up:
+                # Remove the GameSignup entry for the current user
+                GameSignup.objects.filter(nomination=game_nomination, user=request.user).delete()
+
+        # Redirect back to the same page after processing the form
+        return redirect('game_details', event_id=event_id, game_id=game_id)
+
     context = {
         'event': event,
         'game': game,
+        'is_attending': is_attending,
+        'is_signed_up': is_signed_up,
+        'remaining_slots': remaining_slots,
+        'game_signup_set': game_signup_set,  # Include game_signup_set in the context
     }
     return render(request, 'boardgame/game_details.html', context)

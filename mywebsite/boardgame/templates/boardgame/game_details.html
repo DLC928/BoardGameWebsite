@@ -1,8 +1,76 @@
 {% extends 'boardgame/base.html' %}
+{% load static %}
 
 {% block content %}
 <h1>{{ game.name }}</h1>
-<p>Description: {{ game.description }}</p>
-<p>Min Players: {{ game.min_players }}</p>
-<p>Max Players: {{ game.max_players }}</p>
+<div>
+    {% if user.is_authenticated and is_attending %}
+    <form method="post" action="">
+        {% csrf_token %}
+        {% if is_signed_up %}
+        <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Game</button>
+        {% else %}
+        {% if remaining_slots > 0 %}
+        <button type="submit" class="btn btn-primary btn-sm" name="sign_up">Sign up</button>
+        {% else %}
+        <button type="button" class="btn btn-secondary btn-sm" disabled>Waitlist</button>
+        {% endif %}
+        {% endif %}
+    </form>
+    {% else %}
+    <p>You must <a href="{% url 'login' %}">login</a> first to join the event.</p>
+    {% endif %}
+</div>
+
+<br />
+<p><b>Players:</b> {{ game.min_players }} - {{ game.max_players }}</p>
+<p><b>Difficulty:</b> {{ game.weight }} / 5</p>
+
+
+<!-- Display Slot Count -->
+<p><b>Remaining Sign-up Slots:</b> {{ remaining_slots }}</p>
+
+<!-- List of Players Attending -->
+{% if game_signup_set.exists %}
+<p><b>Players Attending:</b></p>
+<ul>
+    {% for signup in game_signup_set %}
+    <li>{{ signup.user.username }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No players have signed up yet.</p>
+{% endif %}
+
+
+<!-- Game Description-->
+{% if game.description|length > 100 %}
+<p><b>Description:</b>
+    <span id="short-description">{{ game.description|slice:":100"|safe }}</span>
+    <span id="full-description" style="display:none;">{{ game.description|safe }}</span>
+    <a href="#" onclick="toggleDescription()" id="readMoreBtn">...See more</a>
+</p>
+{% else %}
+<p><b>Description:</b> {{ game.description|safe }}</p>
+{% endif %}
+
+
+<script>
+    function toggleDescription() {
+        var shortDescription = document.getElementById("short-description");
+        var fullDescription = document.getElementById("full-description");
+        var readMoreBtn = document.getElementById("readMoreBtn");
+
+        if (fullDescription.style.display === "none") {
+            fullDescription.style.display = "inline";
+            shortDescription.style.display = "none";
+            readMoreBtn.innerHTML = "See less";
+        } else {
+            fullDescription.style.display = "none";
+            shortDescription.style.display = "inline";
+            readMoreBtn.innerHTML = "...See more";
+        }
+    }
+</script>
+
 {% endblock %}
