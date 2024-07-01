@@ -105,6 +105,18 @@
 
       // Manually add game details button functionality
       $('#manual-entry-btn').click(function() {
+        // Clear the form fields
+        $('#game-id').val('');
+        $('#game-name-detail').val('');
+        $('#description').val('');
+        $('#min-players').val('');
+        $('#max-players').val('');
+        $('#min-playtime').val('');
+        $('#max-playtime').val('');
+        $('#age').val('');
+        $('#weight').val('');
+
+        // Show the game details section
         $('#game-details').show();
       });
     });

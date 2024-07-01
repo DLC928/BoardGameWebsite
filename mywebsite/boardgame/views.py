@@ -92,7 +92,6 @@ def event_details(request, event_id):
     }
     return render(request, 'boardgame/event_details.html', context)
 
-
 def nominate_game(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     
@@ -102,12 +101,22 @@ def nominate_game(request, event_id):
             game = form.save(commit=False)
             game.name = request.POST.get('name')
             game.description = request.POST.get('description')
-            game.min_players = request.POST.get('min_players')
-            game.max_players = request.POST.get('max_players')
-            game.min_playtime = request.POST.get('min_playtime')
-            game.max_playtime = request.POST.get('max_playtime')
-            game.age = request.POST.get('age')
-            game.weight = request.POST.get('weight')
+            
+            # Handle empty fields
+            min_players = request.POST.get('min_players')
+            max_players = request.POST.get('max_players')
+            min_playtime = request.POST.get('min_playtime')
+            max_playtime = request.POST.get('max_playtime')
+            age = request.POST.get('age')
+            weight = request.POST.get('weight')
+            
+            game.min_players = int(min_players) if min_players else None
+            game.max_players = int(max_players) if max_players else None
+            game.min_playtime = int(min_playtime) if min_playtime else None
+            game.max_playtime = int(max_playtime) if max_playtime else None
+            game.age = int(age) if age else None
+            game.weight = float(weight) if weight else None
+            
             game.save()
             
             GameNomination.objects.create(game=game, event=event, nominator=request.user)
