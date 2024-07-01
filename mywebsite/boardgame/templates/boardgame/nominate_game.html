@@ -56,6 +56,7 @@
               response($.map(data, function(item) {
                 return {
                   label: item.name,
+                  label: item.name + ' (' + item.year + ')', 
                   value: item.name,
                   id: item.id
                 };

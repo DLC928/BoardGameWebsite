@@ -5,28 +5,38 @@ from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
 def search_games(request):
-    query = request.GET.get('query', '')
+    query = request.GET.get('query', '').lower()
 
     if query:
-        url = f'https://www.boardgamegeek.com/xmlapi/search?search={query}'
+        url = f'https://www.boardgamegeek.com/xmlapi/search?search={query}&type=boardgame'
         response = requests.get(url)
 
         if response.status_code == 200:
             root = ET.fromstring(response.content)
-            games = []
+            exact_matches = []
+            partial_matches = []
 
             for item in root.findall('boardgame'):
                 name_elem = item.find('name')
+                year_elem = item.find('yearpublished')  # Extract publication year
                 if name_elem is not None:
+                    game_name = name_elem.text
                     game = {
                         'id': item.attrib['objectid'],
-                        'name': name_elem.text,
+                        'name': game_name,
+                        'year': year_elem.text if year_elem is not None else 'N/A'  # Handle missing year
                     }
-                    games.append(game)
+                    if game_name.lower().startswith(query):
+                        exact_matches.append(game)
+                    elif query in game_name.lower():
+                        partial_matches.append(game)
 
+            # Combine exact matches and partial matches, with exact matches first
+            games = exact_matches + partial_matches
             return JsonResponse(games, safe=False)
 
-    return JsonResponse({'error': 'No query provided or BGG API error'}, status=400)
+    return JsonResponse({'error': 'BGG API error'}, status=400)
+
 
 @csrf_exempt
 def game_details(request):
