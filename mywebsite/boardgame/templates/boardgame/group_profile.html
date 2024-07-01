@@ -10,10 +10,36 @@
 
     <!-- Show Create Event button if user is group admin of this group -->
     {% if is_admin %}
-    <a href="{% url 'create_event' group.slug %}" class="btn btn-secondary">Create Event</a>
+    <a href="{% url 'create_event' group.slug %}" class="btn btn-secondary btn-sm">Create Event</a>
     {% else %}
-        <strong>Join Event button</strong>
+    <strong>Join button</strong>
     {% endif %}
+
+    <!-- Events -->
+    <br/><br/>
+    <div class="col-sm-4">
+    <div class="card">
+        <div class="card-header">
+            Event
+        </div>
+        <div class="card-body">
+          <strong class="card-title">{{ event.title }}</strong>
+          <p class="card-text">
+            {% if events %}
+                {% for event in events %}
+                <strong>{{ event.title }}</strong><br/>
+                {{ event.date_time }}<br/>
+                {{ event.description }}
+                  <br/><br/>
+                <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event Details</a>
+                {% endfor %}
+            {% else %}
+            <p>No events found.</p>
+            {% endif %}
+          </p>
+        </div>
+    </div>
+      </div>
 
     <!-- Link back to home -->
     <br/><br/>
