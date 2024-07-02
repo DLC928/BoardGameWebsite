@@ -4,7 +4,21 @@
     <h1>{{ group.name }}</h1>
     <p>Description: {{ group.description }}</p>
     <p>Location: {{ group.location }}</p>
-
+    <div>
+        {% if user.is_authenticated %}
+        <form method="POST" action="">
+            {% csrf_token %}
+            {% if is_member %}
+            <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Group</button>
+            {% else %}
+            <button type="submit" class="btn btn-secondary btn-sm" name="join">Join Group</button>
+            {% endif %}
+        </form>
+        {% else %}
+        <p>You must <a href="{% url 'login' %}">login</a> first to join the group.</p>
+        {% endif %}
+    </div>
+    <br/>
     <!-- Debug Output -->
     <p>Is Admin: {{ is_admin }}</p>
 

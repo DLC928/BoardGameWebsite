@@ -18,11 +18,21 @@ def group_profile(request, group_slug):
     # Retrieve the group object using the slug
     group = get_object_or_404(Group, slug=group_slug)
     members = group.members.all()
+    is_member = members.filter(id=request.user.id).exists() 
     is_admin = GroupMembers.objects.filter(user=request.user, group=group, is_admin=True).exists()
 
     # Fetch events associated with the group
     events = Event.objects.filter(group=group).order_by('title')
 
+    #Join Group and Request 
+    if request.method == 'POST': # used when a form has been submitted, meaning someone clicked button 
+        if 'join' in request.POST: # based on button name in html page
+            if not is_member:
+                GroupMembers.objects.create(user=request.user, group=group, is_admin=False)
+        elif 'leave' in request.POST:
+            if is_member:
+                GroupMembers.objects.filter(user=request.user, group=group).delete()
+        return redirect('group_profile', group_slug=group.slug)
 
     # Pass the group object to the template
     context = {
@@ -30,6 +40,7 @@ def group_profile(request, group_slug):
         'is_admin': is_admin,
         'events': events,
         'members': members,
+        'is_member': is_member,
     }
     return render(request, 'boardgame/group_profile.html', context)
 
