@@ -106,6 +106,11 @@ def event_details(request, event_id):
         elif 'leave' in request.POST:
             if is_attending:
                 EventAttendance.objects.filter(user=request.user, event=event).delete()
+                # Check if the user has already signed up for this game
+                for nomination in nominations:
+                    is_signed_up = GameSignup.objects.filter(nomination=nomination, user=request.user).exists()
+                    if is_signed_up:
+                        GameSignup.objects.filter(user=request.user, nomination=nomination).delete()
         return redirect('event_details', event_id=event_id)
 
     context = {

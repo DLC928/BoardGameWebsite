@@ -4,21 +4,23 @@
 {% block content %}
 <h1>{{ game.name }}</h1>
 <div>
-    {% if user.is_authenticated and is_attending %}
-    <form method="post" action="">
-        {% csrf_token %}
-        {% if is_signed_up %}
-        <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Game</button>
-        {% else %}
-        {% if remaining_slots > 0 %}
-        <button type="submit" class="btn btn-primary btn-sm" name="sign_up">Sign up</button>
-        {% else %}
-        <button type="button" class="btn btn-secondary btn-sm" disabled>Waitlist</button>
-        {% endif %}
-        {% endif %}
-    </form>
+    {% if user.is_authenticated %}
+        <form method="post" action="">
+            {% csrf_token %}
+            {% if is_signed_up %}
+                <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Game</button>
+            {% else %}
+                {% if remaining_slots > 0 and is_attending %}
+                    <button type="submit" class="btn btn-primary btn-sm" name="sign_up">Sign up</button>
+                {% else %}
+                    {% if is_attending %}
+                        <button type="button" class="btn btn-secondary btn-sm" disabled>Waitlist</button>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </form>
     {% else %}
-    <p>You must <a href="{% url 'login' %}">login</a> first to join the event.</p>
+        <p>You must login first to sign up to play.</p>
     {% endif %}
 </div>
 
