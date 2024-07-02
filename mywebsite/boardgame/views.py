@@ -74,8 +74,17 @@ def create_event(request, group_slug):
 def event_details(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     attendees = event.attendees.all()
-    nominations = event.nominations.all()
+    nominations = event.gamenomination_set.all()  
     is_attending = attendees.filter(id=request.user.id).exists() #check to see if current user is attending
+
+    nominations_with_slots = []
+    for nomination in nominations:
+        signed_up_count = GameSignup.objects.filter(nomination=nomination).count()
+        remaining_slots = nomination.game.max_players - signed_up_count
+        nominations_with_slots.append({
+            'nomination': nomination,
+            'remaining_slots': remaining_slots
+        })
 
     if request.method == 'POST': # used when a form has been submitted, meaning someone clicked button 
         if 'join' in request.POST: # based on button name in html page
@@ -91,6 +100,7 @@ def event_details(request, event_id):
         'attendees': attendees,
         'is_attending': is_attending,
         'nominations': nominations,
+        'nominations_with_slots': nominations_with_slots, 
     }
     return render(request, 'boardgame/event_details.html', context)
 
@@ -121,7 +131,11 @@ def nominate_game(request, event_id):
             
             game.save()
             
-            GameNomination.objects.create(game=game, event=event, nominator=request.user)
+             # Create GameNomination and GameSignup
+            nomination = GameNomination.objects.create(game=game, event=event, nominator=request.user)
+            GameSignup.objects.create(nomination=nomination, user=request.user)
+
+
             return redirect('event_details', event_id=event_id)
     else:
         form = GameDetailForm()
