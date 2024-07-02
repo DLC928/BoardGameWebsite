@@ -200,11 +200,21 @@ def game_details(request, event_id, game_id):
                 GameSignup.objects.create(nomination=game_nomination, user=request.user)
         elif 'leave' in request.POST:
             if is_signed_up:
-                # Remove the GameSignup entry for the current user
-                GameSignup.objects.filter(nomination=game_nomination, user=request.user).delete()
+                # Check if the user is the nominator
+                if game_nomination.nominator == request.user:
+                    # Remove all signups for this nomination
+                    GameSignup.objects.filter(nomination=game_nomination).delete()
+                    # Remove the nomination itself
+                    game_nomination.delete()
+                    # Redirect to event details if the nominator leaves
+                    return redirect('event_details', event_id=event_id)
+                else:
+                    # Remove the GameSignup entry for the current user
+                    GameSignup.objects.filter(nomination=game_nomination, user=request.user).delete()
 
         # Redirect back to the same page after processing the form
         return redirect('game_details', event_id=event_id, game_id=game_id)
+
 
     context = {
         'event': event,
