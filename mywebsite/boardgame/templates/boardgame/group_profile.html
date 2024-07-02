@@ -40,8 +40,24 @@
         {% endif %}
        </div>
 
+    <!-- Group Members-->
 
-
+       <div class="col-sm-4">
+        <div class="card">
+            <div class="card-header">
+                Members
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <ul>
+                        {% for member in members %}
+                        <li>{{ member.username }}</li>
+                        {% endfor %}
+                    </ul>
+                </p>
+            </div>
+        </div>
+    </div>
 
 
     <!-- Link back to home -->

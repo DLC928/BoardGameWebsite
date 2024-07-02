@@ -17,6 +17,7 @@ def home(request):
 def group_profile(request, group_slug):
     # Retrieve the group object using the slug
     group = get_object_or_404(Group, slug=group_slug)
+    members = group.members.all()
     is_admin = GroupMembers.objects.filter(user=request.user, group=group, is_admin=True).exists()
 
     # Fetch events associated with the group
@@ -28,6 +29,7 @@ def group_profile(request, group_slug):
         'group': group,
         'is_admin': is_admin,
         'events': events,
+        'members': members,
     }
     return render(request, 'boardgame/group_profile.html', context)
 
