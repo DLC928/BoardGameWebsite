@@ -25,8 +25,6 @@
     <!-- Show Create Event button if user is group admin of this group -->
     {% if is_admin %}
     <a href="{% url 'create_event' group.slug %}" class="btn btn-secondary btn-sm">Create Event</a>
-    {% else %}
-    <strong>Join button</strong>
     {% endif %}
 
     <!-- Events -->
