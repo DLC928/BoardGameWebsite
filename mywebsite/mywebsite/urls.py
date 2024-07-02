@@ -20,6 +20,8 @@ from django.urls import include
 from boardgame import views
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("", include("boardgame.urls")),
+    path('admin/', admin.site.urls),
+    path('account/', include('account.urls')),
+    path('account/', include('django.contrib.auth.urls')),
+    path('', include('boardgame.urls')),
 ]
