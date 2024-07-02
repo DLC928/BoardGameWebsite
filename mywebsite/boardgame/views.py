@@ -106,11 +106,17 @@ def event_details(request, event_id):
         elif 'leave' in request.POST:
             if is_attending:
                 EventAttendance.objects.filter(user=request.user, event=event).delete()
-                # Check if the user has already signed up for this game
+                # Remove game signups and nominations if the user leaves the event
                 for nomination in nominations:
-                    is_signed_up = GameSignup.objects.filter(nomination=nomination, user=request.user).exists()
-                    if is_signed_up:
-                        GameSignup.objects.filter(user=request.user, nomination=nomination).delete()
+                    # Remove user from game signups
+                    GameSignup.objects.filter(user=request.user, nomination=nomination).delete()
+                    
+                    # Check if the user is the nominator and remove nomination
+                    if nomination.nominator == request.user:
+                        # Remove all signups for this nomination
+                        GameSignup.objects.filter(nomination=nomination).delete()
+                        # Remove the nomination itself
+                        nomination.delete()
         return redirect('event_details', event_id=event_id)
 
     context = {
