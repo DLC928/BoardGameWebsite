@@ -56,7 +56,9 @@
 <p><b>Description:</b> {{ game.description|safe }}</p>
 {% endif %}
 
-
+<div>
+    <a href="{% url 'event_details' event.id %}" >Back to Event</a>
+</div>
 <script>
     function toggleDescription() {
         var shortDescription = document.getElementById("short-description");

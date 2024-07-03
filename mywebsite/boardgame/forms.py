@@ -13,6 +13,12 @@ class GroupForm(forms.ModelForm):
             'description': 'Group Description',
             'location': 'Group Location',
         }
+        
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
+            'location': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
+        }
  
 
 
@@ -22,12 +28,25 @@ class EventForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = ('title', 'description', 'date_time')
+        
+    
+    widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}), 
+            'date_time': forms.SplitDateTimeWidget(attrs={'class': 'form-control'}),
+        }    
+        
 
 class EventLocationForm(forms.ModelForm):
     class Meta:
         model = EventLocation
         fields = ['name', 'address', 'city', 'postcode', 'country', 'latitude', 'longitude']
         widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
+            'address': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
+            'city': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
+            'postcode': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
+            'country': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'latitude': forms.HiddenInput(),
             'longitude': forms.HiddenInput(),
         }

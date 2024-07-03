@@ -1,13 +1,26 @@
 {% extends 'boardgame/base.html' %}
 
 {% block content %}
-<center>
-    <h1>Create new group</h1>
+<h1>Create new group</h1>
 <br/><br/>
 <form action="{% url 'create_group' %}" method="POST">
     {% csrf_token %}
-    {{ form }}
+    
+    <div class="form-group">
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+    </div>
+    <br/>
+    <div class="form-group">
+        <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+        {{ form.description }}
+    </div>
+    <br/>
+    <div class="form-group">
+        <label for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
+        {{ form.location }}
+    </div>
+    <br/>
     <input type="submit" value="Submit" class="btn btn-secondary">
 </form>
-</center>
 {% endblock %}

@@ -2,35 +2,29 @@
 {% load static %}
 
 {% block content %}
+
     <script src="{% url 'js-catlog' %}"></script>
     <script src="{% static '/admin/js/core.js' %}"></script>
     <link rel="stylesheet" href="{% static 'admin/css/base.css' %}">
     <link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">
-
+      
+    <h1>Create new event</h1>
     <div class="container">
-        <h1 class="text-center">Create new event</h1>
         <br><br>
         <form id="eventForm" action="{% url 'create_event' group.slug %}" method="POST">
             {% csrf_token %}
             {{ form.media }}
             {{ form }}
-            <button type="button" class="btn btn-primary" onclick="toggleLocationForm()">Add Location</button>
-            <div id="locationForm" style="display: none;">
-                <h3>Event Location</h3>
+            <br/>
+             <!-- Always show the event location form -->
+            <div id="locationForm">
+                <h1>Event Location</h1>
                 {{ location_form.as_p }}
             </div>
             <input type="submit" value="Submit" class="btn btn-secondary">
         </form>
     </div>
 
-    <script>
-        function toggleLocationForm() {
-            var locationForm = document.getElementById('locationForm');
-            if (locationForm.style.display === 'none') {
-                locationForm.style.display = 'block';
-            } else {
-                locationForm.style.display = 'none';
-            }
-        }
-    </script>
+        
+      
 {% endblock %}
