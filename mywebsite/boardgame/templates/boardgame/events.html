@@ -1,0 +1,72 @@
+{% extends 'boardgame/base.html' %}
+
+{% block content %}
+<title>Events</title>
+
+{% if user.is_authenticated %}
+<div class="d-flex justify-content-between align-items-center">
+    <h3>Your Events</h3>
+</div>
+<br />
+<!-- Display user's groups -->
+<div class="row">
+    {% if user_events %}
+    {% for event_attendance in user_events %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-header">
+                <h4>{{ event_attendance.event.title }}</h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <b>Description:</b> {{ event_attendance.event.description }}<br />
+                    <b>Location:</b> {{ event_attendance.event.location }}<br /><br />
+                    <a href="{% url 'event_details' event_attendance.event.id %}" class="btn btn-secondary btn-sm">View
+                        Event</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>You are not attending any events yet.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<div>
+    <h3>Featured Events</h3>
+    <br/>
+    {% if events %}
+    <div class="row">
+        {% for event in events %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h4>{{ event.title }}</h4>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <b>Description:</b> {{ event.description }}<br />
+                        <b>Location:</b> {{ event.location }}<br /><br />
+                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View
+                            Event</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <strong>There are no events present.</strong>
+    {% endif %}
+</div>
+
+
+<!-- Link back to home -->
+<br /><br />
+<div>
+    <a href="{% url 'home' %}">Back to Home</a>
+</div>
+
+{% endblock %}

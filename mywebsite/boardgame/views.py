@@ -20,7 +20,6 @@ def home(request):
         user_events = EventAttendance.objects.filter(user=user).select_related('event')
 
     context = {
-        'boldmessage': 'Join today!',
         'groups': group_list,
         'events': event_list,
         'user_groups': user_groups,
@@ -31,6 +30,22 @@ def home(request):
 
 
 # ---------------------------GROUPS---------------------------
+
+def groups(request):
+    group_list = Group.objects.all().order_by('name')
+    user_groups = None
+    user = request.user
+
+    if user.is_authenticated:
+        user_groups = GroupMembers.objects.filter(user=user).select_related('group')
+
+    context = {
+        'groups': group_list,
+        'user_groups': user_groups,
+    }
+    return render(request, 'boardgame/groups.html', context=context)
+
+
 def group_profile(request, group_slug):
     # Retrieve the group object using the slug
     group = get_object_or_404(Group, slug=group_slug)
@@ -83,6 +98,23 @@ def create_group(request):
     return render(request, 'boardgame/create_group.html', {'form': form})
 
 # ---------------------------EVENTS---------------------------
+def events(request):
+    event_list = Event.objects.all().order_by('title')
+    user_events = None
+    user = request.user
+    
+    # Check if the user is authenticated
+    if user.is_authenticated:
+        user_events = EventAttendance.objects.filter(user=user).select_related('event')
+
+    context = {
+        'events': event_list,
+        'user_events': user_events,
+    }
+    return render(request, 'boardgame/events.html', context=context)
+
+ 
+
 def create_event(request, group_slug):
     group = get_object_or_404(Group, slug=group_slug)
     if request.method == 'POST':
