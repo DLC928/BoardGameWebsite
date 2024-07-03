@@ -1,0 +1,25 @@
+{% extends 'boardgame/base.html' %}
+
+{% block content %}
+<title>Groups</title>
+
+{% if user.is_authenticated %}
+<div>
+    <!-- Display user's groups -->
+    <h2>Your Groups</h2>
+    {% if user_groups %}
+    <ul>
+        {% for group_member in user_groups %}
+        <li><a href="{% url 'group_profile' group_member.group.slug %}">{{ group_member.group.name }}</a></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>You are not a member of any groups yet.</p>
+</div>
+{% endif %}
+<!-- Link back to home -->
+<br /><br />
+<div>
+    <a href="{% url 'home' %}">Back to Home</a>
+</div>
+{% endblock %}

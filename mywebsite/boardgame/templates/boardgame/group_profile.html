@@ -21,6 +21,15 @@
         {% endif %}
     </div>
 
+     <!-- Debug Output -->
+     <p>Is Admin: {{ is_admin }}</p>
+
+     <!-- Show Create Event button if user is group admin of this group -->
+     {% if is_admin %}
+     <a href="{% url 'create_event' group.slug %}" class="btn btn-secondary btn-sm">Create Event</a>
+     {% endif %}
+ 
+
     <!-- Events -->
     <h3>Events</h3>
     <div class="row">
