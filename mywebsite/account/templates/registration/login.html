@@ -14,7 +14,13 @@
         <label for="InputPassword" class="form-label">Password</label>
         <input type="password" class="form-control" name="password">
     </div>
-    <input type="submit" value="Submit" class="btn btn-secondary">
+
+    <small id="registerHelp" class="form-text text-muted">Not a member? <a href="{% url 'register' %}">Sign up</a></small>
+    <br/><br/>
+ 
+
+
+    <input type="submit" value="Login" class="btn btn-secondary">
 </form>
 
 <br /><br />

@@ -4,57 +4,46 @@
     <h1>{{ group.name }}</h1>
     <p>Description: {{ group.description }}</p>
     <p>Location: {{ group.location }}</p>
+
+    <!-- Join/Leave Group Button -->
     <div>
         {% if user.is_authenticated %}
-        <form method="POST" action="">
-            {% csrf_token %}
-            {% if is_member %}
-            <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Group</button>
-            {% else %}
-            <button type="submit" class="btn btn-secondary btn-sm" name="join">Join Group</button>
-            {% endif %}
-        </form>
+            <form method="POST" action="">
+                {% csrf_token %}
+                {% if is_member %}
+                    <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Group</button>
+                {% else %}
+                    <button type="submit" class="btn btn-secondary btn-sm" name="join">Join Group</button>
+                {% endif %}
+            </form>
         {% else %}
-        <p>You must <a href="{% url 'login' %}">login</a> first to join the group.</p>
+            <p>You must <a href="{% url 'login' %}">login</a> first to join the group.</p>
         {% endif %}
     </div>
-    <br/>
-    <!-- Debug Output -->
-    <p>Is Admin: {{ is_admin }}</p>
-
-    <!-- Show Create Event button if user is group admin of this group -->
-    {% if is_admin %}
-    <a href="{% url 'create_event' group.slug %}" class="btn btn-secondary btn-sm">Create Event</a>
-    {% endif %}
 
     <!-- Events -->
-    <br/><br/>
-      <h3>Events</h3> 
-      <br/>
-       <div class="row">
-        {% if events %}
-          {% for event in events %}
-           <div class="col-md-4 mb-3">
-               <div class="card">
-                   <div class="card-header">
-                       <h4>{{ event.title }}</h4>
-                   </div>
-                   <div class="card-body">
-                       <p class="card-text">
-                        {{ event.date_time }}<br/>
-                        {{ event.description }}<br/><br/>
-                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Events Details</a>
-                       </p>
-                   </div>
-               </div>
-           </div>
-           {% endfor %}
-        {% endif %}
-       </div>
+    <h3>Events</h3>
+    <div class="row">
+        {% for event in events %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>{{ event.title }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            {{ event.date_time }}<br/>
+                            {{ event.description }}<br/><br/>
+                            <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event Details</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 
-    <!-- Group Members-->
-
-       <div class="col-sm-4">
+    <!-- Group Members -->
+    <div class="col-sm-4">
         <div class="card">
             <div class="card-header">
                 Members
@@ -63,14 +52,13 @@
                 <p class="card-text">
                     <ul>
                         {% for member in members %}
-                        <li>{{ member.username }}</li>
+                            <li>{{ member.username }}</li>
                         {% endfor %}
                     </ul>
                 </p>
             </div>
         </div>
     </div>
-
 
     <!-- Link back to home -->
     <br/><br/>

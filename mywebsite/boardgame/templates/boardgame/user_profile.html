@@ -1,0 +1,28 @@
+{% extends 'boardgame/base.html' %}
+
+{% block content %}
+<title>Profile</title>
+
+Profile for {{user.username}}
+<!-- Display user's groups -->
+<h2>Your Groups</h2>
+<ul>
+    {% for group_member in user_groups %}
+    <li><a href="{% url 'group_profile' group_member.group.slug %}">{{ group_member.group.name }}</a></li>
+    {% endfor %}
+</ul>
+
+<!-- Display user's events -->
+<h2>Your Events</h2>
+<ul>
+    {% for event_attendance in user_events %}
+    <li><a href="{% url 'event_details' event_attendance.event.id %}">{{ event_attendance.event.title }}</a></li>
+    {% endfor %}
+</ul>
+
+<!-- Link back to home -->
+<br /><br />
+<div>
+    <a href="{% url 'home' %}">Back to Home</a>
+</div>
+{% endblock %}

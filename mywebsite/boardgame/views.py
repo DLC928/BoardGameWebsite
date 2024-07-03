@@ -4,29 +4,51 @@ from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm
 
 
 def home(request):
+    # Fetch all groups and events
     group_list = Group.objects.all().order_by('name')
     event_list = Event.objects.all().order_by('title')
-    context_dict = {
+    
+    # Initialize user-related variables
+    user_groups = None
+    user_events = None
+    user = request.user
+    
+    # Check if the user is authenticated
+    if user.is_authenticated:
+        # Fetch user-specific groups and events
+        user_groups = GroupMembers.objects.filter(user=user).select_related('group')
+        user_events = EventAttendance.objects.filter(user=user).select_related('event')
+
+    context = {
         'boldmessage': 'Join today!',
         'groups': group_list,
-        'events': event_list
+        'events': event_list,
+        'user_groups': user_groups,
+        'user_events': user_events,
     }
-    return render(request, 'boardgame/home.html', context=context_dict)
+
+    return render(request, 'boardgame/home.html', context=context)
+
 
 # ---------------------------GROUPS---------------------------
 def group_profile(request, group_slug):
     # Retrieve the group object using the slug
     group = get_object_or_404(Group, slug=group_slug)
     members = group.members.all()
-    is_member = members.filter(id=request.user.id).exists() 
-    is_admin = GroupMembers.objects.filter(user=request.user, group=group, is_admin=True).exists()
+
+    # Determine if the user is authenticated and whether they are a member or admin
+    is_member = False
+    is_admin = False
+    if request.user.is_authenticated:
+        is_member = members.filter(id=request.user.id).exists()
+        is_admin = GroupMembers.objects.filter(user=request.user, group=group, is_admin=True).exists()
 
     # Fetch events associated with the group
     events = Event.objects.filter(group=group).order_by('title')
 
-    #Join Group and Request 
-    if request.method == 'POST': # used when a form has been submitted, meaning someone clicked button 
-        if 'join' in request.POST: # based on button name in html page
+    # Process join/leave group actions
+    if request.method == 'POST' and request.user.is_authenticated:
+        if 'join' in request.POST:
             if not is_member:
                 GroupMembers.objects.create(user=request.user, group=group, is_admin=False)
         elif 'leave' in request.POST:
@@ -34,7 +56,7 @@ def group_profile(request, group_slug):
                 GroupMembers.objects.filter(user=request.user, group=group).delete()
         return redirect('group_profile', group_slug=group.slug)
 
-    # Pass the group object to the template
+    # Pass the group object and related data to the template
     context = {
         'group': group,
         'is_admin': is_admin,
@@ -43,6 +65,7 @@ def group_profile(request, group_slug):
         'is_member': is_member,
     }
     return render(request, 'boardgame/group_profile.html', context)
+
 
 
 def create_group(request):
@@ -88,14 +111,18 @@ def event_details(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     attendees = event.attendees.all()
     nominations = event.gamenomination_set.all()
-    is_attending = attendees.filter(id=request.user.id).exists()
-
+    
+    is_attending = False
+    if request.user.is_authenticated:
+        is_attending = attendees.filter(id=request.user.id).exists()
 
     nominations_with_slots = []
     for nomination in nominations:
         signed_up_count = GameSignup.objects.filter(nomination=nomination).count()
         remaining_slots = nomination.game.max_players - signed_up_count
-        is_signed_up = GameSignup.objects.filter(nomination=nomination, user=request.user).exists()
+        is_signed_up = False
+        if request.user.is_authenticated:
+            is_signed_up = GameSignup.objects.filter(nomination=nomination, user=request.user).exists()
         nominations_with_slots.append({
             'nomination': nomination,
             'remaining_slots': remaining_slots,
@@ -204,10 +231,12 @@ def game_details(request, event_id, game_id):
     event = get_object_or_404(Event, id=event_id)
     game = get_object_or_404(Game, id=game_id)
     game_nomination = get_object_or_404(GameNomination, event=event, game=game)
-    is_attending = event.attendees.filter(id=request.user.id).exists()
-
-    # Check if the user has already signed up for this game
-    is_signed_up = GameSignup.objects.filter(nomination=game_nomination, user=request.user).exists()
+    
+    is_attending = False
+    is_signed_up = False
+    if request.user.is_authenticated:
+        is_attending = event.attendees.filter(id=request.user.id).exists()
+        is_signed_up = GameSignup.objects.filter(nomination=game_nomination, user=request.user).exists()
 
     # Calculate remaining sign-up slots
     signed_up_count = GameSignup.objects.filter(nomination=game_nomination).count()
@@ -248,3 +277,19 @@ def game_details(request, event_id, game_id):
         'game_signup_set': game_signup_set,  # Include game_signup_set in the context
     }
     return render(request, 'boardgame/game_details.html', context)
+
+# ---------------------------USER PROFILES---------------------------
+
+def user_profile(request):
+    user = request.user
+    # Fetch all groups where the user is a member
+    user_groups = GroupMembers.objects.filter(user=user).select_related('group')
+    
+    # Fetch all events where the user is attending
+    user_events = EventAttendance.objects.filter(user=user).select_related('event')
+    
+    context = {
+        'user_groups': user_groups,
+        'user_events': user_events,
+    }
+    return render(request, 'boardgame/user_profile.html', context)

@@ -122,6 +122,21 @@
             <a href="{% url 'home' %}">Back to Home</a>
         </div>
     </div>
+    <script>document.addEventListener('DOMContentLoaded', function () {
+        // Initialize all dropdowns (profile dropdown fix)
+        var dropdownToggleList = document.querySelectorAll('.dropdown-toggle');
+        dropdownToggleList.forEach(function (dropdownToggle) {
+            dropdownToggle.addEventListener('click', function () {
+                var dropdownMenu = dropdownToggle.nextElementSibling;
+                if (dropdownMenu.classList.contains('show')) {
+                    dropdownMenu.classList.remove('show');
+                } else {
+                    dropdownMenu.classList.add('show');
+                }
+            });
+        });
+    });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 </body>

@@ -1,50 +1,79 @@
 {% extends 'boardgame/base.html' %}
 {% load static %}
 {% block content %}
-    <head> 
-        <title>Welcome</title>
-        <link rel="stylesheet" type ="text/css" href="{% static 'boardgame/style.css' %}">
-        <img src="{% static 'boardgame/images/boardgamehome.jpeg' %}" alt="Board Game Home" />
-    </head>
-    <body>
-        <h1 class = "test" >Welcome to Board Game Meet!</h1> 
-        <div>
-            Join a community and discover new board games, meet new friends, <br>
-            and participate in exciting events. <br />
-            <strong>{{ boldmessage }}</strong><br /> </div>
-        <div>
 
+<head>
+    <title>Welcome</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'boardgame/style.css' %}">
+    <img src="{% static 'boardgame/images/boardgamehome.jpeg' %}" alt="Board Game Home" />
+</head>
+
+<body>
+    <h1 class="test">Welcome to Board Game Meet!</h1>
+    <div>
+        Join a community and discover new board games, meet new friends, <br>
+        and participate in exciting events. <br />
+        <strong>{{ boldmessage }}</strong><br />
+    </div>
+    <div>
+        {% if not user.is_authenticated %}
         <div>
             <h2>Featured Groups</h2>
             {% if groups %}
-                <ul>
-                    {% for group in groups %}
-                        <li>
-                            <a href="{% url 'group_profile' group.slug %}">{{ group.name }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
+            <ul>
+                {% for group in groups %}
+                <li>
+                    <a href="{% url 'group_profile' group.slug %}">{{ group.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
             {% else %}
-                <strong>There are no groups present.</strong>
+            <strong>There are no groups present.</strong>
             {% endif %}
         </div>
         <div>
             <h2>Featured Events</h2>
             {% if events %}
-                <ul>
-                    {% for event in events %}
-                    <li>
-                        <a href="{% url 'event_details' event.id %}">{{ event.title }}</a>
-                    </li>
-                    {% endfor %}
-                </ul>
+            <ul>
+                {% for event in events %}
+                <li>
+                    <a href="{% url 'event_details' event.id %}">{{ event.title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
             {% else %}
-                <strong>There are no events present.</strong>
+            <strong>There are no events present.</strong>
             {% endif %}
-        </div>  
-        <br>         
+        </div>
+        {% else %}
+        <!-- Display user's groups -->
+        <h2>Your Groups</h2>
+        {% if user_groups %}
+        <ul>
+            {% for group_member in user_groups %}
+            <li><a href="{% url 'group_profile' group_member.group.slug %}">{{ group_member.group.name }}</a></li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>You are not a member of any groups yet.</p>
+        {% endif %}
+
+        <!-- Display user's events -->
+        <h2>Your Events</h2>
+        {% if user_events %}
+        <ul>
+            {% for event_attendance in user_events %}
+            <li><a href="{% url 'event_details' event_attendance.event.id %}">{{ event_attendance.event.title }}</a></li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>You are not attending any events yet.</p>
+        {% endif %}
+        {% endif %}
+        <br>
         <div>
-            <a href="/boardgame/about/">About Board Game Meetup</a><br /> 
-        </div> 
-     </body>
+            <a href="/boardgame/about/">About Board Game Meetup</a><br />
+        </div>
+    </div>
+</body>
 {% endblock %}
