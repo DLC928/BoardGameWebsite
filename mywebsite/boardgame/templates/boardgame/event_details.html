@@ -70,16 +70,26 @@
                             <b>Remaining Sign-up Slots:</b> {{ item.remaining_slots }}
                             <br/><br/>
                             <a href="{% url 'game_details' event.id item.nomination.game.id %}" class="btn btn-secondary btn-sm">View Details</a>
-                            {% if user.is_authenticated and is_attending %}
-                            <a href="#" class="btn btn-primary btn-sm">Sign up</a>
-                            {% endif %}
-                            {% if user.is_authenticated and item.nomination.nominator == user %}
-                            <form method="post" action="">
-                                {% csrf_token %}
-                                <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
-                                <button type="submit" class="btn btn-danger btn-sm" name="remove_nomination">Remove Nomination</button>
-                            </form>
-                            {% endif %}
+
+                            <div>
+                                {% if user.is_authenticated and is_attending %}
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
+                                        {% if item.is_signed_up %}
+                                            <button type="submit" class="btn btn-secondary btn-sm" name="leave_game">Leave Game</button>
+                                        {% elif item.remaining_slots > 0 %}
+                                            <button type="submit" class="btn btn-primary btn-sm" name="sign_up">Sign up</button>
+                                        {% endif %}
+                                        {% if item.nomination.nominator == user %}
+                                            <button type="submit" class="btn btn-danger btn-sm" name="remove_nomination">Remove Nomination</button>
+                                        {% endif %}
+                                    </form>
+                                {% else %}
+                                    <p>You must join event to sign up to play.</p>
+                                {% endif %}
+                            </div>
+                            
                         </p>
                     </div>
                 </div>

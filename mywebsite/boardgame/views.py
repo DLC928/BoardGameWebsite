@@ -90,13 +90,16 @@ def event_details(request, event_id):
     nominations = event.gamenomination_set.all()
     is_attending = attendees.filter(id=request.user.id).exists()
 
+
     nominations_with_slots = []
     for nomination in nominations:
         signed_up_count = GameSignup.objects.filter(nomination=nomination).count()
         remaining_slots = nomination.game.max_players - signed_up_count
+        is_signed_up = GameSignup.objects.filter(nomination=nomination, user=request.user).exists()
         nominations_with_slots.append({
             'nomination': nomination,
-            'remaining_slots': remaining_slots
+            'remaining_slots': remaining_slots,
+            'is_signed_up': is_signed_up
         })
 
     if request.method == 'POST':
@@ -118,6 +121,24 @@ def event_details(request, event_id):
                         GameSignup.objects.filter(nomination=nomination).delete()
                         # Remove the nomination itself
                         nomination.delete()
+    
+        elif 'sign_up' in request.POST:
+            nomination_id = request.POST.get('nomination_id')
+            nomination = get_object_or_404(GameNomination, id=nomination_id)
+            if is_attending and not GameSignup.objects.filter(nomination=nomination, user=request.user).exists():
+                GameSignup.objects.create(nomination=nomination, user=request.user)
+        
+        elif 'leave_game' in request.POST:
+            nomination_id = request.POST.get('nomination_id')
+            nomination = get_object_or_404(GameNomination, id=nomination_id)
+            if GameSignup.objects.filter(nomination=nomination, user=request.user).exists():
+                if nomination.nominator == request.user:
+                    GameSignup.objects.filter(nomination=nomination).delete()
+                    nomination.delete()
+                    return redirect('event_details', event_id=event_id)
+                else:
+                    GameSignup.objects.filter(nomination=nomination, user=request.user).delete()
+             
         elif 'remove_nomination' in request.POST:
             nomination_id = request.POST.get('nomination_id')
             nomination = get_object_or_404(GameNomination, id=nomination_id)
@@ -131,12 +152,14 @@ def event_details(request, event_id):
 
     context = {
         'event': event,
-        'attendees': attendees,
         'is_attending': is_attending,
         'nominations': nominations,
+        'attendees': attendees,
         'nominations_with_slots': nominations_with_slots,
     }
     return render(request, 'boardgame/event_details.html', context)
+
+
 
 
 def nominate_game(request, event_id):
