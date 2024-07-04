@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from boardgame.models import GameSignup, Group,Event,GroupMembers,EventAttendance,GameNomination,Game
-from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm
+from boardgame.models import GameSignup, Group,Event,GroupMembers,EventAttendance,GameNomination,Game, UserProfile
+from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm, UserProfileForm
 
 
 def home(request):
@@ -325,3 +325,19 @@ def user_profile(request):
         'user_events': user_events,
     }
     return render(request, 'boardgame/user_profile.html', context)
+
+
+def profile_setup(request):
+    user_profile = UserProfile.objects.filter(user=request.user).first()
+    
+    if request.method == 'POST':
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
+        if profile_form.is_valid():
+            profile = profile_form.save(commit=False)
+            profile.user = request.user  # Associate profile with current logged-in user
+            profile.save()
+            return redirect('home')  # Redirect to home or profile view
+    else:
+        profile_form = UserProfileForm(instance=user_profile)
+    
+    return render(request, 'boardgame/profile_setup.html', {'profile_form': profile_form})

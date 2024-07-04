@@ -1,0 +1,22 @@
+{% extends 'boardgame/base.html' %}
+{% load static %}
+
+{% block title %}Profile Setup{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Profile Setup</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ profile_form.as_p }}
+        <button type="submit" class="btn btn-primary btn-sm mt-2">Save Profile</button>
+
+    </form>
+    <p class="mt-3 ">
+        <a href="{% url 'home' %}" class="text-muted">
+            <i class="fas fa-times-circle"></i> Skip for now
+        </a>
+    </p>
+    
+</div>
+{% endblock %}

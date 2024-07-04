@@ -16,6 +16,7 @@ urlpatterns = [
     path('profile/', views.user_profile, name='user_profile'),
     path('groups/', views.groups, name='groups'),
     path('events/', views.events, name='events'),
+    path('profile_setup/', views.profile_setup, name='profile_setup'),
 ]
 
  

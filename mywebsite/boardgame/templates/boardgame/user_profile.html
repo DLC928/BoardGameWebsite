@@ -3,23 +3,64 @@
 {% block content %}
 <title>Profile</title>
 
-Profile for {{user.username}}
-<!-- Display user's groups -->
-<h2>Your Groups</h2>
-<ul>
-    {% for group_member in user_groups %}
-    <li><a href="{% url 'group_profile' group_member.group.slug %}">{{ group_member.group.name }}</a></li>
-    {% endfor %}
-</ul>
+Profile for {{user.username}}<br/>
+Bio:  {{user.userprofile.bio}}
 
-<!-- Display user's events -->
-<h2>Your Events</h2>
-<ul>
-    {% for event_attendance in user_events %}
-    <li><a href="{% url 'event_details' event_attendance.event.id %}">{{ event_attendance.event.title }}</a></li>
-    {% endfor %}
-</ul>
+ <!-- Display user's groups -->
+ <h3>Your Groups</h3>
+ <br />
+ <div class="row">
+     {% if user_groups %}
+     {% for group_member in user_groups %}
+     <div class="col-md-4 mb-3">
+         <div class="card">
+             <div class="card-header">
+                 <h4>{{ group_member.group.name }}</h4>
+             </div>
+             <div class="card-body">
+                 <p class="card-text">
+                     <b>Description:</b> {{ group_member.group.description }}<br />
+                     <b>Location:</b> {{ group_member.group.location }}<br /><br />
+                     <a href="{% url 'group_profile' group_member.group.slug %}"
+                         class="btn btn-secondary btn-sm">View Group</a>
+                 </p>
+             </div>
+         </div>
+     </div>
+     {% endfor %}
+     {% else %}
+     <p>You are not a member of any groups yet.</p>
+     {% endif %}
+ </div>
 
+
+ <!-- Display user's events -->
+ <h3>Your Events</h3>
+ <br />
+ <div class="row">
+     {% if user_events %}
+     {% for event_attendance in user_events %}
+     <div class="col-md-4 mb-3">
+         <div class="card">
+             <div class="card-header">
+                 <h4>{{ event_attendance.event.title }}</h4>
+             </div>
+             <div class="card-body">
+                 <p class="card-text">
+                     <b>Description:</b> {{ event_attendance.event.description }}<br />
+                     <b>Location:</b> {{ event_attendance.event.location }}<br /><br />
+                     <a href="{% url 'event_details' event_attendance.event.id %}"
+                         class="btn btn-secondary btn-sm">View Event</a>
+                 </p>
+             </div>
+         </div>
+     </div>
+     {% endfor %}
+     {% else %}
+     <p>You are not attending any events yet.</p>
+     {% endif %}
+ </div>
+ 
 <!-- Link back to home -->
 <br /><br />
 <div>

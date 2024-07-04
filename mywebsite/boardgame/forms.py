@@ -1,5 +1,5 @@
 from django import forms 
-from .models import Group,Event, EventLocation, Game
+from .models import Group,Event, EventLocation, Game, UserProfile
 from django.contrib.admin.widgets import  AdminDateWidget, AdminTimeWidget, AdminSplitDateTime
 
 # Create a group form
@@ -66,6 +66,13 @@ class GameDetailForm(forms.ModelForm):
             'description': forms.Textarea(),
             'thumbnail': forms.URLInput(),
         }
+        
+class UserProfileForm(forms.ModelForm):
+    bio = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 4}))
+    picture = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control-file'}), required=False)
 
+    class Meta:
+        model = UserProfile
+        fields = ['bio', 'picture']
 
         
