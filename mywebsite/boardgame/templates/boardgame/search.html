@@ -1,0 +1,73 @@
+{% extends 'boardgame/base.html' %}
+{% load static %}
+{% block content %}
+    {% if searched %}
+    <h1>Search Results for "{{ searched }}"</h1>
+
+        {% if group_locations or event_locations %}
+            <h2>Groups</h2>
+            {% if groups %}
+                <div class="row">
+                    {% for group in groups %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>{{ group.name }}</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="group-profile">
+                                    {% if group.group_image %}
+                                    <img src="{{ group.group_image.url }}" class="profile-image rounded">
+                                    {% else %}
+                                    <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded">
+                                    {% endif %}
+                                    <br/><br/>
+                                    <p>{{ group.description }}</p>
+                                    <p><b>Location:</b> {{ group.grouplocation.city }}{% if group.grouplocation.state %}, {{ group.grouplocation.state }}{% endif %}</p>
+                                    <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No groups found.</p>
+            {% endif %}
+
+            <h2>Events</h2>
+            {% if events %}
+                <div class="row">
+                    {% for event in events %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>{{ event.title }}</h4>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">
+                                    <b>Description:</b> {{ event.description }}<br />
+                                    <b>Location:</b> {{ event.eventlocation.city }}{% if event.eventlocation.state %}, {{ event.eventlocation.state }}{% endif %}<br /><br />
+                                    <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No events found.</p>
+            {% endif %}
+        {% else %}
+            <p>No locations found.</p>
+        {% endif %}
+    {% else %}
+        <h3>Hey! You forgot to search for something ...</h3>  
+    {% endif %}
+
+    <!-- Link back to home -->
+    <br /><br />
+    <div>
+        <a href="{% url 'home' %}">Back to Home</a>
+    </div>
+{% endblock %}

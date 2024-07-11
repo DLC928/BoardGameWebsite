@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from boardgame.models import EventLocation, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,GameNomination,Game, UserProfile
 from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm, UserProfileForm
 from .utils import fetch_place_details
+from django.db.models import Q
 
 
 def home(request):
@@ -31,21 +32,6 @@ def home(request):
 
 
 # ---------------------------GROUPS---------------------------
-
-def groups(request):
-    group_list = Group.objects.all().order_by('name')
-    user_groups = None
-    user = request.user
-
-    if user.is_authenticated:
-        user_groups = GroupMembers.objects.filter(user=user).select_related('group')
-
-    context = {
-        'groups': group_list,
-        'user_groups': user_groups,
-    }
-    return render(request, 'boardgame/groups.html', context=context)
-
 
 def group_profile(request, group_slug):
     # Retrieve the group object using the slug
@@ -100,6 +86,7 @@ def create_group(request):
                 GroupLocation.objects.create(
                     group=group,
                     city=place_details['city'],
+                    sublocality=place_details['sublocality'],
                     state=place_details['state'],
                     country=place_details['country'],
                     latitude=place_details['latitude'],
@@ -118,20 +105,6 @@ def create_group(request):
 
 
 # ---------------------------EVENTS---------------------------
-def events(request):
-    event_list = Event.objects.all().order_by('title')
-    user_events = None
-    user = request.user
-    
-    # Check if the user is authenticated
-    if user.is_authenticated:
-        user_events = EventAttendance.objects.filter(user=user).select_related('event')
-
-    context = {
-        'events': event_list,
-        'user_events': user_events,
-    }
-    return render(request, 'boardgame/events.html', context=context)
 
 def create_event(request, group_slug):
     group = get_object_or_404(Group, slug=group_slug)
@@ -397,3 +370,67 @@ def profile_setup(request):
         profile_form = UserProfileForm(instance=user_profile)
     
     return render(request, 'boardgame/profile_setup.html', {'profile_form': profile_form})
+
+# ---------------------------NAVBAR---------------------------
+
+def groups(request):
+    group_list = Group.objects.all().order_by('name')
+    user_groups = None
+    user = request.user
+
+    if user.is_authenticated:
+        user_groups = GroupMembers.objects.filter(user=user).select_related('group')
+
+    context = {
+        'groups': group_list,
+        'user_groups': user_groups,
+    }
+    return render(request, 'boardgame/groups.html', context=context)
+
+def events(request):
+    event_list = Event.objects.all().order_by('title')
+    user_events = None
+    user = request.user
+    
+    # Check if the user is authenticated
+    if user.is_authenticated:
+        user_events = EventAttendance.objects.filter(user=user).select_related('event')
+
+    context = {
+        'events': event_list,
+        'user_events': user_events,
+    }
+    return render(request, 'boardgame/events.html', context=context)
+
+
+
+def search(request):
+    if request.method == "POST":
+        searched = request.POST.get('searched')
+        group_locations = GroupLocation.objects.filter(
+            Q(city__icontains=searched) | Q(sublocality__icontains=searched)
+        )
+
+        groups = Group.objects.filter(
+            Q(grouplocation__city__icontains=searched) | 
+            Q(grouplocation__sublocality__icontains=searched)
+        ).distinct()
+
+        event_locations = EventLocation.objects.filter(
+            Q(city__icontains=searched) | Q(sublocality__icontains=searched)
+        )
+
+        events = Event.objects.filter(
+            Q(eventlocation__city__icontains=searched) | 
+            Q(eventlocation__sublocality__icontains=searched)
+        ).distinct()
+
+        return render(request, 'boardgame/search.html', {
+            'searched': searched, 
+            'group_locations': group_locations, 
+            'groups': groups,
+            'event_locations': event_locations,
+            'events': events
+        })
+    
+    return render(request, 'boardgame/search.html', {})

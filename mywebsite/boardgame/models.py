@@ -38,7 +38,9 @@ class Group(models.Model):
 class GroupLocation(models.Model):
     group = models.OneToOneField('Group', on_delete=models.CASCADE)
     city = models.CharField(max_length=100)
+    sublocality = models.CharField(max_length=100, blank=True)  # neighborhoods or sublocalities
     state = models.CharField(max_length=100, blank=True)
+    postcode = models.CharField(max_length=20, blank=True)
     country = models.CharField(max_length=100)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
@@ -106,6 +108,7 @@ class EventLocation(models.Model):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
     address = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
+    sublocality = models.CharField(max_length=100, blank=True)  # neighborhoods or sublocalities
     state = models.CharField(max_length=100, blank=True, null=True)  # Nullable state field
     postcode = models.CharField(max_length=20)
     country = models.CharField(max_length=20)

@@ -21,6 +21,7 @@ def fetch_place_details(place_id):
             # Initialize variables
             address = result.get('formatted_address', '')
             city = ''
+            sublocality = ''
             state = ''
             country = ''
             postcode = ''
@@ -30,18 +31,21 @@ def fetch_place_details(place_id):
             # Parse address components
             address_components = result.get('address_components', [])
             for component in address_components:
-                if 'locality' in component['types'] or 'postal_town' in component['types'] or 'sublocality' in component['types']:
+                if 'locality' in component['types'] or 'postal_town' in component['types']:
                     city = component['long_name']    
+                elif 'sublocality' in component['types'] or 'neighborhood' in component['types']:
+                    sublocality = component['long_name']
                 elif 'administrative_area_level_1' in component['types']:
                     state = component['short_name']  # Use short_name for state code
                 elif 'country' in component['types']:
                     country = component['long_name']
                 elif 'postal_code' in component['types']:
                     postcode = component['long_name']
-
+                    
             place_details = {
                 'formatted_address': address,
                 'city': city,
+                'sublocality': sublocality,
                 'state': state,
                 'country': country,
                 'postcode': postcode,

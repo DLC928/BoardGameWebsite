@@ -1,7 +1,7 @@
 <!-- create_group.html -->
 
 {% extends 'boardgame/base.html' %}
-
+{% load static %}
 {% block content %}
 <head>
     <h1>Create new group</h1>
@@ -43,7 +43,7 @@
     function initAutocomplete() {
         var input = document.getElementById('group-location');
         var autocomplete = new google.maps.places.Autocomplete(input, {
-            types: ['(cities)'],  // Restrict to cities for better autocomplete results
+            types: ['(regions)'], 
             fields: ['place_id', 'formatted_address', 'address_components', 'geometry']
         });
 

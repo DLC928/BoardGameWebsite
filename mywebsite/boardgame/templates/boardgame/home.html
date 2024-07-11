@@ -17,7 +17,7 @@
                     and participate in exciting events. <br /><br />
 
                     {% if not user.is_authenticated %}
-                    <a class="btn" type="submit" style="background-color: #328ba3; border-color: #328ba3; color: #ffffff;" href="{% url 'register' %}">Sign Up!</a>
+                    <a class="btn btn-sm" type="submit" style="background-color: #328ba3; border-color: #328ba3; color: #ffffff;" href="{% url 'register' %}">Sign Up!</a>
                     {% endif %}
                 </div>
             </div>
@@ -29,7 +29,7 @@
         <div>
             {% if not user.is_authenticated %}
             <div>
-                <h2>Featured Groups</h2><br/>
+                <h3>Featured Groups</h3>
                 {% if groups %}
                 <div class="row">
                     {% for group in groups %}
@@ -60,7 +60,7 @@
                 {% endif %}
             </div>
             <div>
-                <h2>Featured Events</h2>
+                <h3>Featured Events</h3>
                 {% if events %}
                 <div class="row">
                     {% for event in events %}
@@ -88,7 +88,6 @@
 
             <!-- Display user's groups -->
             <h3>Your Groups</h3>
-            <br />
             <div class="row">
                 {% if user_groups %}
                 {% for group_member in user_groups %}
@@ -121,7 +120,6 @@
 
             <!-- Display user's events -->
             <h3>Your Events</h3>
-            <br />
             <div class="row">
                 {% if user_events %}
                 {% for event_attendance in user_events %}

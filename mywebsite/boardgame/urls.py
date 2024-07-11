@@ -14,10 +14,11 @@ urlpatterns = [
     path('event/<int:event_id>/nominate/', views.nominate_game, name='nominate_game'),
     path('event/<int:event_id>/game_details/<int:game_id>/', views.game_details, name='game_details'),
     path('profile/', views.user_profile, name='user_profile'),
-    path('groups/', views.groups, name='groups'),
-    path('events/', views.events, name='events'),
     path('profile_setup/', views.profile_setup, name='profile_setup'),
     path('edit_event/<int:event_id>/', views.edit_event, name='edit_event'),
+    path('groups/', views.groups, name='groups'),
+    path('events/', views.events, name='events'),
+    path('search/', views.search, name='search'),
 ]
 
  

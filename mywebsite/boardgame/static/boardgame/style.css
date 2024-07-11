@@ -5,3 +5,35 @@
     width: auto;       /* Maintain aspect ratio */
     height: auto;      /* Maintain aspect ratio */
 }
+
+/* Reduce padding and margin */
+.card {
+    padding: 10px;
+    margin: 10px;
+}
+
+/* Decrease font size */
+.card-header h4 {
+    font-size: 1.2rem; 
+}
+
+.card-body p {
+    font-size: 0.9rem; 
+}
+
+/* Reduce size of buttons */
+.btn-sm {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+}
+
+/* Set a max-width for the container */
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.navbar .form-control.custom-search-bar {
+    width: 275px; /* Adjust this value as needed */
+}
+
