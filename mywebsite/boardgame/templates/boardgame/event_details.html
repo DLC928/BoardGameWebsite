@@ -7,8 +7,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ event.title }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">   
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
 </head>
+<style>
+    body {
+        font-family: 'Varela Round', sans-serif;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Varela Round', sans-serif;
+    }
+    /* Add more specific selectors as needed */
+</style>
+
 <body>
     <div class="container mt-4">
         <div class="row">
@@ -41,10 +52,12 @@
                         <strong class="card-title">Event Location</strong>
                     </div>
                     <div class="card-body">
-                        <h6 class="card-subtitle mb-2 text-muted">{{ event.location.name }}</h6>
-                        <p class="mb-1"><i class="bi bi-geo-alt-fill"></i> {{ event.location.address }}</p>
-                        <p class="mb-1"><i class="bi bi-building"></i> {{ event.location.city }}, {{ event.location.postcode }}</p>
-                        <p><i class="bi bi-flag"></i> {{ event.location.country }}</p>
+                        {% if event_location %}
+                            <h6 class="card-subtitle mb-2 text-muted">{{ event_location.name }}</h6>
+                            <p class="mb-1"><i class="bi bi-geo-alt-fill"></i> {{ event_location.address }}</p>
+                        {% else %}
+                            <p>No location specified for this event.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>

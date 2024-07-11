@@ -1,30 +1,107 @@
 {% extends 'boardgame/base.html' %}
-{% load static %}
 
 {% block content %}
+<h1>Create new event</h1>
 
-    <script src="{% url 'js-catlog' %}"></script>
-    <script src="{% static '/admin/js/core.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'admin/css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">
-      
-    <h1>Create new event</h1>
-    <div class="container">
-        <br><br>
-        <form id="eventForm" action="{% url 'create_event' group.slug %}" method="POST">
-            {% csrf_token %}
-            {{ form.media }}
-            {{ form }}
-            <br/>
-             <!-- Always show the event location form -->
-            <div id="locationForm">
-                <h1>Event Location</h1>
-                {{ location_form.as_p }}
-            </div>
-            <input type="submit" value="Submit" class="btn btn-secondary">
-        </form>
+<form id="event-form" method="POST" action="{% url 'create_event' group.slug %}">
+    {% csrf_token %}
+
+    <!-- Event Form -->
+    {{ form.as_p }}
+
+    <br />
+
+    <!-- Event Location input with Google Places Autocomplete -->
+    <div class="form-group">
+        <label for="event-location-input">Event Location</label>
+        <input type="text" id="event-location-input" class="form-control" style="width: 50%;" name="location_address" autocomplete="off">
+        <!-- Hidden input to store place ID -->
+        <input type="hidden" id="place-id" name="place_id">
+    </div>
+    <br />
+
+    <!-- Hidden input field to indicate location addition -->
+    <input type="hidden" name="add_location" id="add_location" value="false">
+
+    <!-- Button to show/hide location form -->
+    <button type="button" class="btn btn-secondary" id="toggle-location-btn">Manually Add Location</button>
+
+    <!-- Location form, initially hidden -->
+    <div id="location-form" style="display: none; margin-top: 20px;">
+        <!-- Location Form Fields for manual entry -->
+        <div class="form-group">
+            <label for="id_address">Address:</label>
+            <input type="text" name="address" id="id_address" class="form-control" autocomplete="address-line1">
+        </div>
+        <div class="form-group">
+            <label for="id_city">City:</label>
+            <input type="text" name="city" id="id_city" class="form-control" autocomplete="address-level2">
+        </div>
+        <div class="form-group">
+            <label for="id_postcode">Postcode:</label>
+            <input type="text" name="postcode" id="id_postcode" class="form-control" autocomplete="postal-code">
+        </div>
+        <div class="form-group">
+            <label for="id_country">Country:</label>
+            <input type="text" name="country" id="id_country" class="form-control" autocomplete="country">
+        </div>
     </div>
 
-        
-      
+    <!-- Submit Button -->
+    <input type="submit" value="Submit" class="btn btn-secondary">
+</form>
+
+<script>
+    function initMap() {
+        var autocomplete = new google.maps.places.Autocomplete(
+            document.getElementById('event-location-input'), { types: ['geocode'] });
+
+        autocomplete.addListener('place_changed', function () {
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                return;
+            }
+
+            // Populate hidden fields with place details
+            document.getElementById('place-id').value = place.place_id;
+            document.getElementById('id_address').value = place.formatted_address;
+            document.getElementById('id_city').value = '';  // Extract city details as needed
+            document.getElementById('id_postcode').value = '';  // Extract postcode details as needed
+            document.getElementById('id_country').value = '';  // Extract country details as needed
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('toggle-location-btn').addEventListener('click', function () {
+            var locationForm = document.getElementById('location-form');
+            var addLocationInput = document.getElementById('add_location');
+
+            if (locationForm.style.display === 'none') {
+                locationForm.style.display = 'block';
+                addLocationInput.value = 'true';  // Set the hidden input value to true when showing the location form
+                // Make location fields required when shown
+                document.getElementById('id_address').setAttribute('required', 'required');
+                document.getElementById('id_city').setAttribute('required', 'required');
+                document.getElementById('id_postcode').setAttribute('required', 'required');
+                document.getElementById('id_country').setAttribute('required', 'required');
+            } else {
+                locationForm.style.display = 'none';
+                addLocationInput.value = 'false';  // Set the hidden input value to false when hiding the location form
+                // Remove required attribute when hidden
+                document.getElementById('id_address').removeAttribute('required');
+                document.getElementById('id_city').removeAttribute('required');
+                document.getElementById('id_postcode').removeAttribute('required');
+                document.getElementById('id_country').removeAttribute('required');
+            }
+        });
+
+        // Load Google Maps API script
+        var script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&libraries=places&callback=initMap';
+        script.defer = true;
+        script.async = true;
+        document.head.appendChild(script);
+    });
+</script>
+
 {% endblock %}

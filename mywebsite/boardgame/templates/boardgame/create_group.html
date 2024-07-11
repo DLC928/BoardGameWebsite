@@ -1,7 +1,13 @@
+<!-- create_group.html -->
+
 {% extends 'boardgame/base.html' %}
 
 {% block content %}
-<h1>Create new group</h1>
+<head>
+    <h1>Create new group</h1>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&libraries=places"></script>
+</head>
+
 <br/><br/>
 <form action="{% url 'create_group' %}" method="POST">
     {% csrf_token %}
@@ -16,11 +22,41 @@
         {{ form.description }}
     </div>
     <br/>
+    <!-- Input field for location with autocomplete -->
     <div class="form-group">
-        <label for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
-        {{ form.location }}
+        <label for="group-location">Group Location</label>
+        <input type="text" id="group-location" class="form-control" style="width: 50%;" name="location_city">
+        <!-- Hidden input to store place ID -->
+        <input type="hidden" id="place-id" name="place_id">
     </div>
     <br/>
     <input type="submit" value="Submit" class="btn btn-secondary">
 </form>
+
+<!-- JavaScript for Google Places Autocomplete -->
+<script>
+    function initAutocomplete() {
+        var input = document.getElementById('group-location');
+        var autocomplete = new google.maps.places.Autocomplete(input, {
+            types: ['(cities)'],  // Restrict to cities for better autocomplete results
+            fields: ['place_id', 'formatted_address', 'address_components', 'geometry']
+        });
+
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                return;
+            }
+            // Log the full place object to see all available details
+            console.log(place);
+
+            // Set hidden input value to store place ID
+            document.getElementById('place-id').value = place.place_id;
+        });
+    }
+    google.maps.event.addDomListener(window, 'load', initAutocomplete);
+</script>
 {% endblock %}
+
+
+

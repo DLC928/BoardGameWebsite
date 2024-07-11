@@ -1,77 +1,87 @@
 {% extends 'boardgame/base.html' %}
 
 {% block content %}
-    <h1>{{ group.name }}</h1>
-    <p>Description: {{ group.description }}</p>
-    <p>Location: {{ group.location }}</p>
+<h1>{{ group.name }}</h1>
+<p>Description: {{ group.description }}</p>
 
-    <!-- Join/Leave Group Button -->
-    <div>
-        {% if user.is_authenticated %}
-            <form method="POST" action="">
-                {% csrf_token %}
-                {% if is_member %}
-                    <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Group</button>
-                {% else %}
-                    <button type="submit" class="btn btn-secondary btn-sm" name="join">Join Group</button>
-                {% endif %}
-            </form>
+{% if group_location %}
+<p>Location: {{ group_location.city }}</p>
+{% else %}
+<p>No location specified for this group.</p>
+{% endif %}
+
+<!-- Join/Leave Group Button -->
+<div>
+    {% if user.is_authenticated %}
+    <form method="POST" action="">
+        {% csrf_token %}
+        {% if is_member %}
+        <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Group</button>
         {% else %}
-            <p>You must <a href="{% url 'login' %}">login</a> first to join the group.</p>
+        <button type="submit" class="btn btn-secondary btn-sm" name="join">Join Group</button>
         {% endif %}
-    </div>
+    </form>
+    {% else %}
+    <p>You must <a href="{% url 'login' %}">login</a> first to join the group.</p>
+    {% endif %}
+</div>
 
-     <!-- Debug Output -->
-     <p>Is Admin: {{ is_admin }}</p>
+<!-- Debug Output -->
+<p>Is Admin: {{ is_admin }}</p>
 
-     <!-- Show Create Event button if user is group admin of this group -->
-     {% if is_admin %}
-     <a href="{% url 'create_event' group.slug %}" class="btn btn-secondary btn-sm">Create Event</a>
-     {% endif %}
- 
+<!-- Show Create Event button if user is group admin of this group -->
+{% if is_admin %}
+<a href="{% url 'create_event' group.slug %}" class="btn btn-secondary btn-sm">Create Event</a>
+{% endif %}
 
-    <!-- Events -->
-    <h3>Events</h3>
-    <div class="row">
-        {% for event in events %}
-            <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>{{ event.title }}</h4>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">
-                            {{ event.date_time }}<br/>
-                            {{ event.description }}<br/><br/>
-                            <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event Details</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
 
-    <!-- Group Members -->
-    <div class="col-sm-4">
+<!-- Events -->
+<h3>Events</h3>
+<div class="row">
+    {% for event in events %}
+    <div class="col-md-4 mb-3">
         <div class="card">
             <div class="card-header">
-                Members
+                <h4>{{ event.title }}</h4>
             </div>
             <div class="card-body">
                 <p class="card-text">
-                    <ul>
-                        {% for member in members %}
-                            <li>{{ member.username }}</li>
-                        {% endfor %}
-                    </ul>
+                    {{ event.date_time }}<br />
+                    {{ event.description }}<br /><br />
+                    <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event Details</a>
                 </p>
             </div>
+            {% if is_admin %}
+            <div class="card-footer text-body-secondary">
+                <a href="{% url 'edit_event' event.id %}" class="btn btn-secondary btn-sm">Edit Event</a>
+            </div>
+            {% endif %}
         </div>
     </div>
+    {% endfor %}
+</div>
 
-    <!-- Link back to home -->
-    <br/><br/>
-    <div>
-        <a href="{% url 'home' %}">Back to Home</a>
+<!-- Group Members -->
+<div class="col-sm-4">
+    <div class="card">
+        <div class="card-header">
+            Members
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+            <ul>
+                {% for member in members %}
+                <li>{{ member.username }}</li>
+                {% endfor %}
+            </ul>
+            </p>
+        </div>
     </div>
+</div>
+
+<!-- Link back to home -->
+<br /><br />
+<div>
+    <a href="{% url 'home' %}">Back to Home</a>
+</div>
 {% endblock %}

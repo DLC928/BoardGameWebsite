@@ -1,48 +1,37 @@
 from django import forms 
-from .models import Group,Event, EventLocation, Game, UserProfile
-from django.contrib.admin.widgets import  AdminDateWidget, AdminTimeWidget, AdminSplitDateTime
+from .models import Group,Event, EventLocation, Game, GroupLocation, UserProfile
+from django.contrib.admin.widgets import  AdminSplitDateTime
+from django.forms.widgets import SplitDateTimeWidget
 
 # Create a group form
 class GroupForm(forms.ModelForm):
-    class Meta: 
-        model = Group 
-        fields = ('name','description','location')
-
+    class Meta:
+        model = Group
+        fields = ('name', 'description')
         labels = {
             'name': 'Group Name',
-            'description': 'Group Description',
-            'location': 'Group Location',
+            'description': 'Group Description'
         }
-        
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
-            'location': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
         }
- 
-
-
 class EventForm(forms.ModelForm):
-    date_time = forms.SplitDateTimeField(widget=AdminSplitDateTime())
-
-    class Meta:
+      class Meta:
         model = Event
-        fields = ('title', 'description', 'date_time')
-        
-    
-    widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}), 
-            'date_time': forms.SplitDateTimeWidget(attrs={'class': 'form-control'}),
+        fields = ['title', 'description', 'date_time']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
+            'date_time': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'style': 'width: 50%;'}),
         }    
-        
+
 
 class EventLocationForm(forms.ModelForm):
     class Meta:
         model = EventLocation
-        fields = ['name', 'address', 'city', 'postcode', 'country', 'latitude', 'longitude']
+        fields = ['address', 'city', 'postcode', 'country', 'latitude', 'longitude']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'address': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'city': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'postcode': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
@@ -50,7 +39,7 @@ class EventLocationForm(forms.ModelForm):
             'latitude': forms.HiddenInput(),
             'longitude': forms.HiddenInput(),
         }
-
+        
 class GameDetailForm(forms.ModelForm):
     class Meta:
         model = Game

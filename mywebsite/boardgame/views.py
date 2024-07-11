@@ -1,12 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from boardgame.models import GameSignup, Group,Event,GroupMembers,EventAttendance,GameNomination,Game, UserProfile
+from boardgame.models import EventLocation, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,GameNomination,Game, UserProfile
 from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm, UserProfileForm
+from .utils import fetch_place_details
 
 
 def home(request):
-    # Fetch all groups and events
-    group_list = Group.objects.all().order_by('name')
-    event_list = Event.objects.all().order_by('title')
+     # Fetch all groups and events with their locations
+    group_list = Group.objects.all().select_related('grouplocation').order_by('name')
+    event_list = Event.objects.all().select_related('eventlocation').order_by('title')
     
     # Initialize user-related variables
     user_groups = None
@@ -71,9 +72,11 @@ def group_profile(request, group_slug):
                 GroupMembers.objects.filter(user=request.user, group=group).delete()
         return redirect('group_profile', group_slug=group.slug)
 
+    group_location = GroupLocation.objects.filter(group=group).first()
     # Pass the group object and related data to the template
     context = {
         'group': group,
+        'group_location': group_location,
         'is_admin': is_admin,
         'events': events,
         'members': members,
@@ -81,21 +84,38 @@ def group_profile(request, group_slug):
     }
     return render(request, 'boardgame/group_profile.html', context)
 
-
-
 def create_group(request):
     if request.method == 'POST':
-        form = GroupForm(request.POST)
-        if form.is_valid():
-            group = form.save(commit=False)
+        group_form = GroupForm(request.POST)
+        if group_form.is_valid():
+            group = group_form.save(commit=False)
             group.save()
-            
-            # Add the current user as a member of the group and mark them as admin
+
+            # Fetch place details using utility function
+            place_id = request.POST.get('place_id')  # Get selected place ID
+            place_details = fetch_place_details(place_id)
+
+            if place_details:
+                # Save location details to GroupLocation model or related model
+                GroupLocation.objects.create(
+                    group=group,
+                    city=place_details['city'],
+                    state=place_details['state'],
+                    country=place_details['country'],
+                    latitude=place_details['latitude'],
+                    longitude=place_details['longitude'],
+                )
+
+            # Add user as a member of the group
             GroupMembers.objects.create(user=request.user, group=group, is_admin=True)
+
+            # Redirect to group profile page
             return redirect('group_profile', group_slug=group.slug)
     else:
-        form = GroupForm()
-    return render(request, 'boardgame/create_group.html', {'form': form})
+        group_form = GroupForm()
+    
+    return render(request, 'boardgame/create_group.html', {'form': group_form})
+
 
 # ---------------------------EVENTS---------------------------
 def events(request):
@@ -113,31 +133,64 @@ def events(request):
     }
     return render(request, 'boardgame/events.html', context=context)
 
- 
-
 def create_event(request, group_slug):
     group = get_object_or_404(Group, slug=group_slug)
-    if request.method == 'POST':
-        event_form = EventForm(request.POST)
-        location_form = EventLocationForm(request.POST)
-        
-        if event_form.is_valid() and location_form.is_valid():
-            location = location_form.save()
-            event = event_form.save(commit=False)
-            event.group = group  # Associate the event with the group
-            event.location = location  # Associate the event with the location
-            event.save()
-            return redirect('group_profile', group_slug=group_slug)
-    else:
-        event_form = EventForm()
-        location_form = EventLocationForm()
+    event_form = EventForm(request.POST or None)
+    location_form = None
 
+    if request.method == 'POST':
+        if event_form.is_valid():
+            event = event_form.save(commit=False)
+            event.group = group
+            event.save()
+
+            add_location = request.POST.get('add_location', False)
+
+            if add_location == 'true':
+                # Handle manual entry of location details
+                location_form = EventLocationForm(request.POST)
+                if location_form.is_valid():
+                    event_location = location_form.save(commit=False)
+                    event_location.event = event  # Associate event with event location
+                    event_location.save()
+            else:
+                # Handle location details from Google Places API
+                place_id = request.POST.get('place_id', None)
+                if place_id:
+                    place_details = fetch_place_details(place_id)
+
+                    if place_details:
+                        # Create EventLocation instance
+                        EventLocation.objects.create(
+                            event=event,
+                            address=place_details.get('formatted_address', ''),
+                            city=place_details.get('city', ''),
+                            state=place_details.get('state', ''),
+                            postcode=place_details.get('postcode', ''),
+                            country=place_details.get('country', ''),
+                            latitude=place_details.get('latitude', None),
+                            longitude=place_details.get('longitude', None),
+                        )
+
+            return redirect('group_profile', group_slug=group_slug)
+    
     context = {
         'form': event_form,
         'location_form': location_form,
         'group': group,
     }
     return render(request, 'boardgame/create_event.html', context)
+
+def edit_event(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    form = EventForm(request.POST or None, instance=event)
+    
+    if form.is_valid():
+        form.save()
+        return redirect('event_details', event_id=event_id)
+
+    return render(request, 'boardgame/edit_event.html', {'form': form, 'event': event})
+
 
 def event_details(request, event_id):
     event = get_object_or_404(Event, id=event_id)
@@ -209,8 +262,11 @@ def event_details(request, event_id):
         
         return redirect('event_details', event_id=event_id)
 
+    event_location = EventLocation.objects.filter(event=event).first()
+
     context = {
         'event': event,
+        'event_location': event_location,
         'is_attending': is_attending,
         'nominations': nominations,
         'attendees': attendees,

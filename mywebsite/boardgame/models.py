@@ -17,25 +17,34 @@ def create_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
 
-# Group model
 class Group(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
-    location = models.CharField(max_length=255)
     members = models.ManyToManyField(User, through='GroupMembers')
     slug = models.SlugField(unique=True)
-
+    
     def save(self, *args, **kwargs):
         if not self.id:
-            # Save without slug to get an ID
             super(Group, self).save(*args, **kwargs)
         if not self.slug:
             self.slug = f"{slugify(self.name)}-{self.id}"
-            self.save()  # Save again to update slug
+            self.save()
         super(Group, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
+
+class GroupLocation(models.Model):
+    group = models.OneToOneField('Group', on_delete=models.CASCADE)
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100, blank=True)
+    country = models.CharField(max_length=100)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    
+    def __str__(self):
+        return f"{self.city}, {self.state if self.state else ''}, {self.country}"
+
 
 # GroupMember model to handle the relationship between users and groups
 class GroupMembers(models.Model):
@@ -73,7 +82,6 @@ class Event(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     date_time = models.DateTimeField()
-    location = models.ForeignKey('EventLocation', on_delete=models.CASCADE)
     attendees = models.ManyToManyField(User, through='EventAttendance')
     nominations = models.ManyToManyField(Game, through='GameNomination')
 
@@ -94,16 +102,17 @@ class EventAttendance(models.Model):
         return f"{self.user.username} attending {self.event.title}"
 
 class EventLocation(models.Model):
-    name = models.CharField(max_length=255)
+    event = models.OneToOneField('Event', on_delete=models.CASCADE)
     address = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100, blank=True, null=True)  # Nullable state field
     postcode = models.CharField(max_length=20)
     country = models.CharField(max_length=20)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.address}, {self.city}, {self.country}"
 
 
 # Nomination model to handle the relationship between events and games

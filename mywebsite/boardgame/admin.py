@@ -1,10 +1,18 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 from django.contrib.auth.models import User
-from .models import Event, Game, Group, EventAttendance, GroupMembers, UserProfile, GameNomination, EventLocation, GameSignup
+from .models import Event, Game, Group, EventAttendance, GroupLocation, GroupMembers, UserProfile, GameNomination, EventLocation, GameSignup
+
+
+class GroupLocationInline(admin.StackedInline):
+    model = GroupLocation
+    can_delete = False  # Prevents deletion of existing GroupLocation from Group admin
+    verbose_name_plural = 'Group Location'  # Display name for inline
 
 class GroupAdmin(admin.ModelAdmin):
+    inlines = [GroupLocationInline]
     prepopulated_fields = {'slug': ('name',)}
+
     
 class EventAttendanceInline(admin.TabularInline):
     model = EventAttendance
@@ -15,9 +23,13 @@ class GameNominationInline(admin.TabularInline):
     extra = 1  # Display one extra blank form by default
 
 
-class EventAdmin(admin.ModelAdmin):
-    inlines = [EventAttendanceInline,GameNominationInline]
+class EventLocationInline(admin.StackedInline):
+    model = EventLocation
+    can_delete = False  # Prevents deletion of existing EventLocation from Event admin
+    verbose_name_plural = 'Event Location'  # Display name for inline
 
+class EventAdmin(admin.ModelAdmin):
+    inlines = [EventAttendanceInline, GameNominationInline, EventLocationInline]
 
 # Add profile information to user model
 class UserProfileInline(admin.StackedInline):
