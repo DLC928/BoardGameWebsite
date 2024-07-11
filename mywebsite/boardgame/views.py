@@ -86,7 +86,7 @@ def group_profile(request, group_slug):
 
 def create_group(request):
     if request.method == 'POST':
-        group_form = GroupForm(request.POST)
+        group_form = GroupForm(request.POST, request.FILES)
         if group_form.is_valid():
             group = group_form.save(commit=False)
             group.save()

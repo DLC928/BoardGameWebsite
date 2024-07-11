@@ -1,3 +1,7 @@
-.test{
-    color: rgb(25, 27, 48);
+
+.profile-image {
+    max-width: 300px;  /* Set the maximum width */
+    max-height: 200px; /* Set the maximum height */
+    width: auto;       /* Maintain aspect ratio */
+    height: auto;      /* Maintain aspect ratio */
 }

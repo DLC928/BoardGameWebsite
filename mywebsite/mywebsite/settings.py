@@ -119,8 +119,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'boardgame', 'static', 'boardgame'),
+    os.path.join(BASE_DIR, 'boardgame', 'static'),
 ]
 
 GOOGLE_API_KEY = "AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU"

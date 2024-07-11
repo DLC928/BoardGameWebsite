@@ -9,7 +9,7 @@
 </head>
 
 <br/><br/>
-<form action="{% url 'create_group' %}" method="POST">
+<form action="{% url 'create_group' %}" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     
     <div class="form-group">
@@ -29,6 +29,11 @@
         <!-- Hidden input to store place ID -->
         <input type="hidden" id="place-id" name="place_id">
     </div>
+    <br/>
+    <div class="form-group">
+        <label for="{{ form.group_image.id_for_label }}">{{ form.group_image.label }}</label>
+        {{ form.group_image }}
+     </div>
     <br/>
     <input type="submit" value="Submit" class="btn btn-secondary">
 </form>

@@ -22,6 +22,7 @@ class Group(models.Model):
     description = models.TextField()
     members = models.ManyToManyField(User, through='GroupMembers')
     slug = models.SlugField(unique=True)
+    group_image = models.ImageField(upload_to='images/', null=True, blank=True)
     
     def save(self, *args, **kwargs):
         if not self.id:

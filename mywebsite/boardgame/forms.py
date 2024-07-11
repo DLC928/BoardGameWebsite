@@ -7,10 +7,11 @@ from django.forms.widgets import SplitDateTimeWidget
 class GroupForm(forms.ModelForm):
     class Meta:
         model = Group
-        fields = ('name', 'description')
+        fields = ('name', 'description','group_image')
         labels = {
             'name': 'Group Name',
-            'description': 'Group Description'
+            'description': 'Group Description',
+             'group_image': 'Group Image',
         }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
