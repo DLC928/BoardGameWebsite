@@ -3,9 +3,8 @@
 {% block content %}
 <h1>Create new event</h1>
 
-<form id="event-form" method="POST" action="{% url 'create_event' group.slug %}">
+<form id="event-form" method="POST" action="{% url 'create_event' group.slug %}" enctype="multipart/form-data">
     {% csrf_token %}
-
     <!-- Event Form -->
     {{ form.as_p }}
 

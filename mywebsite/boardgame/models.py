@@ -22,7 +22,7 @@ class Group(models.Model):
     description = models.TextField()
     members = models.ManyToManyField(User, through='GroupMembers')
     slug = models.SlugField(unique=True)
-    group_image = models.ImageField(upload_to='images/', null=True, blank=True)
+    group_image = models.ImageField(upload_to='group_images/', null=True, blank=True)
     
     def save(self, *args, **kwargs):
         if not self.id:
@@ -52,7 +52,7 @@ class GroupLocation(models.Model):
 # GroupMember model to handle the relationship between users and groups
 class GroupMembers(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    group = models.ForeignKey(Group,related_name='group_members', on_delete=models.CASCADE)
     is_admin = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
 
@@ -87,6 +87,7 @@ class Event(models.Model):
     date_time = models.DateTimeField()
     attendees = models.ManyToManyField(User, through='EventAttendance')
     nominations = models.ManyToManyField(Game, through='GameNomination')
+    event_image = models.ImageField(upload_to='event_images/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.title} by {self.group.name}"

@@ -10,6 +10,8 @@ def home(request):
     group_list = Group.objects.all().select_related('grouplocation').order_by('name')
     event_list = Event.objects.all().select_related('eventlocation').order_by('title')
     
+ 
+
     # Initialize user-related variables
     user_groups = None
     user_events = None
@@ -109,6 +111,7 @@ def create_group(request):
 def create_event(request, group_slug):
     group = get_object_or_404(Group, slug=group_slug)
     event_form = EventForm(request.POST or None)
+    event_form = EventForm(request.POST or None, request.FILES or None)
     location_form = None
 
     if request.method == 'POST':

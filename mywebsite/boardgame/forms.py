@@ -20,7 +20,7 @@ class GroupForm(forms.ModelForm):
 class EventForm(forms.ModelForm):
       class Meta:
         model = Event
-        fields = ['title', 'description', 'date_time']
+        fields = ['title', 'description', 'date_time','event_image']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
