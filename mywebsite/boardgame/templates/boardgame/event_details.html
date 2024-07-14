@@ -94,19 +94,19 @@
             <div class="col-md-4 mb-3">
                 <div class="card">
                     <div class="card-header">
-                        <h5>{{ item.nomination.game.name }}</h5>
+                        <h5>{{ item.nomination.name }}</h5>
                     </div>
                     <div class="card-body">
                         <p class="card-text">
-                            <b>Description:</b> {{ item.nomination.game.description|truncatewords:25|striptags|safe }}... <a href="{% url 'game_details' event.id item.nomination.game.id %}">See Details</a>
+                            <b>Description:</b> {{ item.nomination.description|truncatewords:25|striptags|safe }}... <a href="{% url 'game_details' event.id item.nomination.id %}">See Details</a>
                             <br /><br />
-                            <b>Difficulty:</b> {{ item.nomination.game.weight }} /5
+                            <b>Difficulty:</b> {{ item.nomination.weight }} /5
                             <br/><br/>
                             <b>Nominated by:</b> {{ item.nomination.nominator.username }}
                             <br/><br/>
                             <b>Remaining Sign-up Slots:</b> {{ item.remaining_slots }}
                             <br/><br/>
-                            <a href="{% url 'game_details' event.id item.nomination.game.id %}" class="btn btn-secondary btn-sm">View Details</a>
+                            <a href="{% url 'game_details' event.id item.nomination.id %}" class="btn btn-secondary btn-sm">View Details</a>
                             <div>
                                 {% if user.is_authenticated and is_attending %}
                                     <form method="post">

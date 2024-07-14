@@ -30,6 +30,7 @@
         <br>
         <label for="weight">Weight:</label>
         <input type="text" name="weight" id="weight" placeholder="Weight">
+        <input type="hidden" name="thumbnail" id="thumbnail">
     </div>
     <input type="submit" value="Nominate Game" class="btn btn-secondary">
     <button type="button" id="manual-entry-btn">Manually Add Game Details</button>
@@ -87,9 +88,10 @@
               $('#min-players').val(data.min_players);
               $('#max-players').val(data.max_players);
               $('#min-playtime').val(data.min_playtime);  
-            $('#max-playtime').val(data.max_playtime);  
+              $('#max-playtime').val(data.max_playtime);  
               $('#age').val(data.age);
               $('#weight').val(data.weight);
+              $('#thumbnail').val(data.thumbnail);
 
               // Show game details section
               $('#game-details').show();

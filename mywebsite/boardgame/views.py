@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from boardgame.models import EventLocation, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,GameNomination,Game, UserProfile
+from boardgame.models import EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, UserProfile
 from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm, UserProfileForm
 from .utils import fetch_place_details
 from django.db.models import Q
@@ -171,7 +171,7 @@ def edit_event(request, event_id):
 def event_details(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     attendees = event.attendees.all()
-    nominations = event.gamenomination_set.all()
+    nominations = Game.objects.filter(event=event)
     
     is_attending = False
     if request.user.is_authenticated:
@@ -180,7 +180,7 @@ def event_details(request, event_id):
     nominations_with_slots = []
     for nomination in nominations:
         signed_up_count = GameSignup.objects.filter(nomination=nomination).count()
-        remaining_slots = nomination.game.max_players - signed_up_count
+        remaining_slots = nomination.max_players - signed_up_count
         is_signed_up = False
         if request.user.is_authenticated:
             is_signed_up = GameSignup.objects.filter(nomination=nomination, user=request.user).exists()
@@ -212,13 +212,13 @@ def event_details(request, event_id):
     
         elif 'sign_up' in request.POST:
             nomination_id = request.POST.get('nomination_id')
-            nomination = get_object_or_404(GameNomination, id=nomination_id)
+            nomination = get_object_or_404(Game, id=nomination_id)
             if is_attending and not GameSignup.objects.filter(nomination=nomination, user=request.user).exists():
                 GameSignup.objects.create(nomination=nomination, user=request.user)
         
         elif 'leave_game' in request.POST:
             nomination_id = request.POST.get('nomination_id')
-            nomination = get_object_or_404(GameNomination, id=nomination_id)
+            nomination = get_object_or_404(Game, id=nomination_id)
             if GameSignup.objects.filter(nomination=nomination, user=request.user).exists():
                 if nomination.nominator == request.user:
                     GameSignup.objects.filter(nomination=nomination).delete()
@@ -229,11 +229,9 @@ def event_details(request, event_id):
              
         elif 'remove_nomination' in request.POST:
             nomination_id = request.POST.get('nomination_id')
-            nomination = get_object_or_404(GameNomination, id=nomination_id)
+            nomination = get_object_or_404(Game, id=nomination_id)
             if nomination.nominator == request.user:
-                # Remove all signups for this nomination
                 GameSignup.objects.filter(nomination=nomination).delete()
-                # Remove the nomination itself
                 nomination.delete()
         
         return redirect('event_details', event_id=event_id)
@@ -251,15 +249,19 @@ def event_details(request, event_id):
     return render(request, 'boardgame/event_details.html', context)
 
 
-
-
 def nominate_game(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     
     if request.method == 'POST':
         form = GameDetailForm(request.POST)
         if form.is_valid():
+              # Log form data for debugging
+            print(request.POST)  # Print all POST data for debugging
+            print(form.cleaned_data)  # Print cleaned data from the form
+
             game = form.save(commit=False)
+            game.event = event
+            game.nominator = request.user
             game.name = request.POST.get('name')
             game.description = request.POST.get('description')
             
@@ -278,12 +280,13 @@ def nominate_game(request, event_id):
             game.age = int(age) if age else None
             game.weight = float(weight) if weight else None
             
+            # Automatically set thumbnail if available
+            game.thumbnail = request.POST.get('thumbnail')
+
             game.save()
             
-             # Create GameNomination and GameSignup
-            nomination = GameNomination.objects.create(game=game, event=event, nominator=request.user)
-            GameSignup.objects.create(nomination=nomination, user=request.user)
-
+            # Create GameSignup for the user who nominated the game
+            GameSignup.objects.create(nomination=game, user=request.user)
 
             return redirect('event_details', event_id=event_id)
     else:
@@ -294,39 +297,42 @@ def nominate_game(request, event_id):
 def game_details(request, event_id, game_id):
     event = get_object_or_404(Event, id=event_id)
     game = get_object_or_404(Game, id=game_id)
-    game_nomination = get_object_or_404(GameNomination, event=event, game=game)
     
     is_attending = False
     is_signed_up = False
     if request.user.is_authenticated:
         is_attending = event.attendees.filter(id=request.user.id).exists()
-        is_signed_up = GameSignup.objects.filter(nomination=game_nomination, user=request.user).exists()
+        is_signed_up = GameSignup.objects.filter(nomination=game, user=request.user).exists()
 
     # Calculate remaining sign-up slots
-    signed_up_count = GameSignup.objects.filter(nomination=game_nomination).count()
+    signed_up_count = GameSignup.objects.filter(nomination=game).count()
     remaining_slots = game.max_players - signed_up_count
 
     # Retrieve the list of players signed up for this game
-    game_signup_set = GameSignup.objects.filter(nomination=game_nomination)
+    game_signup_set = GameSignup.objects.filter(nomination=game)
 
     if request.method == 'POST':
         if 'sign_up' in request.POST:
             if not is_signed_up:
                 # Create a new GameSignup entry for the current user
-                GameSignup.objects.create(nomination=game_nomination, user=request.user)
+                GameSignup.objects.create(nomination=game, user=request.user)
         elif 'leave' in request.POST:
             if is_signed_up:
                 # Check if the user is the nominator
-                if game_nomination.nominator == request.user:
+                if game.nominator == request.user:
                     # Remove all signups for this nomination
-                    GameSignup.objects.filter(nomination=game_nomination).delete()
+                    GameSignup.objects.filter(nomination=game).delete()
                     # Remove the nomination itself
-                    game_nomination.delete()
+                    game.delete()
                     # Redirect to event details if the nominator leaves
                     return redirect('event_details', event_id=event_id)
                 else:
                     # Remove the GameSignup entry for the current user
-                    GameSignup.objects.filter(nomination=game_nomination, user=request.user).delete()
+                    GameSignup.objects.filter(nomination=game, user=request.user).delete()
+        elif 'comment' in request.POST:
+            comment_content = request.POST.get('comment_content')
+            if comment_content:
+                GameComment.objects.create(nominated_game=game, user=request.user, content=comment_content)
 
         # Redirect back to the same page after processing the form
         return redirect('game_details', event_id=event_id, game_id=game_id)

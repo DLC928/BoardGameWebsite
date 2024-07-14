@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
-from django.db.models.signals import post_save
 
 # UserProfile model to store additional user information
 class UserProfile(models.Model):
@@ -63,22 +62,6 @@ class GroupMembers(models.Model):
     def __str__(self):
         return f"{self.user.username} in {self.group.name}"
     
-# Game model to store game details from BGG
-class Game(models.Model):
-    name = models.CharField(max_length=200)
-    min_players = models.PositiveIntegerField(blank=True, null=True)
-    max_players = models.PositiveIntegerField(blank=True, null=True)
-    min_playtime = models.PositiveIntegerField(blank=True, null=True)
-    max_playtime = models.PositiveIntegerField(blank=True, null=True)
-    age =models.PositiveIntegerField(blank=True, null=True)
-    weight = models.CharField(max_length=10, blank=True, null=True) 
-    description = models.TextField(blank=True, null=True)
-    thumbnail = models.URLField(blank=True, null=True)
-
-
-    def __str__(self):
-        return self.name    
-
 # Event model
 class Event(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -86,7 +69,6 @@ class Event(models.Model):
     description = models.TextField()
     date_time = models.DateTimeField()
     attendees = models.ManyToManyField(User, through='EventAttendance')
-    nominations = models.ManyToManyField(Game, through='GameNomination')
     event_image = models.ImageField(upload_to='event_images/', null=True, blank=True)
 
     def __str__(self):
@@ -119,22 +101,29 @@ class EventLocation(models.Model):
     def __str__(self):
         return f"{self.address}, {self.city}, {self.country}"
 
-
-# Nomination model to handle the relationship between events and games
-class GameNomination(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+class Game(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='nominated_games')
     nominator = models.ForeignKey(User, on_delete=models.CASCADE)
-    date_nominated = models.DateTimeField(auto_now_add=True)
+    date_nominated = models.DateTimeField(auto_now_add=True,)
+
+    name = models.CharField(max_length=200)
+    min_players = models.PositiveIntegerField(blank=True, null=True)
+    max_players = models.PositiveIntegerField(blank=True, null=True)
+    min_playtime = models.PositiveIntegerField(blank=True, null=True)
+    max_playtime = models.PositiveIntegerField(blank=True, null=True)
+    age = models.PositiveIntegerField(blank=True, null=True)
+    weight = models.CharField(max_length=10, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    thumbnail = models.URLField(blank=True, null=True)
 
     class Meta:
-        unique_together = ('event', 'game')
+        unique_together = ('event', 'name')
 
     def __str__(self):
-        return f"{self.game.name} nominated for {self.event.title}"
+        return f"{self.name} nominated for {self.event.title}"
 
 class GameSignup(models.Model):
-    nomination = models.ForeignKey(GameNomination, on_delete=models.CASCADE)
+    nomination = models.ForeignKey(Game, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date_signed_up = models.DateTimeField(auto_now_add=True)
 
@@ -142,4 +131,15 @@ class GameSignup(models.Model):
         unique_together = ('nomination', 'user')
 
     def __str__(self):
-        return f"{self.user.username} signed up for {self.nomination.game.name} at {self.nomination.event.title}"
+        return f"{self.user.username} signed up for {self.nomination.name} at {self.nomination.event.title}"
+
+
+class GameComment(models.Model):
+    nominated_game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.nominated_game.name}"    
+    

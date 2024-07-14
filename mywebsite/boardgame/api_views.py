@@ -60,6 +60,7 @@ def load_game_details(request):
                 'max_playtime': '',
                 'age': '',
                 'weight': '',
+                'thumbnail': ''
             }
             
             if item is not None:
@@ -75,6 +76,7 @@ def load_game_details(request):
                 game['min_players'] = item.find('minplayers').text if item.find('minplayers') is not None else ''
                 game['max_players'] = item.find('maxplayers').text if item.find('maxplayers') is not None else ''
                 game['age'] = item.find('age').text if item.find('age') is not None else ''
+                game['thumbnail'] = item.find('thumbnail').text if item.find('thumbnail') is not None else ''
 
                 # Extract and format weight to two decimal places
                 weight_elem = item.find('statistics').find('ratings').find('averageweight')

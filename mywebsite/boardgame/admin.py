@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 from django.contrib.auth.models import User
-from .models import Event, Game, Group, EventAttendance, GroupLocation, GroupMembers, UserProfile, GameNomination, EventLocation, GameSignup
+from .models import Event, Game, Group, EventAttendance, GroupLocation, GroupMembers, UserProfile, EventLocation, GameSignup, GameComment
 
 
 class GroupLocationInline(admin.StackedInline):
@@ -18,8 +18,8 @@ class EventAttendanceInline(admin.TabularInline):
     model = EventAttendance
     extra = 1  # Display one extra blank form by default
 
-class GameNominationInline(admin.TabularInline):
-    model = GameNomination
+class GameInLine(admin.StackedInline):
+    model = Game
     extra = 1  # Display one extra blank form by default
 
 
@@ -29,7 +29,7 @@ class EventLocationInline(admin.StackedInline):
     verbose_name_plural = 'Event Location'  # Display name for inline
 
 class EventAdmin(admin.ModelAdmin):
-    inlines = [EventAttendanceInline, GameNominationInline, EventLocationInline]
+    inlines = [EventAttendanceInline, GameInLine, EventLocationInline]
 
 # Add profile information to user model
 class UserProfileInline(admin.StackedInline):
@@ -46,7 +46,6 @@ admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 
 
-admin.site.register(GameNomination)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Game)
 admin.site.register(Group, GroupAdmin)  
@@ -54,4 +53,6 @@ admin.site.register(EventAttendance)
 admin.site.register(EventLocation)
 admin.site.register(GroupMembers)
 admin.site.register(GameSignup)
+admin.site.register(GameComment)
+
     

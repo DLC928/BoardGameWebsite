@@ -56,7 +56,7 @@ class GameDetailForm(forms.ModelForm):
             'description': forms.Textarea(),
             'thumbnail': forms.URLInput(),
         }
-        
+
 class UserProfileForm(forms.ModelForm):
     bio = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 4}))
     picture = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control-file'}), required=False)
