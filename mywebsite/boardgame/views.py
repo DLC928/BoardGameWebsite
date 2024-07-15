@@ -186,6 +186,7 @@ def event_details(request, event_id):
     for nomination in nominations:
         signed_up_count = GameSignup.objects.filter(nomination=nomination).count()
         remaining_slots = nomination.max_players - signed_up_count
+        players_needed = max(0, nomination.min_players - signed_up_count)
         
         is_signed_up = False
         if request.user.is_authenticated:
@@ -195,7 +196,9 @@ def event_details(request, event_id):
             nominations_with_slots.append({
                 'nomination': nomination,
                 'remaining_slots': remaining_slots,
-                'is_signed_up': is_signed_up
+                'is_signed_up': is_signed_up,
+                'signed_up_count':signed_up_count,
+                'players_needed': players_needed
             })
         else:
             waitlisted_games.append({
