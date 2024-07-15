@@ -1,11 +1,11 @@
 from django import forms 
-from .models import Group,Event, EventLocation, Game, UserProfile
+from .models import Category, Group,Event, EventLocation, Game, Tag, UserProfile
 
 # Create a group form
 class GroupForm(forms.ModelForm):
     class Meta:
         model = Group
-        fields = ('name', 'description','group_image')
+        fields = ['name', 'description','group_image','categories', 'tags']
         labels = {
             'name': 'Group Name',
             'description': 'Group Description',
@@ -14,15 +14,19 @@ class GroupForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
+            'categories': forms.CheckboxSelectMultiple,
+            'tags': forms.CheckboxSelectMultiple,
         }
 class EventForm(forms.ModelForm):
-      class Meta:
+    class Meta:
         model = Event
-        fields = ['title', 'description', 'date_time','event_image']
+        fields = ['title', 'description', 'date_time','event_image','categories', 'tags']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'date_time': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'style': 'width: 50%;'}),
+            'categories': forms.CheckboxSelectMultiple,
+            'tags': forms.CheckboxSelectMultiple,
         }    
 
 

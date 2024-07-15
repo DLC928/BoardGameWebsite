@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 from django.contrib.auth.models import User
-from .models import Event, Game, Group, EventAttendance, GroupLocation, GroupMembers, UserProfile, EventLocation, GameSignup, GameComment
+from .models import Event, Category, Tag, Game, Group, EventAttendance, GroupLocation, GroupMembers, UserProfile, EventLocation, GameSignup, GameComment
 
 
 class GroupLocationInline(admin.StackedInline):
@@ -54,5 +54,7 @@ admin.site.register(EventLocation)
 admin.site.register(GroupMembers)
 admin.site.register(GameSignup)
 admin.site.register(GameComment)
+admin.site.register(Category)
+admin.site.register(Tag)
 
     

@@ -83,6 +83,8 @@ def create_group(request):
             group = group_form.save(commit=False)
             group.save()
 
+            group_form.save_m2m()
+
             # Fetch place details using utility function
             place_id = request.POST.get('place_id')  # Get selected place ID
             place_details = fetch_place_details(place_id)
@@ -114,7 +116,6 @@ def create_group(request):
 
 def create_event(request, group_slug):
     group = get_object_or_404(Group, slug=group_slug)
-    event_form = EventForm(request.POST or None)
     event_form = EventForm(request.POST or None, request.FILES or None)
     location_form = None
 
@@ -123,6 +124,7 @@ def create_event(request, group_slug):
             event = event_form.save(commit=False)
             event.group = group
             event.save()
+            event_form.save_m2m()
 
             add_location = request.POST.get('add_location', False)
 

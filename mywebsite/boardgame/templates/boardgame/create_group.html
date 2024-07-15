@@ -34,7 +34,17 @@
         <label for="{{ form.group_image.id_for_label }}">{{ form.group_image.label }}</label>
         {{ form.group_image }}
      </div>
-    <br/>
+     <br/>
+     <div class="form-group">
+         <label for="{{ form.categories.id_for_label }}">{{ form.categories.label }}</label>
+         {{ form.categories }}
+     </div>
+     <br/>
+     <div class="form-group">
+         <label for="{{ form.tags.id_for_label }}">{{ form.tags.label }}</label>
+         {{ form.tags }}
+     </div>
+     <br/>
     <input type="submit" value="Submit" class="btn btn-secondary">
 </form>
 

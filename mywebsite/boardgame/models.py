@@ -20,12 +20,26 @@ def create_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
 
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class Tag(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+    
 class Group(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     members = models.ManyToManyField(User, through='GroupMembers')
     slug = models.SlugField(unique=True)
     group_image = models.ImageField(upload_to='group_images/', null=True, blank=True)
+    categories = models.ManyToManyField(Category, related_name='groups')
+    tags = models.ManyToManyField(Tag, related_name='groups')
     
     def save(self, *args, **kwargs):
         if not self.id:
@@ -74,6 +88,8 @@ class Event(models.Model):
     date_time = models.DateTimeField()
     attendees = models.ManyToManyField(User, through='EventAttendance')
     event_image = models.ImageField(upload_to='event_images/', null=True, blank=True)
+    categories = models.ManyToManyField(Category, related_name='events')
+    tags = models.ManyToManyField(Tag, related_name='events')
 
     def __str__(self):
         return f"{self.title} by {self.group.name}"
@@ -165,3 +181,5 @@ class GameComment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.nominated_game.name}"    
+
+
