@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from boardgame.models import EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, UserProfile
 from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm, UserProfileForm
@@ -48,7 +49,9 @@ def group_profile(request, group_slug):
         is_admin = GroupMembers.objects.filter(user=request.user, group=group, is_admin=True).exists()
 
     # Fetch events associated with the group
-    events = Event.objects.filter(group=group).order_by('title')
+    now = datetime.now()
+    upcoming_events = Event.objects.filter(group=group, date_time__gte=now).order_by('date_time')
+    past_events = Event.objects.filter(group=group, date_time__lt=now).order_by('-date_time')
 
     # Process join/leave group actions
     if request.method == 'POST' and request.user.is_authenticated:
@@ -66,7 +69,8 @@ def group_profile(request, group_slug):
         'group': group,
         'group_location': group_location,
         'is_admin': is_admin,
-        'events': events,
+        'upcoming_events': upcoming_events,
+        'past_events': past_events,
         'members': members,
         'is_member': is_member,
     }
@@ -178,17 +182,27 @@ def event_details(request, event_id):
         is_attending = attendees.filter(id=request.user.id).exists()
 
     nominations_with_slots = []
+    waitlisted_games = []
     for nomination in nominations:
         signed_up_count = GameSignup.objects.filter(nomination=nomination).count()
         remaining_slots = nomination.max_players - signed_up_count
+        
         is_signed_up = False
         if request.user.is_authenticated:
             is_signed_up = GameSignup.objects.filter(nomination=nomination, user=request.user).exists()
-        nominations_with_slots.append({
-            'nomination': nomination,
-            'remaining_slots': remaining_slots,
-            'is_signed_up': is_signed_up
-        })
+        
+        if remaining_slots > 0:
+            nominations_with_slots.append({
+                'nomination': nomination,
+                'remaining_slots': remaining_slots,
+                'is_signed_up': is_signed_up
+            })
+        else:
+            waitlisted_games.append({
+                'nomination': nomination,
+                'remaining_slots': remaining_slots,
+                'is_signed_up': is_signed_up
+            })
 
     if request.method == 'POST':
         if 'join' in request.POST:
@@ -243,6 +257,7 @@ def event_details(request, event_id):
         'event_location': event_location,
         'is_attending': is_attending,
         'nominations': nominations,
+        'waitlisted_games': waitlisted_games,
         'attendees': attendees,
         'nominations_with_slots': nominations_with_slots,
     }
@@ -255,10 +270,6 @@ def nominate_game(request, event_id):
     if request.method == 'POST':
         form = GameDetailForm(request.POST)
         if form.is_valid():
-              # Log form data for debugging
-            print(request.POST)  # Print all POST data for debugging
-            print(form.cleaned_data)  # Print cleaned data from the form
-
             game = form.save(commit=False)
             game.event = event
             game.nominator = request.user
@@ -281,8 +292,7 @@ def nominate_game(request, event_id):
             game.weight = float(weight) if weight else None
             
             # Automatically set thumbnail if available
-            game.thumbnail = request.POST.get('thumbnail')
-
+            game.thumbnail_url = request.POST.get('thumbnail')
             game.save()
             
             # Create GameSignup for the user who nominated the game

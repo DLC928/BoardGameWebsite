@@ -1,7 +1,5 @@
 from django import forms 
-from .models import Group,Event, EventLocation, Game, GroupLocation, UserProfile
-from django.contrib.admin.widgets import  AdminSplitDateTime
-from django.forms.widgets import SplitDateTimeWidget
+from .models import Group,Event, EventLocation, Game, UserProfile
 
 # Create a group form
 class GroupForm(forms.ModelForm):
@@ -44,7 +42,7 @@ class EventLocationForm(forms.ModelForm):
 class GameDetailForm(forms.ModelForm):
     class Meta:
         model = Game
-        fields = ['name', 'min_players', 'max_players', 'min_playtime', 'max_playtime', 'age', 'weight', 'description', 'thumbnail']
+        fields = ['name', 'min_players', 'max_players', 'min_playtime', 'max_playtime', 'age', 'weight', 'description', 'thumbnail_url']
         widgets = {
             'name': forms.TextInput(attrs={'autocomplete': 'off', 'class': 'game-autocomplete'}),
             'min_players': forms.NumberInput(),

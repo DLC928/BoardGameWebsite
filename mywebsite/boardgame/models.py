@@ -1,4 +1,8 @@
+import os
+from tempfile import NamedTemporaryFile
 from django.db import models
+from django.core.files import File
+import requests
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 
@@ -114,14 +118,33 @@ class Game(models.Model):
     age = models.PositiveIntegerField(blank=True, null=True)
     weight = models.CharField(max_length=10, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    thumbnail = models.URLField(blank=True, null=True)
+    thumbnail_url = models.URLField(blank=True, null=True)
+    thumbnail_file = models.ImageField(upload_to='game_thumbnails/', blank=True, null=True)
 
     class Meta:
         unique_together = ('event', 'name')
 
     def __str__(self):
         return f"{self.name} nominated for {self.event.title}"
+    
+    def save(self, *args, **kwargs):
+        # Check if there's an image URL and no image file is set
+        if self.thumbnail_url and not self.thumbnail_file:
+            response = requests.get(self.thumbnail_url)
+            if response.status_code == 200:
+                # Create a temporary file to store the image data
+                image = NamedTemporaryFile(delete=True)
+                image.write(response.content)
+                image.flush()
+                
+                # Save the image to the ImageField
+                self.thumbnail_file.save(
+                    os.path.basename(self.thumbnail_url),  # File name derived from URL
+                    File(image)  # File object containing image data
+                )
+        super().save(*args, **kwargs)
 
+            
 class GameSignup(models.Model):
     nomination = models.ForeignKey(Game, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -142,4 +165,3 @@ class GameComment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.nominated_game.name}"    
-    
