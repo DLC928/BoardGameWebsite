@@ -38,8 +38,8 @@ class Group(models.Model):
     members = models.ManyToManyField(User, through='GroupMembers')
     slug = models.SlugField(unique=True)
     group_image = models.ImageField(upload_to='group_images/', null=True, blank=True)
-    categories = models.ManyToManyField(Category, related_name='groups')
-    tags = models.ManyToManyField(Tag, related_name='groups')
+    categories = models.ManyToManyField(Category, related_name='groups', blank=True)
+    tags = models.ManyToManyField(Tag, related_name='groups', blank=True)
     
     def save(self, *args, **kwargs):
         if not self.id:
@@ -88,9 +88,8 @@ class Event(models.Model):
     date_time = models.DateTimeField()
     attendees = models.ManyToManyField(User, through='EventAttendance')
     event_image = models.ImageField(upload_to='event_images/', null=True, blank=True)
-    categories = models.ManyToManyField(Category, related_name='events')
-    tags = models.ManyToManyField(Tag, related_name='events')
-
+    categories = models.ManyToManyField(Category, related_name='events', blank=True)
+    tags = models.ManyToManyField(Tag, related_name='events', blank=True)
     def __str__(self):
         return f"{self.title} by {self.group.name}"
 

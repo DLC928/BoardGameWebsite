@@ -6,8 +6,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ event.title }}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
 </head>
+
 <body>
     <div class="container mt-4">
         <div class="row">
@@ -15,7 +17,8 @@
                 {% if event.event_image %}
                 <img src="{{ event.event_image.url }}" class="profile-image img-fluid rounded" alt="Event Image">
                 {% else %}
-                <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image img-fluid rounded" alt="Default Image">
+                <img src="{% static 'boardgame/images/group_profile_default.jpg' %}"
+                    class="profile-image img-fluid rounded" alt="Default Image">
                 {% endif %}
             </div>
             <div class="col-md-9">
@@ -35,9 +38,33 @@
                     <p>You must <a href="{% url 'login' %}">login</a> first to join the event.</p>
                     {% endif %}
                 </div>
-                <br/>
+                <br />
+                <!-- Categories -->
+                <div class="mb-1">
+                    <strong class="small">Categories</strong>
+                    <p class="small">
+                        {% for category in event.categories.all %}
+                        <a href="#" class="badge bg-primary text-decoration-none small py-1 px-2">{{ category.name }}</a>
+                        {% empty %}
+                        <span class="badge bg-secondary small py-1 px-2">No categories</span>
+                        {% endfor %}
+                    </p>
+                </div>
+                <!-- Tags -->
+                <div class="mb-1">
+                    <strong class="small">Tags</strong>
+                    <p class="small">
+                        {% for tag in event.tags.all %}
+                        <a href="#" class="badge bg-info text-decoration-none small py-1 px-2">{{ tag.name }}</a>
+                        {% empty %}
+                        <span class="badge bg-secondary small py-1 px-2">No tags</span>
+                        {% endfor %}
+                    </p>
+                </div>
+
+                <br />
             </div>
-            <br/>
+            <br />
         </div>
         <hr>
         <div class="row">
@@ -51,19 +78,16 @@
                     <div class="card-body">
                         <h5 class="card-title">Event Location</h5>
                         {% if event_location %}
-                            <strong class="card-subtitle mb-2 text-muted">{{ event_location.name }}</strong>
-                            <p class="card-text"><i class="bi bi-geo-alt-fill"></i> {{ event_location.address }}</p>
-                            {% if event_location.latitude and event_location.longitude %}
-                            <iframe
-                                class="card-img-bottom"
-                                width="100%"
-                                height="200"
-                                frameborder="0" style="border:0"
-                                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&q={{ event_location.latitude }},{{ event_location.longitude }}" allowfullscreen>
-                            </iframe>
-                            {% endif %}
+                        <strong class="card-subtitle mb-2 text-muted">{{ event_location.name }}</strong>
+                        <p class="card-text"><i class="bi bi-geo-alt-fill"></i> {{ event_location.address }}</p>
+                        {% if event_location.latitude and event_location.longitude %}
+                        <iframe class="card-img-bottom" width="100%" height="200" frameborder="0" style="border:0"
+                            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&q={{ event_location.latitude }},{{ event_location.longitude }}"
+                            allowfullscreen>
+                        </iframe>
+                        {% endif %}
                         {% else %}
-                            <p>No location specified for this event.</p>
+                        <p>No location specified for this event.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -72,14 +96,17 @@
         <hr>
         <ul class="nav nav-tabs" id="eventTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <a class="nav-link active" id="nominated-games-tab" data-bs-toggle="tab" href="#nominated-games" role="tab" aria-controls="nominated-games" aria-selected="true">Nominated Games</a>
+                <a class="nav-link active" id="nominated-games-tab" data-bs-toggle="tab" href="#nominated-games"
+                    role="tab" aria-controls="nominated-games" aria-selected="true">Nominated Games</a>
             </li>
             <li class="nav-item" role="presentation">
-                <a class="nav-link" id="waitlisted-games-tab" data-bs-toggle="tab" href="#waitlisted-games" role="tab" aria-controls="waitlisted-games" aria-selected="false">Waitlisted Games</a>
+                <a class="nav-link" id="waitlisted-games-tab" data-bs-toggle="tab" href="#waitlisted-games" role="tab"
+                    aria-controls="waitlisted-games" aria-selected="false">Waitlisted Games</a>
             </li>
         </ul>
         <div class="tab-content" id="eventTabsContent">
-            <div class="tab-pane fade show active" id="nominated-games" role="tabpanel" aria-labelledby="nominated-games-tab">
+            <div class="tab-pane fade show active" id="nominated-games" role="tabpanel"
+                aria-labelledby="nominated-games-tab">
                 <div class="row mt-4">
                     {% for item in nominations_with_slots %}
                     <div class="col-md-4 mb-3">
@@ -92,39 +119,43 @@
                                     <b>Description:</b> {{ item.nomination.description|truncatewords:25|striptags|safe }}... <a href="{% url 'game_details' event.id item.nomination.id %}">See Details</a>
                                     <br /><br />
                                     <b>Difficulty:</b> {{ item.nomination.weight }} /5
-                                    <br/><br/>
+                                    <br /><br />
                                     <b>Nominated by:</b> {{ item.nomination.nominator.username }}
-                                    <br/><br/>
+                                    <br /><br />
                                     <b>Remaining Sign-up Slots:</b> {{ item.remaining_slots }}
-                                    <br/>
-                                     {% if item.nomination.min_players > item.signed_up_count %}
-                                       {% if item.players_needed == 1 %}
-                                       <p style="color: red;">We need {{ item.players_needed }} more player!</p>
-                                       {% else %}
-                                       <p style="color: red;">We need {{ item.players_needed }} more players!</p>
-                                       {% endif %}
-                                    {% endif %}
-                                    <br/>
-                                    <a href="{% url 'game_details' event.id item.nomination.id %}" class="btn btn-secondary btn-sm">View Details</a>
-                                    <div>
-                                        <br/>
-                                        {% if user.is_authenticated and is_attending %}
-                                            <form method="post">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
-                                                {% if item.is_signed_up %}
-                                                    <button type="submit" class="btn btn-secondary btn-sm" name="leave_game">Leave Game</button>
-                                                {% elif item.remaining_slots > 0 %}
-                                                    <button type="submit" class="btn btn-primary btn-sm" name="sign_up">Sign up</button>
-                                                {% endif %}
-                                                {% if item.nomination.nominator == user %}
-                                                    <button type="submit" class="btn btn-danger btn-sm" name="remove_nomination">Remove Nomination</button>
-                                                {% endif %}
-                                            </form>
-                                        {% else %}
-                                            <p>You must join event to sign up to play.</p>
+                                    <br />
+                                    {% if item.nomination.min_players > item.signed_up_count %}
+                                    {% if item.players_needed == 1 %}
+                                <p style="color: red;">We need {{ item.players_needed }} more player!</p>
+                                {% else %}
+                                <p style="color: red;">We need {{ item.players_needed }} more players!</p>
+                                {% endif %}
+                                {% endif %}
+                                <br />
+                                <a href="{% url 'game_details' event.id item.nomination.id %}"
+                                    class="btn btn-secondary btn-sm">View Details</a>
+                                <div>
+                                    <br />
+                                    {% if user.is_authenticated and is_attending %}
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
+                                        {% if item.is_signed_up %}
+                                        <button type="submit" class="btn btn-secondary btn-sm" name="leave_game">Leave
+                                            Game</button>
+                                        {% elif item.remaining_slots > 0 %}
+                                        <button type="submit" class="btn btn-primary btn-sm" name="sign_up">Sign
+                                            up</button>
                                         {% endif %}
-                                    </div>
+                                        {% if item.nomination.nominator == user %}
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                            name="remove_nomination">Remove Nomination</button>
+                                        {% endif %}
+                                    </form>
+                                    {% else %}
+                                    <p>You must join event to sign up to play.</p>
+                                    {% endif %}
+                                </div>
                                 </p>
                             </div>
                         </div>
@@ -142,28 +173,30 @@
                             </div>
                             <div class="card-body">
                                 <p class="card-text">
-                                    <b>Description:</b> {{ item.nomination.description|truncatewords:25|striptags|safe }}... <a href="{% url 'game_details' event.id item.nomination.id %}">See Details</a>
+                                    <b>Description:</b> {{ item.nomination.description|truncatewords:25|striptags|safe }} ... <a href="{% url 'game_details' event.id item.nomination.id %}">See Details</a>
                                     <br /><br />
                                     <b>Difficulty:</b> {{ item.nomination.weight }} /5
-                                    <br/><br/>
+                                    <br /><br />
                                     <b>Nominated by:</b> {{ item.nomination.nominator.username }}
-                                    <br/><br/>
+                                    <br /><br />
                                     <b>Remaining Sign-up Slots:</b> {{ item.remaining_slots }}
-                                    <br/><br/>
-                                    <a href="{% url 'game_details' event.id item.nomination.id %}" class="btn btn-secondary btn-sm">View Details</a>
-                                    <div>
-                                        {% if user.is_authenticated and is_attending %}
-                                            <form method="post">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
-                                                {% if item.is_signed_up %}
-                                                    <button type="submit" class="btn btn-secondary btn-sm" name="leave_game">Leave Game</button>
-                                                {% endif %}
-                                            </form>
-                                        {% else %}
-                                            <p>You must join event to sign up to play.</p>
+                                    <br /><br />
+                                    <a href="{% url 'game_details' event.id item.nomination.id %}"
+                                        class="btn btn-secondary btn-sm">View Details</a>
+                                <div>
+                                    {% if user.is_authenticated and is_attending %}
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
+                                        {% if item.is_signed_up %}
+                                        <button type="submit" class="btn btn-secondary btn-sm" name="leave_game">Leave
+                                            Game</button>
                                         {% endif %}
-                                    </div>
+                                    </form>
+                                    {% else %}
+                                    <p>You must join event to sign up to play.</p>
+                                    {% endif %}
+                                </div>
                                 </p>
                             </div>
                         </div>

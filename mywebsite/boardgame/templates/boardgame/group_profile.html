@@ -11,14 +11,6 @@
     </div>
     <div class="col-md-9">
         <h1>{{ group.name }}</h1>
-        <p>{{ group.description }}</p>
-        
-        {% if group_location %}
-        <p><strong>Location:</strong> {{ group_location.city }}</p>
-        {% else %}
-        <p><strong>Location:</strong> Not specified</p>
-        {% endif %}
-        
         <!-- Join/Leave Group Button -->
         {% if user.is_authenticated %}
         <form method="POST" action="">
@@ -28,15 +20,44 @@
             {% else %}
             <button type="submit" class="btn btn-secondary btn-sm mb-2" name="join">Join Group</button>
             {% endif %}
+            <!-- Show Create Event button if user is group admin -->
+            {% if is_admin %}
+            <a href="{% url 'create_event' group.slug %}" class="btn btn-secondary btn-sm mb-2">Create Event</a>
+            {% endif %}
         </form>
         {% else %}
         <p>You must <a href="{% url 'login' %}">login</a> first to join the group.</p>
         {% endif %}
-        
-        <!-- Show Create Event button if user is group admin -->
-        {% if is_admin %}
-        <a href="{% url 'create_event' group.slug %}" class="btn btn-secondary btn-sm mb-2">Create Event</a>
+
+        <p>{{ group.description }}</p>
+        {% if group_location %}
+        <p><strong>Location:</strong> {{ group_location.city }}</p>
+        {% else %}
+        <p><strong>Location:</strong> Not specified</p>
         {% endif %}
+        <!-- Categories -->
+        <div class="mb-1">
+            <strong class="small">Categories</strong>
+            <p class="small">
+                {% for category in group.categories.all %}
+                <a href="#" class="badge bg-primary text-decoration-none small py-1 px-2">{{ category.name }}</a>
+                {% empty %}
+                <span class="badge bg-secondary small py-1 px-2">No categories</span>
+                {% endfor %}
+            </p>
+        </div>
+        <!-- Tags -->
+        <div class="mb-1">
+            <strong class="small">Tags</strong>
+            <p class="small">
+                {% for tag in group.tags.all %}
+                <a href="#" class="badge bg-info text-decoration-none small py-1 px-2">{{ tag.name }}</a>
+                {% empty %}
+                <span class="badge bg-secondary small py-1 px-2">No tags</span>
+                {% endfor %}
+            </p>
+        </div>
+
     </div>
 </div>
 
@@ -46,10 +67,12 @@
 <h3>Events</h3>
 <ul class="nav nav-tabs" id="eventTabs" role="tablist">
     <li class="nav-item" role="presentation">
-        <a class="nav-link active" id="upcoming-events-tab" data-bs-toggle="tab" href="#upcoming-events" role="tab" aria-controls="upcoming-events" aria-selected="true">Upcoming Events</a>
+        <a class="nav-link active" id="upcoming-events-tab" data-bs-toggle="tab" href="#upcoming-events" role="tab"
+            aria-controls="upcoming-events" aria-selected="true">Upcoming Events</a>
     </li>
     <li class="nav-item" role="presentation">
-        <a class="nav-link" id="past-events-tab" data-bs-toggle="tab" href="#past-events" role="tab" aria-controls="past-events" aria-selected="false">Past Events</a>
+        <a class="nav-link" id="past-events-tab" data-bs-toggle="tab" href="#past-events" role="tab"
+            aria-controls="past-events" aria-selected="false">Past Events</a>
     </li>
 </ul>
 <div class="tab-content" id="eventTabsContent">
@@ -66,7 +89,8 @@
                             <strong>Date:</strong> {{ event.date_time }}<br>
                             {{ event.description }}
                         </p>
-                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event Details</a>
+                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event
+                            Details</a>
                         {% if is_admin %}
                         <a href="{% url 'edit_event' event.id %}" class="btn btn-secondary btn-sm">Edit Event</a>
                         {% endif %}
@@ -89,7 +113,8 @@
                             <strong>Date:</strong> {{ event.date_time }}<br>
                             {{ event.description }}
                         </p>
-                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event Details</a>
+                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event
+                            Details</a>
                         {% if is_admin %}
                         <a href="{% url 'edit_event' event.id %}" class="btn btn-secondary btn-sm">Edit Event</a>
                         {% endif %}
@@ -131,6 +156,7 @@
         display: flex;
         overflow-x: auto;
     }
+
     .event-container .col-md-4 {
         flex: 0 0 auto;
         margin-right: 10px;

@@ -2,70 +2,139 @@
 {% load static %}
 {% block content %}
 <title>Groups</title>
-
-{% if user.is_authenticated %}
-<div class="d-flex justify-content-between align-items-center">
-    <h3>Your Groups</h3>
-    <a href="{% url 'create_group' %}" class="btn btn-primary btn-sm">Create Group</a>
-</div>
-<br/>
-<!-- Display user's groups -->
-<div class="row">
-    {% if user_groups %}
-    {% for group_member in user_groups %}
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-header">
-                <h4>{{ group_member.group.name }}</h4>
-            </div>
-            <div class="card-body">
-                <p class="card-text">
-                    <b>Description:</b> {{ group_member.group.description }}<br />
-                    <b>Location:</b>{{ group_member.group.location }}<br /><br />
-                    <a href="{% url 'group_profile' group_member.group.slug %}" class="btn btn-secondary btn-sm">View
-                        Group</a>
-                </p>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <p>You are not a member of any groups yet.</p>
-    {% endif %}
-</div>
-{% endif %}
-
-<div>
-    <h3>Featured Groups</h3>
-    <br />
-    {% if groups %}
+<head>
+<h3>Groups</h3>
+</head>
+<div class="container">
+    <!-- Row for search bar and buttons -->
     <div class="row">
-        {% for group in groups %}
-        <div class="col-md-4 mb-3">
-            <div class="card">
-                <div class="card-header">
-                    <h4>{{ group.name }}</h4>
+        <!-- Left column for search bar, buttons, and filters -->
+        <div class="col-md-3">
+            <!-- Search bar -->
+            <div class="mb-2">
+                <form method="get" action="{% url 'groups' %}">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="search-bar" name="search" placeholder="Search groups" value="{{ request.GET.search }}">
+                    </div>
+                </form>
+                <br/>
+                <a href="{% url 'groups' %}" class="btn btn-primary btn-sm">Featured Groups</a>
+            </div>
+            <!-- Buttons for actions -->
+            {% if user.is_authenticated %}
+            <div class="mb-5">
+                <a href="?your_groups=true" class="btn btn-primary btn-sm mb-2">Your Groups</a><br/>
+                <a href="{% url 'create_group' %}" class="btn btn-primary btn-sm mb-2">Create Group</a>
+            </div>
+            {% endif %}
+    
+            <hr>
+            <!-- Tags and Categories Filters -->
+            <div class="mb-3">
+                <h5>Browse Groups by Game Categories</h5>
+                <div class="row">
+                    {% if categories %}
+                    {% for category in categories %}
+                    <div class="col-6 mb-2">
+                        <a href="?category={{ category.name }}" class="category-link">{{ category.name }}</a>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p>No categories available</p>
+                    {% endif %}
                 </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        <b>Description:</b> {{ group.description }}<br />
-                        <b>Location:</b> {{ group.location }}<br /><br />
-                        <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
-                    </p>
+            </div>
+            <div class="mb-3">
+                <h5>Browse Groups by Tags</h5>
+                <div class="row">
+                    {% if tags %}
+                    {% for tag in tags %}
+                    <div class="col-6 mb-2">
+                        <a href="?tag={{ tag.name }}" class="tag-link">{{ tag.name }}</a>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p>No tags available</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        {% endfor %}
+
+        <!-- Right column for group cards -->
+        <div class="col-md-9">
+            <h3>
+                {% if request.GET.your_groups %}
+                    Your Groups
+                {% elif request.GET.tag %}
+                    Results for Tag: {{ request.GET.tag }}
+                {% elif request.GET.category %}
+                    Results for Category: {{ request.GET.category }}
+                {% else %}
+                    Featured Groups
+                {% endif %}
+            </h3>
+          
+            <div class="row" id="group-cards">
+                {% if groups %}
+                {% for group in groups %}
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>{{ group.name }}</h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                <b>Description:</b> {{ group.description }}<br />
+                                <b>Location:</b> {{ group.location }}<br /><br />
+                                <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <strong>There are no groups present.</strong>
+                {% endif %}
+            </div>
+        </div>
     </div>
-    {% else %}
-    <strong>There are no groups present.</strong>
-    {% endif %}
 </div>
 
 <!-- Link back to home -->
-<br /><br />
-<div>
-    <a href="{% url 'home' %}">Back to Home</a>
+<div class="mt-3">
+    <a href="{% url 'home' %}" class="btn btn-secondary btn-sm">Back to Home</a>
 </div>
+
+<style>
+    .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .btn-group .btn {
+        margin: 5px;
+    }
+
+    #group-cards {
+        overflow-x: auto;
+    }
+
+    #group-cards .card {
+        min-width: 300px;
+    }
+
+    /* Styling for tags and categories */
+    .tag-link, .category-link {
+        text-decoration: none;
+        color: #4275af; /* Primary color for links */
+        font-size: 0.9rem; /* Slightly smaller font size */
+    }
+
+    /* Ensure two items per row */
+    .row > div {
+        margin-bottom: 1rem;
+    }
+</style>
 
 {% endblock %}

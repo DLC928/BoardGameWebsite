@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
-from boardgame.models import EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, UserProfile
+from boardgame.models import Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile
 from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm, UserProfileForm
 from .utils import fetch_place_details
 from django.db.models import Q
@@ -398,31 +398,84 @@ def profile_setup(request):
 # ---------------------------NAVBAR---------------------------
 
 def groups(request):
+    tag_name = request.GET.get('tag')
+    category_name = request.GET.get('category')
+    show_user_groups = request.GET.get('your_groups') == 'true'
+    search_query = request.GET.get('search')
+    
+    # Get all groups
     group_list = Group.objects.all().order_by('name')
+    
+    # Filter by search query if present
+    if search_query:
+        # Filter by group name or location
+        group_list = group_list.filter(
+            Q(name__icontains=search_query) |
+            Q(grouplocation__city__icontains=search_query) |
+            Q(grouplocation__sublocality__icontains=search_query)
+        ).distinct()
+
+    # Filter by tag if a tag is specified
+    if tag_name:
+        group_list = group_list.filter(tags__name=tag_name)
+
+    # Filter by category if a category is specified
+    if category_name:
+        group_list = group_list.filter(categories__name=category_name)
+
+    # Filter user groups if 'your_groups' is specified or if user is authenticated
     user_groups = None
     user = request.user
-
-    if user.is_authenticated:
+    if show_user_groups and user.is_authenticated:
         user_groups = GroupMembers.objects.filter(user=user).select_related('group')
+        if show_user_groups:
+            group_list = group_list.filter(id__in=user_groups.values_list('group_id', flat=True))
 
     context = {
         'groups': group_list,
         'user_groups': user_groups,
+        'tags': Tag.objects.all(),
+        'categories': Category.objects.all(),
+        'search_query': search_query, 
     }
     return render(request, 'boardgame/groups.html', context=context)
 
+
 def events(request):
-    event_list = Event.objects.all().order_by('title')
+    tag_name = request.GET.get('tag')
+    category_name = request.GET.get('category')
+    show_user_events = request.GET.get('your_events') == 'true'
+    search_query = request.GET.get('search')
+    
+    now = datetime.now()
+    # Get upcoming events
+    event_list = Event.objects.filter(date_time__gte=now).order_by('title')
+    
+     # Filter by search query if provided
+    if search_query:
+        event_list = event_list.filter(title__icontains=search_query,date_time__gte=now)
+
+    # Filter by tag if a tag is specified
+    if tag_name:
+        event_list = event_list.filter(tags__name=tag_name,date_time__gte=now)
+
+    # Filter by category if a category is specified
+    if category_name:
+        event_list = event_list.filter(categories__name=category_name,date_time__gte=now)
+
+    # Filter user events if 'your_events' is specified and if user is authenticated
     user_events = None
     user = request.user
-    
-    # Check if the user is authenticated
-    if user.is_authenticated:
+    if show_user_events and user.is_authenticated:
         user_events = EventAttendance.objects.filter(user=user).select_related('event')
+        if show_user_events:
+            event_list = event_list.filter(id__in=user_events.values_list('event_id', flat=True))
 
     context = {
         'events': event_list,
-        'user_events': user_events,
+        'tags': Tag.objects.all(),
+        'categories': Category.objects.all(),
+        'search_query': search_query, 
     }
     return render(request, 'boardgame/events.html', context=context)
 

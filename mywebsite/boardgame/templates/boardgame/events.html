@@ -2,71 +2,138 @@
 {% load static %}
 {% block content %}
 <title>Events</title>
-
-{% if user.is_authenticated %}
-<div class="d-flex justify-content-between align-items-center">
-    <h3>Your Events</h3>
-</div>
-<br />
-<!-- Display user's groups -->
-<div class="row">
-    {% if user_events %}
-    {% for event_attendance in user_events %}
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-header">
-                <h4>{{ event_attendance.event.title }}</h4>
-            </div>
-            <div class="card-body">
-                <p class="card-text">
-                    <b>Description:</b> {{ event_attendance.event.description }}<br />
-                    <b>Location:</b> {{ event_attendance.event.location }}<br /><br />
-                    <a href="{% url 'event_details' event_attendance.event.id %}" class="btn btn-secondary btn-sm">View
-                        Event</a>
-                </p>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <p>You are not attending any events yet.</p>
-    {% endif %}
-</div>
-{% endif %}
-
-<div>
-    <h3>Featured Events</h3>
-    <br/>
-    {% if events %}
+<head>
+<h3>Events</h3>
+</head>
+<div class="container">
+    <!-- Row for search bar and buttons -->
     <div class="row">
-        {% for event in events %}
-        <div class="col-md-4 mb-3">
-            <div class="card">
-                <div class="card-header">
-                    <h4>{{ event.title }}</h4>
+        <!-- Left column for search bar, buttons, and filters -->
+        <div class="col-md-3">
+            <!-- Search bar -->
+            <div class="mb-2">
+                <form method="get" action="{% url 'events' %}">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="search-bar" name="search" placeholder="Search events" value="{{ request.GET.search }}">
+                    </div>
+                </form>
+                <br/>
+                <a href="{% url 'events' %}" class="btn btn-primary btn-sm">Featured Events</a>
+            </div>
+            <!-- Buttons for actions -->
+            {% if user.is_authenticated %}
+            <div class="mb-5">
+                <a href="?your_events=true" class="btn btn-primary btn-sm mb-2">Your Events</a><br/>
+            </div>
+            {% endif %}
+    
+            <hr>
+            <!-- Tags and Categories Filters -->
+            <div class="mb-3">
+                <h5>Browse Events by Game Categories</h5>
+                <div class="row">
+                    {% if categories %}
+                    {% for category in categories %}
+                    <div class="col-6 mb-2">
+                        <a href="?category={{ category.name }}" class="category-link">{{ category.name }}</a>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p>No categories available</p>
+                    {% endif %}
                 </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        <b>Description:</b> {{ event.description }}<br />
-                        <b>Location:</b> {{ event.location }}<br /><br />
-                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View
-                            Event</a>
-                    </p>
+            </div>
+            <div class="mb-3">
+                <h5>Browse Events by Tags</h5>
+                <div class="row">
+                    {% if tags %}
+                    {% for tag in tags %}
+                    <div class="col-6 mb-2">
+                        <a href="?tag={{ tag.name }}" class="tag-link">{{ tag.name }}</a>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p>No tags available</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <strong>There are no events present.</strong>
-    {% endif %}
-</div>
 
+        <!-- Right column for event cards -->
+        <div class="col-md-9">
+            <h3>
+                {% if request.GET.your_events %}
+                    Your Events
+                {% elif request.GET.tag %}
+                    Results for Tag: {{ request.GET.tag }}
+                {% elif request.GET.category %}
+                    Results for Category: {{ request.GET.category }}
+                {% else %}
+                    Featured Events
+                {% endif %}
+            </h3>
+          
+            <div class="row" id="event-cards">
+                {% if events %}
+                {% for event in events %}
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>{{ event.title }}</h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                <b>Description:</b> {{ event.description }}<br />
+                                <b>Location:</b> {{ event.location }}<br /><br />
+                                <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <strong>There are no events present.</strong>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Link back to home -->
-<br /><br />
-<div>
-    <a href="{% url 'home' %}">Back to Home</a>
+<div class="mt-3">
+    <a href="{% url 'home' %}" class="btn btn-secondary btn-sm">Back to Home</a>
 </div>
+
+<style>
+    .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .btn-group .btn {
+        margin: 5px;
+    }
+
+    #group-cards {
+        overflow-x: auto;
+    }
+
+    #group-cards .card {
+        min-width: 300px;
+    }
+
+    /* Styling for tags and categories */
+    .tag-link, .category-link {
+        text-decoration: none;
+        color: #4275af; /* Primary color for links */
+        font-size: 0.9rem; /* Slightly smaller font size */
+    }
+
+    /* Ensure two items per row */
+    .row > div {
+        margin-bottom: 1rem;
+    }
+</style>
 
 {% endblock %}
