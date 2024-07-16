@@ -451,9 +451,13 @@ def events(request):
     # Get upcoming events
     event_list = Event.objects.filter(date_time__gte=now).order_by('title')
     
-     # Filter by search query if provided
+      # Filter by search query if present
     if search_query:
-        event_list = event_list.filter(title__icontains=search_query,date_time__gte=now)
+        # Filter by group name or location
+        event_list = event_list.filter(
+            Q(title__icontains=search_query) |
+            Q(eventlocation__city__icontains=search_query) 
+        ).distinct()
 
     # Filter by tag if a tag is specified
     if tag_name:
