@@ -71,6 +71,7 @@ class GroupMembers(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     group = models.ForeignKey(Group,related_name='group_members', on_delete=models.CASCADE)
     is_admin = models.BooleanField(default=False)
+    is_moderator = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -121,10 +122,15 @@ class EventLocation(models.Model):
         return f"{self.address}, {self.city}, {self.country}"
 
 class Game(models.Model):
+    
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='nominated_games')
     nominator = models.ForeignKey(User, on_delete=models.CASCADE)
     date_nominated = models.DateTimeField(auto_now_add=True,)
-
+    nomination_status = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
     name = models.CharField(max_length=200)
     min_players = models.PositiveIntegerField(blank=True, null=True)
     max_players = models.PositiveIntegerField(blank=True, null=True)

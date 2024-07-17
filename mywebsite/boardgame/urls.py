@@ -9,16 +9,18 @@ urlpatterns = [
     path('api/game-details/', api_views.load_game_details, name='load_game_details'),
     path('group/<slug:group_slug>/', views.group_profile, name='group_profile'),
     path('event/<int:event_id>/', views.event_details, name='event_details'),
-    path('create_group/', views.create_group, name='create_group'),
+    path('create-group/', views.create_group, name='create_group'),
     path('group/<slug:group_slug>/create_event/', views.create_event, name='create_event'),
     path('event/<int:event_id>/nominate/', views.nominate_game, name='nominate_game'),
     path('event/<int:event_id>/game_details/<int:game_id>/', views.game_details, name='game_details'),
     path('profile/', views.user_profile, name='user_profile'),
-    path('profile_setup/', views.profile_setup, name='profile_setup'),
-    path('edit_event/<int:event_id>/', views.edit_event, name='edit_event'),
+    path('profile-setup/', views.profile_setup, name='profile_setup'),
+    path('edit-event/<int:event_id>/', views.edit_event, name='edit_event'),
     path('groups/', views.groups, name='groups'),
     path('events/', views.events, name='events'),
     path('search/', views.search, name='search'),
+    path('dashboard/<slug:group_slug>/', views.admin_dashboard, name='admin_dashboard'),
+
 ]
 
  

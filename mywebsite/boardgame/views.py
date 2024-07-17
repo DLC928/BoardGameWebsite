@@ -1,17 +1,18 @@
 from datetime import datetime
+from django.contrib import messages  
+
 from django.shortcuts import render, get_object_or_404, redirect
-from boardgame.models import Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile
+from boardgame.models import User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile
 from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm, UserProfileForm
 from .utils import fetch_place_details
 from django.db.models import Q
+from django.views.generic import TemplateView
 
 
 def home(request):
      # Fetch all groups and events with their locations
     group_list = Group.objects.all().select_related('grouplocation').order_by('name')
     event_list = Event.objects.all().select_related('eventlocation').order_by('title')
-    
- 
 
     # Initialize user-related variables
     user_groups = None
@@ -33,7 +34,6 @@ def home(request):
 
     return render(request, 'boardgame/home.html', context=context)
 
-
 # ---------------------------GROUPS---------------------------
 
 def group_profile(request, group_slug):
@@ -44,9 +44,11 @@ def group_profile(request, group_slug):
     # Determine if the user is authenticated and whether they are a member or admin
     is_member = False
     is_admin = False
+    is_moderator = False
     if request.user.is_authenticated:
         is_member = members.filter(id=request.user.id).exists()
         is_admin = GroupMembers.objects.filter(user=request.user, group=group, is_admin=True).exists()
+        is_moderator = GroupMembers.objects.filter(user=request.user, group=group, is_moderator=True).exists()
 
     # Fetch events associated with the group
     now = datetime.now()
@@ -69,6 +71,7 @@ def group_profile(request, group_slug):
         'group': group,
         'group_location': group_location,
         'is_admin': is_admin,
+        'is_moderator': is_moderator,
         'upcoming_events': upcoming_events,
         'past_events': past_events,
         'members': members,
@@ -100,7 +103,6 @@ def create_group(request):
                     latitude=place_details['latitude'],
                     longitude=place_details['longitude'],
                 )
-
             # Add user as a member of the group
             GroupMembers.objects.create(user=request.user, group=group, is_admin=True)
 
@@ -110,7 +112,6 @@ def create_group(request):
         group_form = GroupForm()
     
     return render(request, 'boardgame/create_group.html', {'form': group_form})
-
 
 # ---------------------------EVENTS---------------------------
 
@@ -483,8 +484,6 @@ def events(request):
     }
     return render(request, 'boardgame/events.html', context=context)
 
-
-
 def search(request):
     if request.method == "POST":
         searched = request.POST.get('searched')
@@ -515,3 +514,101 @@ def search(request):
         })
     
     return render(request, 'boardgame/search.html', {})
+
+def admin_dashboard(request, group_slug):
+    group = get_object_or_404(Group, slug=group_slug)
+    section = request.GET.get('section', 'member_management')
+          
+    if section == 'member_management':
+        if request.method == 'POST':
+            action = request.POST.get('action')
+            user_id = request.POST.get('user_id')
+            selected_user = User.objects.get(id=user_id)
+            group_member = GroupMembers.objects.get(user=selected_user, group=group)
+            
+            if action == 'set_admin':
+                group_member.is_admin = True
+                group_member.save()
+                messages.success(request, f"{selected_user.username} has been changed to admin.")   
+            elif action == 'set_mod':
+                group_member.is_moderator = True
+                group_member.save() 
+                messages.success(request, f"{selected_user.username} has been changed to moderator.")     
+            elif action == 'remove_mod':
+                if GroupMembers.objects.filter(group=group, is_moderator=True):
+                    group_member.is_moderator = False
+                    group_member.save()
+                    messages.success(request, f"{selected_user.username} has been removed as moderator.")    
+            elif action == 'remove_admin':
+                if GroupMembers.objects.filter(group=group, is_admin=True).count() > 1:
+                    group_member.is_admin = False
+                    group_member.save()
+                    messages.success(request, f"{selected_user.username} has been removed as admin.")
+                else:
+                    messages.error(request, f"You are the last admin of {group.name}. Invite new admins to maintain this group when you're not an admin.")
+
+            return redirect('admin_dashboard', group_slug=group.slug)
+        
+        admins = GroupMembers.objects.filter(group=group, is_admin=True)
+        moderators = GroupMembers.objects.filter(group=group, is_moderator=True)
+        users = GroupMembers.objects.filter(group=group, is_admin=False, is_moderator=False)
+        context = {'admins': admins, 'moderators': moderators, 'users': users, 'group': group}
+        
+    elif section == 'event_management':
+        if request.method == 'POST':
+            event_id = request.POST.get('event_id')
+            action = request.POST.get('action')
+            event = get_object_or_404(Event, id=event_id)
+            if action == 'delete':
+                event.delete()
+            elif action == 'edit':
+                # Handle editing logic here
+                pass
+            return redirect('admin_dashboard', group_slug=group.slug, section='event_management')
+
+        events = Event.objects.filter(group=group)
+        context = {'events': events, 'group': group}
+
+    elif section == 'game_management':
+        if request.method == 'POST':
+            nomination_id = request.POST.get('nomination_id')
+            action = request.POST.get('action')
+            nomination = get_object_or_404(Game, id=nomination_id)
+            if action == 'approve':
+                nomination.status = 'approved'
+            elif action == 'reject':
+                nomination.status = 'rejected'
+            nomination.save()
+            return redirect('admin_dashboard', group_slug=group.slug, section='game_management')
+
+        nominations = '' #will fix later
+        context = {'nominations': nominations, 'group': group}
+
+    elif section == 'notification_management':
+        if request.method == 'POST':
+            # Handle sending notifications
+            pass
+
+        notifications = []  # Adding logic later
+        context = {'notifications': notifications, 'group': group}
+
+    elif section == 'group_management':
+        if request.method == 'POST':
+            group_id = request.POST.get('group_id')
+            action = request.POST.get('action')
+            group = get_object_or_404(Group, id=group_id)
+            if action == 'edit':
+                # Handle editing logic 
+                pass
+            elif action == 'remove':
+                group.delete()
+            return redirect('admin_dashboard', group_slug=group.slug, section='group_management')
+
+        groups = Group.objects.all()
+        context = {'groups': groups, 'group': group}
+
+    else:
+        context = {'group': group}
+
+    context['section'] = section
+    return render(request, 'boardgame/admin_dashboard.html', context)

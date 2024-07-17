@@ -17,7 +17,9 @@
                     and participate in exciting events. <br /><br />
 
                     {% if not user.is_authenticated %}
-                    <a class="btn btn-sm" type="submit" style="background-color: #328ba3; border-color: #328ba3; color: #ffffff;" href="{% url 'register' %}">Sign Up!</a>
+                    <a class="btn btn" type="submit" style="background-color: #328ba3; border-color: #328ba3; color: #ffffff;" href="{% url 'register' %}">Sign Up!</a>
+                    {% else %}
+                    <a class="btn btn" type="submit" style="background-color: #328ba3; border-color: #328ba3; color: #ffffff;" href="{% url 'groups' %}">Find groups!</a>
                     {% endif %}
                 </div>
             </div>
@@ -26,128 +28,129 @@
             </div>
         </div>
 
-        <div>
-            {% if not user.is_authenticated %}
-            <div>
-                <h3>Featured Groups</h3>
-                {% if groups %}
-                <div class="row">
-                    {% for group in groups %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>{{ group.name }}</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="group-profile">
-                                    {% if group.group_image %}
-                                    <img src="{{ group.group_image.url }}" class="profile-image rounded">
-                                    {% else %}
-                                    <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded">
-                                    {% endif %}
-                                    <br/><br/>
-                                    {{ group.group_members.all.count }} members
-                                    <p><b>Location:</b> {{ group.grouplocation.city }}{% if group.grouplocation.state %}, {{ group.grouplocation.state }}{% endif %}</p>
-                                    <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <strong>There are no groups present.</strong>
-                {% endif %}
-            </div>
-            <div>
-                <h3>Featured Events</h3>
-                {% if events %}
-                <div class="row">
-                    {% for event in events %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>{{ event.title }}</h4>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text">
-                                    <b>Description:</b> {{ event.description }}<br />
-                                    <b>Location:</b> {{ event.eventlocation.city }}{% if event.eventlocation.state %}, {{ event.eventlocation.state }}{% endif %}<br /><br />
-                                    <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event</a>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <strong>There are no events present.</strong>
-                {% endif %}
-            </div>
-            {% else %}
+    </div>
 
-            <!-- Display user's groups -->
-            <h3>Your Groups</h3>
+    <div>
+        {% if not user.is_authenticated %}
+        <div>
+            <h3>Featured Groups</h3>
+            {% if groups %}
             <div class="row">
-                {% if user_groups %}
-                {% for group_member in user_groups %}
+                {% for group in groups %}
                 <div class="col-md-4 mb-3">
                     <div class="card">
                         <div class="card-header">
-                            <h4>{{ group_member.group.name }}</h4>
+                            <h4>{{ group.name }}</h4>
                         </div>
                         <div class="card-body">
                             <div class="group-profile">
-                                {% if group_member.group.group_image %}
-                                <img src="{{ group_member.group.group_image.url }}" class="profile-image rounded">
+                                {% if group.group_image %}
+                                <img src="{{ group.group_image.url }}" class="profile-image rounded">
                                 {% else %}
                                 <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded">
                                 {% endif %}
                                 <br/><br/>
-                                {{ group_member.group.group_members.all.count }} members
-                                <p><b>Location:</b> {{ group_member.group.grouplocation.city }}{% if group_member.group.grouplocation.state %}, {{ group_member.group.grouplocation.state }}{% endif %}</p>
-                                <a href="{% url 'group_profile' group_member.group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
+                                {{ group.group_members.all.count }} members
+                                <p><b>Location:</b> {{ group.grouplocation.city }}{% if group.grouplocation.state %}, {{ group.grouplocation.state }}{% endif %}</p>
+                                <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
                             </div>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
-                {% else %}
-                <p>You are not a member of any groups yet.</p>
-                {% endif %}
             </div>
-
-
-            <!-- Display user's events -->
-            <h3>Your Events</h3>
+            {% else %}
+            <strong>There are no groups present.</strong>
+            {% endif %}
+        </div>
+        <div>
+            <h3>Featured Events</h3>
+            {% if events %}
             <div class="row">
-                {% if user_events %}
-                {% for event_attendance in user_events %}
+                {% for event in events %}
                 <div class="col-md-4 mb-3">
                     <div class="card">
                         <div class="card-header">
-                            <h4>{{ event_attendance.event.title }}</h4>
+                            <h4>{{ event.title }}</h4>
                         </div>
                         <div class="card-body">
                             <p class="card-text">
-                                <b>Description:</b> {{ event_attendance.event.description }}<br />
-                                <b>Location:</b> {{ event_attendance.event.eventlocation.city }}{% if event_attendance.event.eventlocation.state %}, {{ event_attendance.event.eventlocation.state }}{% endif %}<br /><br />
-                                <a href="{% url 'event_details' event_attendance.event.id %}" class="btn btn-secondary btn-sm">View Event</a>
+                                <b>Description:</b> {{ event.description }}<br />
+                                <b>Location:</b> {{ event.eventlocation.city }}{% if event.eventlocation.state %}, {{ event.eventlocation.state }}{% endif %}<br /><br />
+                                <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event</a>
                             </p>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
-                {% else %}
-                <p>You are not attending any events yet.</p>
-                {% endif %}
             </div>
-
+            {% else %}
+            <strong>There are no events present.</strong>
             {% endif %}
-            <br>
-            <div>
-                <a href="/boardgame/about/">About Board Game Meetup</a><br />
+        </div>
+        {% else %}
+
+        <!-- Display user's groups -->
+        <h3>Your Groups</h3>
+        <div class="row">
+            {% if user_groups %}
+            {% for group_member in user_groups %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>{{ group_member.group.name }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="group-profile">
+                            {% if group_member.group.group_image %}
+                            <img src="{{ group_member.group.group_image.url }}" class="profile-image rounded">
+                            {% else %}
+                            <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded">
+                            {% endif %}
+                            <br/><br/>
+                            {{ group_member.group.group_members.all.count }} members
+                            <p><b>Location:</b> {{ group_member.group.grouplocation.city }}{% if group_member.group.grouplocation.state %}, {{ group_member.group.grouplocation.state }}{% endif %}</p>
+                            <a href="{% url 'group_profile' group_member.group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
+                        </div>
+                    </div>
+                </div>
             </div>
+            {% endfor %}
+            {% else %}
+            <p>You are not a member of any groups yet.</p>
+            {% endif %}
+        </div>
+
+
+        <!-- Display user's events -->
+        <h3>Your Events</h3>
+        <div class="row">
+            {% if user_events %}
+            {% for event_attendance in user_events %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>{{ event_attendance.event.title }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <b>Description:</b> {{ event_attendance.event.description }}<br />
+                            <b>Location:</b> {{ event_attendance.event.eventlocation.city }}{% if event_attendance.event.eventlocation.state %}, {{ event_attendance.event.eventlocation.state }}{% endif %}<br /><br />
+                            <a href="{% url 'event_details' event_attendance.event.id %}" class="btn btn-secondary btn-sm">View Event</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p>You are not attending any events yet.</p>
+            {% endif %}
+        </div>
+
+        {% endif %}
+        <br>
+        <div>
+            <a href="/boardgame/about/">About Board Game Meetup</a><br />
         </div>
     </div>
 </body>
