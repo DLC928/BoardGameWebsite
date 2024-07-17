@@ -59,7 +59,18 @@
     {% elif section == 'event_management' %}
         <h2>Event Management</h2>
         <!-- Event Management content goes here -->
-
+        <h3>Upcoming Events</h3>
+        <ul>
+            {% for event in upcoming_events %}
+                {{ event.title }} - {{ event.date_time }}<br/>
+            {% endfor %}
+        </ul>
+        <h3>Past Events</h3>
+        <ul>
+            {% for event in past_events %}
+                {{ event.title }} - {{ event.date_time }}<br/>
+            {% endfor %}
+        </ul>
     {% elif section == 'game_nomination_management' %}
         <h2>Game Nomination Management</h2>
         <!-- Game Nomination Management content goes here -->

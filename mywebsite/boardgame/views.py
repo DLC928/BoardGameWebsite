@@ -566,8 +566,10 @@ def admin_dashboard(request, group_slug):
                 pass
             return redirect('admin_dashboard', group_slug=group.slug, section='event_management')
 
-        events = Event.objects.filter(group=group)
-        context = {'events': events, 'group': group}
+        now = datetime.now()
+        upcoming_events = Event.objects.filter(group=group, date_time__gte=now).order_by('date_time')
+        past_events = Event.objects.filter(group=group, date_time__lt=now).order_by('-date_time')
+        context = {'upcoming_events': upcoming_events, 'past_events':past_events,'group': group}
 
     elif section == 'game_management':
         if request.method == 'POST':
