@@ -38,6 +38,11 @@ class Group(models.Model):
     members = models.ManyToManyField(User, through='GroupMembers')
     slug = models.SlugField(unique=True)
     group_image = models.ImageField(upload_to='group_images/', null=True, blank=True)
+    TYPE_SELECT = (
+        ('0', 'Public'),
+        ('1', 'Private'),
+    )
+    group_privacy = models.CharField(max_length=10,choices=TYPE_SELECT,default='0')
     categories = models.ManyToManyField(Category, related_name='groups', blank=True)
     tags = models.ManyToManyField(Tag, related_name='groups', blank=True)
     

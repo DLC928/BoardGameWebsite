@@ -5,17 +5,19 @@ from .models import Category, Group,Event, EventLocation, Game, Tag, UserProfile
 class GroupForm(forms.ModelForm):
     class Meta:
         model = Group
-        fields = ['name', 'description','group_image','categories', 'tags']
+        fields = ['name', 'description','group_image','group_privacy','categories', 'tags']
         labels = {
             'name': 'Group Name',
             'description': 'Group Description',
-             'group_image': 'Group Image',
+            'group_privacy': 'Group Privacy',
+            'group_image': 'Group Image',
         }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'categories': forms.CheckboxSelectMultiple,
             'tags': forms.CheckboxSelectMultiple,
+            'group_privacy': forms.RadioSelect()
         }
 class EventForm(forms.ModelForm):
     class Meta:

@@ -558,18 +558,25 @@ def admin_dashboard(request, group_slug):
         if request.method == 'POST':
             event_id = request.POST.get('event_id')
             action = request.POST.get('action')
-            event = get_object_or_404(Event, id=event_id)
+            event = get_object_or_404(Event, pk=event_id)
             if action == 'delete':
                 event.delete()
-            elif action == 'edit':
-                # Handle editing logic here
-                pass
+                messages.success(request, "Event deleted successfully.")
+            elif action == 'edit_event':
+                form = EventForm(request.POST, instance=event)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, "Event updated successfully.")
             return redirect('admin_dashboard', group_slug=group.slug, section='event_management')
 
         now = datetime.now()
         upcoming_events = Event.objects.filter(group=group, date_time__gte=now).order_by('date_time')
         past_events = Event.objects.filter(group=group, date_time__lt=now).order_by('-date_time')
+       
         context = {'upcoming_events': upcoming_events, 'past_events':past_events,'group': group}
+        
+
+
 
     elif section == 'game_management':
         if request.method == 'POST':
