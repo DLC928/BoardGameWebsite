@@ -20,6 +20,7 @@ urlpatterns = [
     path('events/', views.events, name='events'),
     path('search/', views.search, name='search'),
     path('dashboard/<slug:group_slug>/', views.admin_dashboard, name='admin_dashboard'),
+    path('dashboard/<slug:group_slug>/<str:section>/', views.admin_dashboard, name='admin_dashboard_with_section'),
 
 ]
 

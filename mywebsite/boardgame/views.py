@@ -164,17 +164,6 @@ def create_event(request, group_slug):
     }
     return render(request, 'boardgame/create_event.html', context)
 
-def edit_event(request, event_id):
-    event = get_object_or_404(Event, pk=event_id)
-    form = EventForm(request.POST or None, instance=event)
-    
-    if form.is_valid():
-        form.save()
-        return redirect('event_details', event_id=event_id)
-
-    return render(request, 'boardgame/edit_event.html', {'form': form, 'event': event})
-
-
 def event_details(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     attendees = event.attendees.all()
@@ -515,10 +504,10 @@ def search(request):
     
     return render(request, 'boardgame/search.html', {})
 
-def admin_dashboard(request, group_slug):
+def admin_dashboard(request, group_slug,section=None):
     group = get_object_or_404(Group, slug=group_slug)
-    section = request.GET.get('section', 'member_management')
-          
+    section = section or request.GET.get('section', 'member_management')
+
     if section == 'member_management':
         if request.method == 'POST':
             action = request.POST.get('action')
@@ -556,8 +545,8 @@ def admin_dashboard(request, group_slug):
         
     elif section == 'event_management':
         if request.method == 'POST':
-            event_id = request.POST.get('event_id')
             action = request.POST.get('action')
+            event_id = request.POST.get('event_id')
             event = get_object_or_404(Event, pk=event_id)
             if action == 'delete':
                 event.delete()
@@ -567,17 +556,17 @@ def admin_dashboard(request, group_slug):
                 if form.is_valid():
                     form.save()
                     messages.success(request, "Event updated successfully.")
-            return redirect('admin_dashboard', group_slug=group.slug, section='event_management')
+            return redirect('admin_dashboard_with_section', group_slug=group.slug, section='event_management')
+        
 
         now = datetime.now()
         upcoming_events = Event.objects.filter(group=group, date_time__gte=now).order_by('date_time')
         past_events = Event.objects.filter(group=group, date_time__lt=now).order_by('-date_time')
-       
-        context = {'upcoming_events': upcoming_events, 'past_events':past_events,'group': group}
+        # Create a form for each upcoming event
+        forms = {event.id: EventForm(instance=event).as_p() for event in upcoming_events}
         
-
-
-
+        context = {'upcoming_events': upcoming_events, 'past_events':past_events, 'group': group, 'forms': forms}
+        
     elif section == 'game_management':
         if request.method == 'POST':
             nomination_id = request.POST.get('nomination_id')
@@ -621,3 +610,15 @@ def admin_dashboard(request, group_slug):
 
     context['section'] = section
     return render(request, 'boardgame/admin_dashboard.html', context)
+
+
+
+def edit_event(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    form = EventForm(request.POST or None, instance=event)
+    
+    if form.is_valid():
+        form.save()
+        return redirect('event_details', event_id=event_id)
+
+    return render(request, 'boardgame/edit_event.html', {'form': form, 'event': event})

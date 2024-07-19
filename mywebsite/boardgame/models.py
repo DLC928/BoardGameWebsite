@@ -39,10 +39,10 @@ class Group(models.Model):
     slug = models.SlugField(unique=True)
     group_image = models.ImageField(upload_to='group_images/', null=True, blank=True)
     TYPE_SELECT = (
-        ('0', 'Public'),
-        ('1', 'Private'),
+        ('Public', 'Public'),
+        ('Private', 'Private'),
     )
-    group_privacy = models.CharField(max_length=10,choices=TYPE_SELECT,default='0')
+    group_privacy = models.CharField(max_length=10,choices=TYPE_SELECT,default='Public')
     categories = models.ManyToManyField(Category, related_name='groups', blank=True)
     tags = models.ManyToManyField(Tag, related_name='groups', blank=True)
     
@@ -78,7 +78,6 @@ class GroupMembers(models.Model):
     is_admin = models.BooleanField(default=False)
     is_moderator = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         verbose_name_plural = 'GroupMembers'
         unique_together = ('user', 'group')
@@ -127,15 +126,16 @@ class EventLocation(models.Model):
         return f"{self.address}, {self.city}, {self.country}"
 
 class Game(models.Model):
-    
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='nominated_games')
     nominator = models.ForeignKey(User, on_delete=models.CASCADE)
     date_nominated = models.DateTimeField(auto_now_add=True,)
-    nomination_status = [
+    TYPE_SELECT = (
         ('Pending', 'Pending'),
         ('Approved', 'Approved'),
         ('Rejected', 'Rejected'),
-    ]
+        ('Deleted', 'Deleted'),
+    )
+    nomination_status = models.CharField(max_length=10,choices=TYPE_SELECT,default='Pending')
     name = models.CharField(max_length=200)
     min_players = models.PositiveIntegerField(blank=True, null=True)
     max_players = models.PositiveIntegerField(blank=True, null=True)
