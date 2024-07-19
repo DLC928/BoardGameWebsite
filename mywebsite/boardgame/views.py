@@ -602,13 +602,13 @@ def manage_event_dashboard(request, event_id, section=None):
             form = EventForm(instance=event)
         
         context.update({'form': form})
-
+        
     elif section == 'game_nominations':
         if request.method == 'POST':
             action = request.POST.get('action')
             nomination_id = request.POST.get('nomination_id')
             nomination = get_object_or_404(Game, id=nomination_id)
-            
+
             if action == 'approve':
                 nomination.nomination_status = 'Approved'
                 nomination.save()
@@ -622,11 +622,12 @@ def manage_event_dashboard(request, event_id, section=None):
                 messages.success(request, 'Game nomination deleted.')
 
             return redirect('manage_event_dashboard_with_section', event_id=event.id, section='game_nominations')
-        
+
         pending_nominations = Game.objects.filter(event=event, nomination_status='Pending')
         approved_nominations = Game.objects.filter(event=event, nomination_status='Approved')
-        
+
         context.update({'pending_nominations': pending_nominations, 'approved_nominations': approved_nominations})
+
 
     elif section == 'attendee_management':
         attendees = event.attendees.all()

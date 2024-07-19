@@ -22,9 +22,11 @@
 
 {% elif section == 'game_nominations' %}
     <h2>Game Nominations</h2>
+    <h3>Pending Nominations</h3>
     <ul>
         {% for nomination in pending_nominations %}
-            <li>{{ nomination.title }} 
+            <li>
+                {{ nomination.name }} nominated by {{ nomination.nominator }} 
                 <form method="post" style="display:inline;">
                     {% csrf_token %}
                     <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
@@ -33,8 +35,27 @@
                     <button type="submit" name="action" value="delete">Delete</button>
                 </form>
             </li>
+        {% empty %}
+            <li>No pending nominations.</li>
         {% endfor %}
     </ul>
+    <h3>Approved Nominations</h3>
+    <ul>
+        {% for nomination in approved_nominations %}
+            <li>
+                {{ nomination.name }} 
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                    <button type="submit" name="action" value="reject">Reject</button>
+                    <button type="submit" name="action" value="delete">Delete</button>
+                </form>
+            </li>
+        {% empty %}
+            <li>No approved nominations.</li>
+        {% endfor %}
+    </ul>
+
 
 {% elif section == 'attendee_management' %}
     <h2>Attendee Management</h2>
