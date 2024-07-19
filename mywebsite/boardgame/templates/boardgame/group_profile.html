@@ -23,7 +23,7 @@
             <!-- Show Create Event button if user is group admin -->
             {% if is_admin or is_moderator %}
             <a href="{% url 'create_event' group.slug %}" class="btn btn-primary btn-sm mb-2">Create Event</a>
-            <a href="{% url 'admin_dashboard' group.slug %}" class="btn btn-primary btn-sm mb-2">Manage Group</a>
+            <a href="{% url 'manage_group_dashboard' group.slug %}" class="btn btn-primary btn-sm mb-2">Manage Group</a>
             {% endif %}
         </form>
         {% else %}

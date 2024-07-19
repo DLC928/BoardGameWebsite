@@ -1,0 +1,100 @@
+{% extends 'boardgame/base.html' %}
+{% load static %}
+
+{% block content %}
+<h1>Group Dashboard for {{ group.name }}</h1>
+<nav>
+    <ul>
+        <li><a href="{% url 'manage_group_dashboard_with_section' group.slug 'group_setup' %}">Group Setup</a></li>
+        <li><a href="{% url 'manage_group_dashboard_with_section' group.slug 'member_management' %}">Member Management</a></li>
+        <li><a href="{% url 'manage_group_dashboard_with_section' group.slug 'needs_review' %}">Needs Review</a></li>
+        <li><a href="{% url 'manage_group_dashboard_with_section' group.slug 'event_management' %}">Event Management</a></li>
+    </ul>
+</nav>
+
+{% if section == 'group_setup' %}
+    <h2>Group Setup</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Changes</button>
+    </form>
+
+{% elif section == 'member_management' %}
+    <h2>Member Management</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <h3>Current Admins</h3>
+            <ul class="list-group">
+                {% for admin in admins %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ admin.user.username }}
+                    <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ admin.user.id }}">
+                        <button type="submit" name="action" value="remove_admin" class="btn btn-danger btn-sm">Remove</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <h3>Current Moderators</h3>
+            <ul class="list-group">
+                {% for mod in moderators %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ mod.user.username }}
+                    <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ mod.user.id }}">
+                        <button type="submit" name="action" value="remove_mod" class="btn btn-danger btn-sm">Remove</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <h3>Regular Users</h3>
+            <ul class="list-group">
+                {% for user in users %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ user.user.username }}
+                    <div>
+                        <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.user.id }}">
+                            <input type="hidden" name="group_id" value="{{ user.group.id }}">
+                            <button type="submit" name="action" value="set_admin" class="btn btn-success btn-sm">Set Admin</button>
+                        </form>
+                        <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.user.id }}">
+                            <button type="submit" name="action" value="set_mod" class="btn btn-primary btn-sm">Set Moderator</button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+{% elif section == 'event_management' %}
+    <h2>Event Management</h2>
+    <ul>
+        {% for event in upcoming_events %}
+            <li>{{ event.title }} <a href="{% url 'manage_event_dashboard' event.id %}">Edit Event</a></li>
+        {% endfor %}
+    </ul>
+    <h3>Past Events</h3>
+    <ul>
+        {% for event in past_events %}
+            <li>{{ event.title }}</li>
+        {% endfor %}
+    </ul>
+
+{% elif section == 'needs_review' %}
+    <h2>Needs Review</h2>
+    <!-- Needs review functionality -->
+
+{% endif %}
+{% endblock %}

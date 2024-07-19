@@ -504,9 +504,24 @@ def search(request):
     
     return render(request, 'boardgame/search.html', {})
 
-def admin_dashboard(request, group_slug,section=None):
+
+
+def edit_event(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    form = EventForm(request.POST or None, instance=event)
+    
+    if form.is_valid():
+        form.save()
+        return redirect('event_details', event_id=event_id)
+
+    return render(request, 'boardgame/edit_event.html', {'form': form, 'event': event})
+
+
+def manage_group_dashboard(request, group_slug, section=None):
     group = get_object_or_404(Group, slug=group_slug)
     section = section or request.GET.get('section', 'member_management')
+
+    context = {'group': group, 'section': section}
 
     if section == 'member_management':
         if request.method == 'POST':
@@ -536,89 +551,101 @@ def admin_dashboard(request, group_slug,section=None):
                 else:
                     messages.error(request, f"You are the last admin of {group.name}. Invite new admins to maintain this group when you're not an admin.")
 
-            return redirect('admin_dashboard', group_slug=group.slug)
+            return redirect('manage_group_dashboard_with_section', group_slug=group.slug, section='member_management')
         
         admins = GroupMembers.objects.filter(group=group, is_admin=True)
         moderators = GroupMembers.objects.filter(group=group, is_moderator=True)
         users = GroupMembers.objects.filter(group=group, is_admin=False, is_moderator=False)
-        context = {'admins': admins, 'moderators': moderators, 'users': users, 'group': group}
-        
-    elif section == 'event_management':
-        if request.method == 'POST':
-            action = request.POST.get('action')
-            event_id = request.POST.get('event_id')
-            event = get_object_or_404(Event, pk=event_id)
-            if action == 'delete':
-                event.delete()
-                messages.success(request, "Event deleted successfully.")
-            elif action == 'edit_event':
-                form = EventForm(request.POST, instance=event)
-                if form.is_valid():
-                    form.save()
-                    messages.success(request, "Event updated successfully.")
-            return redirect('admin_dashboard_with_section', group_slug=group.slug, section='event_management')
-        
+        context.update({'admins': admins, 'moderators': moderators, 'users': users})
 
+    elif section == 'event_management':
         now = datetime.now()
         upcoming_events = Event.objects.filter(group=group, date_time__gte=now).order_by('date_time')
         past_events = Event.objects.filter(group=group, date_time__lt=now).order_by('-date_time')
-        # Create a form for each upcoming event
-        forms = {event.id: EventForm(instance=event).as_p() for event in upcoming_events}
         
-        context = {'upcoming_events': upcoming_events, 'past_events':past_events, 'group': group, 'forms': forms}
+        context.update({'upcoming_events': upcoming_events, 'past_events': past_events})
+
+    elif section == 'needs_review':
+        pass
+        # Will setup later 
         
-    elif section == 'game_management':
+    elif section == 'group_setup':
         if request.method == 'POST':
+            form = GroupForm(request.POST, instance=group)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Group updated successfully.')
+                return redirect('manage_group_dashboard_with_section', group_slug=group.slug, section='group_setup')
+        else:
+            form = GroupForm(instance=group)
+        
+        context.update({'form': form})
+
+    return render(request, 'boardgame/manage_group_dashboard.html', context)
+
+
+
+def manage_event_dashboard(request, event_id, section=None):
+    event = get_object_or_404(Event, id=event_id)
+    section = section or request.GET.get('section', 'event_setup')
+
+    context = {'event': event, 'section': section}
+
+    if section == 'event_setup':
+        if request.method == 'POST':
+            form = EventForm(request.POST, instance=event)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Event updated successfully.')
+                return redirect('manage_event_dashboard_with_section', event_id=event.id, section='event_setup')
+        else:
+            form = EventForm(instance=event)
+        
+        context.update({'form': form})
+
+    elif section == 'game_nominations':
+        if request.method == 'POST':
+            action = request.POST.get('action')
             nomination_id = request.POST.get('nomination_id')
-            action = request.POST.get('action')
             nomination = get_object_or_404(Game, id=nomination_id)
+            
             if action == 'approve':
-                nomination.status = 'approved'
+                nomination.nomination_status = 'Approved'
+                nomination.save()
+                messages.success(request, 'Game nomination approved.')
             elif action == 'reject':
-                nomination.status = 'rejected'
-            nomination.save()
-            return redirect('admin_dashboard', group_slug=group.slug, section='game_management')
+                nomination.nomination_status = 'Rejected'
+                nomination.save()
+                messages.success(request, 'Game nomination rejected.')
+            elif action == 'delete':
+                nomination.delete()
+                messages.success(request, 'Game nomination deleted.')
 
-        nominations = '' #will fix later
-        context = {'nominations': nominations, 'group': group}
+            return redirect('manage_event_dashboard_with_section', event_id=event.id, section='game_nominations')
+        
+        pending_nominations = Game.objects.filter(event=event, nomination_status='Pending')
+        approved_nominations = Game.objects.filter(event=event, nomination_status='Approved')
+        
+        context.update({'pending_nominations': pending_nominations, 'approved_nominations': approved_nominations})
 
-    elif section == 'notification_management':
+    elif section == 'attendee_management':
+        attendees = event.attendees.all()
         if request.method == 'POST':
-            # Handle sending notifications
-            pass
-
-        notifications = []  # Adding logic later
-        context = {'notifications': notifications, 'group': group}
-
-    elif section == 'group_management':
-        if request.method == 'POST':
-            group_id = request.POST.get('group_id')
             action = request.POST.get('action')
-            group = get_object_or_404(Group, id=group_id)
-            if action == 'edit':
-                # Handle editing logic 
-                pass
-            elif action == 'remove':
-                group.delete()
-            return redirect('admin_dashboard', group_slug=group.slug, section='group_management')
+            user_id = request.POST.get('user_id')
+            selected_user = User.objects.get(id=user_id)
+            
+            if action == 'remove':
+                event.attendees.remove(selected_user)
+                messages.success(request, f"{selected_user.username} has been removed from the event.")
+            
+            return redirect('manage_event_dashboard_with_section', event_id=event.id, section='attendee_management')
+        
+        context.update({'attendees': attendees})
 
-        groups = Group.objects.all()
-        context = {'groups': groups, 'group': group}
-
-    else:
-        context = {'group': group}
-
-    context['section'] = section
-    return render(request, 'boardgame/admin_dashboard.html', context)
-
+    elif section == 'needs_review':
+        # will setup later 
+        pass
+    return render(request, 'boardgame/manage_event_dashboard.html', context)
 
 
-def edit_event(request, event_id):
-    event = get_object_or_404(Event, pk=event_id)
-    form = EventForm(request.POST or None, instance=event)
-    
-    if form.is_valid():
-        form.save()
-        return redirect('event_details', event_id=event_id)
-
-    return render(request, 'boardgame/edit_event.html', {'form': form, 'event': event})

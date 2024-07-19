@@ -1,0 +1,58 @@
+{% extends 'boardgame/base.html' %}
+{% load static %}
+
+{% block content %}
+<h1>Event Dashboard for {{ event.title }} </h1>
+<nav>
+    <ul>
+        <li><a href="{% url 'manage_event_dashboard_with_section' event.id 'event_setup' %}">Event Setup</a></li>
+        <li><a href="{% url 'manage_event_dashboard_with_section' event.id 'game_nominations' %}">Game Nominations</a></li>
+        <li><a href="{% url 'manage_event_dashboard_with_section' event.id 'attendee_management' %}">Attendee Management</a></li>
+        <li><a href="{% url 'manage_event_dashboard_with_section' event.id 'needs_review' %}">Needs Review</a></li>
+    </ul>
+</nav>
+
+{% if section == 'event_setup' %}
+    <h2>Event Setup</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Changes</button>
+    </form>
+
+{% elif section == 'game_nominations' %}
+    <h2>Game Nominations</h2>
+    <ul>
+        {% for nomination in pending_nominations %}
+            <li>{{ nomination.title }} 
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                    <button type="submit" name="action" value="approve">Approve</button>
+                    <button type="submit" name="action" value="reject">Reject</button>
+                    <button type="submit" name="action" value="delete">Delete</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+{% elif section == 'attendee_management' %}
+    <h2>Attendee Management</h2>
+    <ul>
+        {% for attendee in attendees %}
+            <li>{{ attendee.username }} 
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_id" value="{{ attendee.id }}">
+                    <button type="submit" name="action" value="remove">Remove</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+{% elif section == 'needs_review' %}
+    <h2>Needs Review</h2>
+    <!-- Needs review functionality -->
+
+{% endif %}
+{% endblock %}

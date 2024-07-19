@@ -19,8 +19,10 @@ urlpatterns = [
     path('groups/', views.groups, name='groups'),
     path('events/', views.events, name='events'),
     path('search/', views.search, name='search'),
-    path('dashboard/<slug:group_slug>/', views.admin_dashboard, name='admin_dashboard'),
-    path('dashboard/<slug:group_slug>/<str:section>/', views.admin_dashboard, name='admin_dashboard_with_section'),
+    path('group-dashboard/<slug:group_slug>/', views.manage_group_dashboard, name='manage_group_dashboard'),
+    path('group-dashboard/<slug:group_slug>/<str:section>/', views.manage_group_dashboard, name='manage_group_dashboard_with_section'),
+    path('event-dashboard/event/<int:event_id>/', views.manage_event_dashboard, name='manage_event_dashboard'),
+    path('event-dashboard/event/<int:event_id>/<str:section>/', views.manage_event_dashboard, name='manage_event_dashboard_with_section'),
 
 ]
 
