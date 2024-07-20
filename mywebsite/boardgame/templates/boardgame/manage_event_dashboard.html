@@ -1,104 +1,87 @@
 {% extends 'boardgame/base.html' %}
 {% load static %}
 {% load custom_filters %}
-
-
 {% block content %}
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Align tooltip text to the left */
+        .tooltip-inner {
+            text-align: left;
+        }
+    </style>
+
+</head>
 <h1>Event Dashboard for {{ event.title }} </h1>
 <nav>
     <ul class="nav nav-pills">
         <li class="nav-item">
-            <a class="btn btn-info btn-sm me-2" href="{% url 'manage_event_dashboard_with_section' event.id 'event_setup' %}">Event Setup</a>
+            <a class="btn btn-info btn-sm me-2"
+                href="{% url 'manage_event_dashboard_with_section' event.id 'event_setup' %}">Event Setup</a>
         </li>
         <li class="nav-item">
-            <a class="btn btn-info btn-sm me-2" href="{% url 'manage_event_dashboard_with_section' event.id 'game_nominations' %}">Game Nomination Management</a>
+            <a class="btn btn-info btn-sm me-2"
+                href="{% url 'manage_event_dashboard_with_section' event.id 'game_nominations' %}">Game Nomination
+                Management</a>
         </li>
         <li class="nav-item">
-            <a class="btn btn-info btn-sm me-2" href="{% url 'manage_event_dashboard_with_section' event.id 'attendee_management' %}">Attendee Management</a>
+            <a class="btn btn-info btn-sm me-2"
+                href="{% url 'manage_event_dashboard_with_section' event.id 'attendee_management' %}">Attendee
+                Management</a>
         </li>
         <li class="nav-item">
-            <a class="btn btn-info btn-sm me-2" href="{% url 'manage_event_dashboard_with_section' event.id 'needs_review' %}">Needs Review</a>
+            <a class="btn btn-info btn-sm me-2"
+                href="{% url 'manage_event_dashboard_with_section' event.id 'needs_review' %}">Needs Review</a>
         </li>
     </ul>
 </nav>
-<br/>
+<br />
 
 {% if section == 'event_setup' %}
-    <h2>Event Setup</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save Changes</button>
-    </form>
+<h2>Event Setup</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Changes</button>
+</form>
 
 {% elif section == 'game_nominations' %}
-        <div class="section">
-            <h3>Nomination Settings</h3>
-            <form method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="id_nominations_open">Nominations Open:</label>
-                    <div class="form-check form-switch">
-                        {{ nomination_settings.nominations_open }}
-                    </div>
-                </div> 
-                <br/>
-                <div class="form-group">
-                    <label for="id_signups_open">Game Sign-ups Open:</label>
-                    <div class="form-check form-switch">
-                        {{ nomination_settings.signups_open }}
-                    </div>
-                </div>
-                <br/>
-                <button type="submit" name="nomination_settings" class="btn btn-secondary btn-sm" >Save Changes</button>
-            </form>
-            <br/>
-            <h3>Pending Nominations</h3>
-            <table class="table table-warning table-hover">
-            <thead>
-                <tr>
-                <th scope="col">#</th>
-                <th scope="col">Game Name</th>
-                <th scope="col">Nominator</th>
-                <th scope="col">Difficulty</th>
-                <th scope="col">Player Count</th>
-                <th scope="col">Play Time</th>
-                <th scope="col">Attendee Votes</th>
-                <th scope="col">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for nomination in pending_nominations %}
-                <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <td>{{ nomination.name }}</td>
-                    <td>{{ nomination.nominator }}</td>
-                    <td>{{ nomination.weight }}</td>
-                    <td>{{ nomination.min_players }} - {{ nomination.max_players }}</td>
-                    <td>maximum {{ nomination.max_playtime }} mins</td>
-                    <td>{{ vote_counts|get_item:nomination.id }}</td>
-                    <td>
-                        <form method="post" class="d-inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                            <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                            <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                            <button type="submit" name="action" value="delete" class="btn btn-secondary btn-sm">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7">No pending nominations.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-            </table>
+<div class="section">
+    <h3>Nomination Settings</h3>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_nominations_open" class="d-flex align-items-center">
+                Nominations Open:
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                    title="<strong>Enabled:</strong> Users can nominate games.<br><strong>Disabled:</strong> Nominations are closed and the section is removed from the event page."></i>
+            </label>
+            <div class="form-check form-switch">
+                {{ nomination_settings.nominations_open }}
+            </div>
+        </div>
+        <br />
+        <div class="form-group">
+            <label for="id_signups_open" class="d-flex align-items-center">
+                Game Sign-ups Open:
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                    title="<strong>Enabled:</strong> Approved games will be listed in the game sign-up section of the event page.<br><strong>Disabled:</strong> The game sign-up section will not appear on the event page and users cannot sign up for games.">
+                </i> </label>
+            <div class="form-check form-switch">
+                {{ nomination_settings.signups_open }}
+            </div>
+        </div>
+        <br />
+        <button type="submit" name="nomination_settings" class="btn btn-secondary btn-sm">Save Changes</button>
+    </form>
 
-            <h3>Approved Nominations</h3>
-            <table class="table table-success table-hover">
-            <thead>
-                <tr>
+
+    <br />
+    <h3>Pending Nominations</h3>
+    <table class="table table-warning table-hover">
+        <thead>
+            <tr>
                 <th scope="col">#</th>
                 <th scope="col">Game Name</th>
                 <th scope="col">Nominator</th>
@@ -107,57 +90,110 @@
                 <th scope="col">Play Time</th>
                 <th scope="col">Attendee Votes</th>
                 <th scope="col">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for nomination in approved_nominations %}
-                <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <td>{{ nomination.name }}</td>
-                    <td>{{ nomination.nominator }}</td>
-                    <td>{{ nomination.weight }}</td>
-                    <td>{{ nomination.min_players }} - {{ nomination.max_players }}</td>
-                    <td>maximum {{ nomination.max_playtime }} mins</td>
-                    <td>{{ vote_counts|get_item:nomination.id }}</td>
-                    <td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nomination in pending_nominations %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ nomination.name }}</td>
+                <td>{{ nomination.nominator }}</td>
+                <td>{{ nomination.weight }}</td>
+                <td>{{ nomination.min_players }} - {{ nomination.max_players }}</td>
+                <td>maximum {{ nomination.max_playtime }} mins</td>
+                <td>{{ vote_counts|get_item:nomination.id }}</td>
+                <td>
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                        <button type="submit" name="action" value="approve"
+                            class="btn btn-success btn-sm">Approve</button>
+                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
+                        <button type="submit" name="action" value="delete"
+                            class="btn btn-secondary btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No pending nominations.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Approved Nominations</h3>
+    <table class="table table-success table-hover">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Game Name</th>
+                <th scope="col">Nominator</th>
+                <th scope="col">Difficulty</th>
+                <th scope="col">Player Count</th>
+                <th scope="col">Play Time</th>
+                <th scope="col">Attendee Votes</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nomination in approved_nominations %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ nomination.name }}</td>
+                <td>{{ nomination.nominator }}</td>
+                <td>{{ nomination.weight }}</td>
+                <td>{{ nomination.min_players }} - {{ nomination.max_players }}</td>
+                <td>maximum {{ nomination.max_playtime }} mins</td>
+                <td>{{ vote_counts|get_item:nomination.id }}</td>
+                <td>
                     <form method="post" class="d-inline">
                         {% csrf_token %}
                         <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
                         <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                        <button type="submit" name="action" value="delete" class="btn btn-secondary btn-sm">Delete</button>
+                        <button type="submit" name="action" value="delete"
+                            class="btn btn-secondary btn-sm">Delete</button>
                     </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7">No approved nominations.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-            </table>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No approved nominations.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-{% elif section == 'attendee_management' %}
+    {% elif section == 'attendee_management' %}
     <h2>Attendee Management</h2>
     <ul>
         {% for attendee in attendees %}
-            <li>{{ attendee.username }} 
-                <form method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <input type="hidden" name="user_id" value="{{ attendee.id }}">
-                    <button type="submit" name="action" value="remove">Remove</button>
-                </form>
-            </li>
+        <li>{{ attendee.username }}
+            <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ attendee.id }}">
+                <button type="submit" name="action" value="remove">Remove</button>
+            </form>
+        </li>
         {% endfor %}
     </ul>
 
-{% elif section == 'needs_review' %}
+    {% elif section == 'needs_review' %}
     <h2>Needs Review</h2>
     <!-- Needs review functionality -->
 
-{% endif %}
-<!-- Back to Event Button -->
-<div class="text-center mt-4">
-    <a href="{% url 'event_details' event.id %}" class="btn btn-primary">Back to Event</a>
-</div>
+    {% endif %}
+    <!-- Back to Event Button -->
+    <div class="text-center mt-4">
+        <a href="{% url 'event_details' event.id %}" class="btn btn-primary">Back to Event</a>
+    </div>
 
-{% endblock %}
+    <!-- Initialize Bootstrap tooltips -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+        });
+    </script>
+
+    {% endblock %}
