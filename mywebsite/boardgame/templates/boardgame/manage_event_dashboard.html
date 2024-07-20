@@ -10,6 +10,17 @@
         .tooltip-inner {
             text-align: left;
         }
+        .scrollable-checkboxes {
+        max-height: 110px; 
+        width: 300px; 
+        overflow-y: auto; /* Enables vertical scrolling */
+        border: 1px solid #ddd; /* Boarder */
+        padding: 10px; /* Padding */
+    }
+
+        .form-check {
+            margin-bottom: 5px; /* Space between checkboxes */
+        }
     </style>
 
 </head>
@@ -42,7 +53,57 @@
 <h2>Event Setup</h2>
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+   <!-- Event Form -->
+   <div class="form-group">
+    {{ form.title.label_tag }} {{ form.title }} <br/>
+    {{ form.description.label_tag }} {{ form.description }} <br/>
+    {{ form.date_time.label_tag }} {{ form.date_time }} <br/>
+    {{ form.event_image.label_tag }} {{ form.event_image }} <br/>
+    </div>
+    <br/>
+    <!-- Categories Multi-Select Scrollable Box -->
+    <div class="form-group">
+        <label for="id_categories">{{ form.categories.label }}</label>
+        <div class="scrollable-checkboxes">
+            {{ form.categories }}
+        </div>
+    </div>
+    <br/>
+
+    <!-- Tags Multi-Select Scrollable Box -->
+    <div class="form-group">
+        <label for="id_tags">{{ form.tags.label }}</label>
+        <div class="scrollable-checkboxes">
+            {{ form.tags }}
+        </div>
+    </div>
+    <br/>
+     <!-- Nomination Settings -->
+     <div class="section">
+        <h3>Game Nomination Settings</h3>
+        <div class="form-group">
+            <label for="id_nominations_open" class="d-flex align-items-center">
+                Nominations Open:
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                   title="<strong>Enabled:</strong> Users can nominate games.<br><strong>Disabled:</strong> Nominations are closed and the section is removed from the event page."></i>
+            </label>
+            <div class="form-check form-switch">
+                {{ form.nominations_open }}
+            </div>
+        </div>
+        <br />
+        <div class="form-group">
+            <label for="id_signups_open" class="d-flex align-items-center">
+                Game Sign-ups Open:
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                   title="<strong>Enabled:</strong> Approved games will be listed in the game sign-up section of the event page.<br><strong>Disabled:</strong> The game sign-up section will not appear on the event page and users cannot sign up for games."></i>
+            </label>
+            <div class="form-check form-switch">
+                {{ form.signups_open }}
+            </div>
+        </div>
+        <br />
+    </div>
     <button type="submit">Save Changes</button>
 </form>
 
