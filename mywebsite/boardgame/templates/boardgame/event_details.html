@@ -35,6 +35,9 @@
                         {% else %}
                         <button type="submit" class="btn btn-secondary btn-sm" name="join">Join Event</button>
                         {% endif %}
+                        {% if is_admin or is_moderator %}
+                        <a href="{% url 'manage_event_dashboard' event.id %}" class="btn btn-primary btn-sm ">Manage Event</a>
+                        {% endif %}
                     </form>
                     {% else %}
                     <p>You must <a href="{% url 'login' %}">login</a> first to join the event.</p>

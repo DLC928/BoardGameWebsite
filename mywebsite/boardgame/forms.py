@@ -37,7 +37,15 @@ class EventForm(forms.ModelForm):
        
         }    
 
-
+class EventNominationSettingsForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = ['nominations_open', 'signups_open']
+        widgets = {
+            'nominations_open': forms.CheckboxInput(attrs={'class': 'form-check-input form-switch'}),
+            'signups_open': forms.CheckboxInput(attrs={'class': 'form-check-input form-switch'}),
+        }    
+        
 class EventLocationForm(forms.ModelForm):
     class Meta:
         model = EventLocation

@@ -2,9 +2,9 @@ from datetime import datetime
 from django.contrib import messages  
 from django.shortcuts import render, get_object_or_404, redirect
 from boardgame.models import User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote
-from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm, UserProfileForm
+from .forms import EventNominationSettingsForm, GroupForm, EventForm, EventLocationForm, GameDetailForm, UserProfileForm
 from .utils import fetch_place_details
-from django.db.models import Q
+from django.db.models import Count, Q
 
 
 def home(request):
@@ -170,9 +170,11 @@ def event_details(request, event_id):
     
     is_attending = False
     is_admin =False
+    is_moderator =False
     if request.user.is_authenticated:
         is_attending = attendees.filter(id=request.user.id).exists()
         is_admin = GroupMembers.objects.filter(user=request.user, group=event.group, is_admin=True).exists()
+        is_moderator = GroupMembers.objects.filter(user=request.user, group=event.group, is_moderator=True).exists()
 
     approved_nominations_with_slots = []
     waitlisted_games = []
@@ -264,6 +266,7 @@ def event_details(request, event_id):
         'event_location': event_location,
         'is_attending': is_attending,
         'is_admin' : is_admin,
+        'is_moderator': is_moderator,
         'nominations': nominations,
         'waitlisted_games': waitlisted_games,
         'attendees': attendees,
@@ -271,7 +274,7 @@ def event_details(request, event_id):
         'vote_counts':vote_counts,
         'user_votes': user_votes
     }
-    print("Context:", context)  # Add this for debugging
+
     return render(request, 'boardgame/event_details.html', context)
 
 
@@ -621,28 +624,59 @@ def manage_event_dashboard(request, event_id, section=None):
         
     elif section == 'game_nominations':
         if request.method == 'POST':
-            action = request.POST.get('action')
-            nomination_id = request.POST.get('nomination_id')
-            nomination = get_object_or_404(Game, id=nomination_id)
+            if 'approve_nomination' in request.POST:
+                action = 'approve'
+            elif 'reject_nomination' in request.POST:
+                action = 'reject'
+            elif 'delete_nomination' in request.POST:
+                action = 'delete'
+            else:
+                action = None
+            
+            if action:
+                nomination_id = request.POST.get('nomination_id')
+                nomination = get_object_or_404(Game, id=nomination_id)
+                if action == 'approve':
+                    nomination.nomination_status = 'Approved'
+                    nomination.save()
+                    messages.success(request, 'Game nomination approved.')
+                elif action == 'reject':
+                    nomination.nomination_status = 'Rejected'
+                    nomination.save()
+                    messages.success(request, 'Game nomination rejected.')
+                elif action == 'delete':
+                    nomination.delete()
+                    messages.success(request, 'Game nomination deleted.')
 
-            if action == 'approve':
-                nomination.nomination_status = 'Approved'
-                nomination.save()
-                messages.success(request, 'Game nomination approved.')
-            elif action == 'reject':
-                nomination.nomination_status = 'Rejected'
-                nomination.save()
-                messages.success(request, 'Game nomination rejected.')
-            elif action == 'delete':
-                nomination.delete()
-                messages.success(request, 'Game nomination deleted.')
+                return redirect('manage_event_dashboard_with_section', event_id=event.id, section='game_nominations')
 
-            return redirect('manage_event_dashboard_with_section', event_id=event.id, section='game_nominations')
+            elif 'nomination_settings' in request.POST:
+                nomination_settings = EventNominationSettingsForm(request.POST, instance=event)
+                if nomination_settings.is_valid():
+                    nomination_settings.save()
+                    messages.success(request, 'Event settings updated successfully.')
+                    return redirect('manage_event_dashboard_with_section', event_id=event.id, section='game_nominations')
+        
+        nominations = Game.objects.filter(event=event) 
+              
+        pending_nominations = Game.objects.filter(
+            event=event, 
+            nomination_status='Pending'
+        ).annotate(
+            vote_count=Count('vote', filter=Q(vote__event=event))
+        ).order_by('-vote_count')
 
-        pending_nominations = Game.objects.filter(event=event, nomination_status='Pending')
         approved_nominations = Game.objects.filter(event=event, nomination_status='Approved')
 
-        context.update({'pending_nominations': pending_nominations, 'approved_nominations': approved_nominations})
+        # Calculate vote counts for each game
+        vote_counts = {}
+        for nomination in nominations:
+            count = Vote.objects.filter(game=nomination, event=event).count()
+            vote_counts[nomination.id] = count
+
+        nomination_settings = EventNominationSettingsForm(instance=event)
+        
+        context.update({'pending_nominations': pending_nominations, 'approved_nominations': approved_nominations,'vote_counts': vote_counts, 'nomination_settings': nomination_settings})
 
 
     elif section == 'attendee_management':
