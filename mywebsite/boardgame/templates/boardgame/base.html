@@ -48,5 +48,12 @@
   <!-- Bootstrap JavaScript dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXlPILFhosVNubq7rA2F2U29S7P2x9HTy5ZQ1smXKp4ITN2kp1Rt9JOQpF7F" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhG0U2lKkC7CWKH4gMbOtvTzXj5x13eBbr60BXT7HfL8A7GmOL7OA1gHLmkb" crossorigin="anonymous"></script>
+    <!-- Initialize Bootstrap tooltips -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+          const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+      });
+  </script>
 </body>
 </html>

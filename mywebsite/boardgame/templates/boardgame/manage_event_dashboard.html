@@ -76,7 +76,7 @@
         <button type="submit" name="nomination_settings" class="btn btn-secondary btn-sm">Save Changes</button>
     </form>
 
-
+</div>
     <br />
     <h3>Pending Nominations</h3>
     <table class="table table-warning table-hover">
@@ -187,13 +187,5 @@
     <div class="text-center mt-4">
         <a href="{% url 'event_details' event.id %}" class="btn btn-primary">Back to Event</a>
     </div>
-
-    <!-- Initialize Bootstrap tooltips -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-        });
-    </script>
 
     {% endblock %}
