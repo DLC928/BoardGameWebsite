@@ -6,6 +6,19 @@
 <head>
     <h1>Create new group</h1>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&libraries=places"></script>
+    <style>
+        .scrollable-checkboxes {
+        max-height: 110px; 
+        width: 300px; 
+        overflow-y: auto; /* Enables vertical scrolling */
+        border: 1px solid #ddd; /* Boarder */
+        padding: 10px; /* Padding */
+    }
+
+        .form-check {
+        margin-bottom: 5px; /* Space between checkboxes */
+    }
+    </style>
 </head>
 
 <br/><br/>
@@ -41,16 +54,23 @@
         {{ form.group_image }}
      </div>
      <br/>
+     <!-- Categories Multi-Select Scrollable Box -->
      <div class="form-group">
-         <label for="{{ form.categories.id_for_label }}">{{ form.categories.label }}</label>
-         {{ form.categories }}
-     </div>
-     <br/>
-     <div class="form-group">
-         <label for="{{ form.tags.id_for_label }}">{{ form.tags.label }}</label>
-         {{ form.tags }}
-     </div>
-     <br/>
+        <label for="id_categories">{{ form.categories.label }}</label>
+        <div class="scrollable-checkboxes">
+            {{ form.categories }}
+        </div>
+    </div>
+    <br/>
+
+    <!-- Tags Multi-Select Scrollable Box -->
+    <div class="form-group">
+        <label for="id_tags">{{ form.tags.label }}</label>
+        <div class="scrollable-checkboxes">
+            {{ form.tags }}
+        </div>
+    </div>
+    <br/>
     <input type="submit" value="Submit" class="btn btn-secondary">
 </form>
 
