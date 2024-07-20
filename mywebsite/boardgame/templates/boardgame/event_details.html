@@ -97,7 +97,7 @@
         <ul class="nav nav-tabs" id="eventTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <a class="nav-link active" id="nominated-games-tab" data-bs-toggle="tab" href="#nominated-games"
-                    role="tab" aria-controls="nominated-games" aria-selected="true">Nominated Games</a>
+                    role="tab" aria-controls="nominated-games" aria-selected="true">Game Sign-Up</a>
             </li>
             <li class="nav-item" role="presentation">
                 <a class="nav-link" id="waitlisted-games-tab" data-bs-toggle="tab" href="#waitlisted-games" role="tab"
@@ -204,6 +204,47 @@
                     {% endfor %}
                 </div>
             </div>
+        </div>
+        <hr>
+        <h3>Game Nominations</h3>
+        <div class="row mt-4">
+            {% for item in nominations_with_slots %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>{{ item.nomination.name }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <b>Description:</b> {{ item.nomination.description|truncatewords:25|striptags|safe }}... <a
+                                href="{% url 'game_details' event.id item.nomination.id %}">See Details</a>
+                            <br /><br />
+                            <b>Difficulty:</b> {{ item.nomination.weight }} /5
+                            <br /><br />
+                            <b>Nominated by:</b> {{ item.nomination.nominator.username }}
+                            <br/> <br/>
+                            <a href="{% url 'game_details' event.id item.nomination.id %}" class="btn btn-secondary btn-sm">View
+                                Details</a>
+                        <div>
+                            {% if user.is_authenticated and is_attending %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
+                                <button type="submit" class="btn btn-primary btn-sm" name="sign_up">Vote</button>
+                                {% if item.nomination.nominator == user %}
+                                <button type="submit" class="btn btn-danger btn-sm" name="remove_nomination">Remove
+                                    Nomination</button>
+                                {% endif %}
+                            </form>
+                            {% else %}
+                            <p>You must join event to vote.</p>
+                            {% endif %}
+                        </div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
         <hr>
         <div class="row mt-4">

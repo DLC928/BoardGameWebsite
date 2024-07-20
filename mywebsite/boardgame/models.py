@@ -95,6 +95,10 @@ class Event(models.Model):
     event_image = models.ImageField(upload_to='event_images/', null=True, blank=True)
     categories = models.ManyToManyField(Category, related_name='events', blank=True)
     tags = models.ManyToManyField(Tag, related_name='events', blank=True)
+    nominations_open = models.BooleanField(default=True)
+    signups_open = models.BooleanField(default=False)
+    admin_only_nominations = models.BooleanField(default=False)
+    skip_nominations = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.title} by {self.group.name}"
 

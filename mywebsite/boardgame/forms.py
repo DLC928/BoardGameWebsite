@@ -22,13 +22,19 @@ class GroupForm(forms.ModelForm):
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = ['title', 'description', 'date_time','event_image','categories', 'tags']
+        fields = ['title', 'description', 'date_time','event_image','categories', 'tags',
+                  'nominations_open', 'signups_open', 'admin_only_nominations', 'skip_nominations']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'style': 'width: 50%;'}),
             'date_time': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'style': 'width: 50%;'}),
             'categories': forms.CheckboxSelectMultiple,
             'tags': forms.CheckboxSelectMultiple,
+            'nominations_open': forms.CheckboxInput(attrs={'class': 'form-check-input form-switch'}),
+            'signups_open': forms.CheckboxInput(attrs={'class': 'form-check-input form-switch'}),
+            'admin_only_nominations': forms.CheckboxInput(attrs={'class': 'form-check-input form-switch'}),
+            'skip_nominations': forms.CheckboxInput(attrs={'class': 'form-check-input form-switch'}),
+       
         }    
 
 
