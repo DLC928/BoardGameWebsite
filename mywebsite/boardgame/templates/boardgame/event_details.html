@@ -29,7 +29,9 @@
                         {% csrf_token %}
                         {% if is_attending %}
                         <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Event</button>
-                        <a href="{% url 'nominate_game' event.id %}" class="btn btn-secondary btn-sm">Nominate Game</a>
+                            {% if not event.admin_only_nominations or is_admin %}
+                            <a href="{% url 'nominate_game' event.id %}" class="btn btn-secondary btn-sm">Nominate Game</a>
+                            {% endif %}
                         {% else %}
                         <button type="submit" class="btn btn-secondary btn-sm" name="join">Join Event</button>
                         {% endif %}
@@ -93,6 +95,7 @@
                 </div>
             </div>
         </div>
+        {% if event.signups_open %}
         <hr>
         <ul class="nav nav-tabs" id="eventTabs" role="tablist">
             <li class="nav-item" role="presentation">
@@ -108,7 +111,7 @@
             <div class="tab-pane fade show active" id="nominated-games" role="tabpanel"
                 aria-labelledby="nominated-games-tab">
                 <div class="row mt-4">
-                    {% for item in nominations_with_slots %}
+                    {% for item in approved_nominations_with_slots %}
                     <div class="col-md-4 mb-3">
                         <div class="card">
                             <div class="card-header">
@@ -205,33 +208,41 @@
                 </div>
             </div>
         </div>
+        </hr>
+        {% endif %}
+
+        {% if event.nominations_open %}
         <hr>
         <h3>Game Nominations</h3>
         <div class="row mt-4">
-            {% for item in nominations_with_slots %}
+            {% for game in nominations %}
             <div class="col-md-4 mb-3">
                 <div class="card">
                     <div class="card-header">
-                        <h5>{{ item.nomination.name }}</h5>
+                        <h5>{{ game.name }}</h5>
                     </div>
                     <div class="card-body">
                         <p class="card-text">
-                            <b>Description:</b> {{ item.nomination.description|truncatewords:25|striptags|safe }}... <a
-                                href="{% url 'game_details' event.id item.nomination.id %}">See Details</a>
+                            <b>Description:</b> {{ game.description|truncatewords:25|striptags|safe }}... <a
+                                href="{% url 'game_details' event.id game.id %}">See Details</a>
                             <br /><br />
-                            <b>Difficulty:</b> {{ item.nomination.weight }} /5
+                            <b>Difficulty:</b> {{ game.weight }} /5
                             <br /><br />
-                            <b>Nominated by:</b> {{ item.nomination.nominator.username }}
+                            <b>Nominated by:</b> {{ game.nominator.username }}
                             <br/> <br/>
-                            <a href="{% url 'game_details' event.id item.nomination.id %}" class="btn btn-secondary btn-sm">View
+                            <a href="{% url 'game_details' event.id game.id %}" class="btn btn-secondary btn-sm">View
                                 Details</a>
                         <div>
                             {% if user.is_authenticated and is_attending %}
                             <form method="post">
                                 {% csrf_token %}
-                                <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
-                                <button type="submit" class="btn btn-primary btn-sm" name="sign_up">Vote</button>
-                                {% if item.nomination.nominator == user %}
+                                <input type="hidden" name="nomination_id" value="{{ game.id }}">
+                                {% if game.id in user_votes %}
+                                    <button type="submit" class="btn btn-danger btn-sm" name="remove_vote">Remove Vote</button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-primary btn-sm" name="vote">Vote</button>
+                                {% endif %}
+                                {% if game.nominator == user %}
                                 <button type="submit" class="btn btn-danger btn-sm" name="remove_nomination">Remove
                                     Nomination</button>
                                 {% endif %}
@@ -247,6 +258,8 @@
             {% endfor %}
         </div>
         <hr>
+        {% endif %}
+       
         <div class="row mt-4">
             <div class="col-md-4">
                 <div class="card">

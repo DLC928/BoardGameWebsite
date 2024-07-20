@@ -1,12 +1,10 @@
 from datetime import datetime
 from django.contrib import messages  
-
 from django.shortcuts import render, get_object_or_404, redirect
-from boardgame.models import User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile
+from boardgame.models import User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote
 from .forms import GroupForm, EventForm, EventLocationForm, GameDetailForm, UserProfileForm
 from .utils import fetch_place_details
 from django.db.models import Q
-from django.views.generic import TemplateView
 
 
 def home(request):
@@ -168,14 +166,17 @@ def event_details(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     attendees = event.attendees.all()
     nominations = Game.objects.filter(event=event)
+    approved_nominations = Game.objects.filter(event=event,nomination_status='Approved')
     
     is_attending = False
+    is_admin =False
     if request.user.is_authenticated:
         is_attending = attendees.filter(id=request.user.id).exists()
+        is_admin = GroupMembers.objects.filter(user=request.user, group=event.group, is_admin=True).exists()
 
-    nominations_with_slots = []
+    approved_nominations_with_slots = []
     waitlisted_games = []
-    for nomination in nominations:
+    for nomination in approved_nominations:
         signed_up_count = GameSignup.objects.filter(nomination=nomination).count()
         remaining_slots = nomination.max_players - signed_up_count
         players_needed = max(0, nomination.min_players - signed_up_count)
@@ -185,7 +186,7 @@ def event_details(request, event_id):
             is_signed_up = GameSignup.objects.filter(nomination=nomination, user=request.user).exists()
         
         if remaining_slots > 0:
-            nominations_with_slots.append({
+            approved_nominations_with_slots.append({
                 'nomination': nomination,
                 'remaining_slots': remaining_slots,
                 'is_signed_up': is_signed_up,
@@ -198,7 +199,7 @@ def event_details(request, event_id):
                 'remaining_slots': remaining_slots,
                 'is_signed_up': is_signed_up
             })
-
+            
     if request.method == 'POST':
         if 'join' in request.POST:
             if not is_attending:
@@ -242,20 +243,35 @@ def event_details(request, event_id):
             if nomination.nominator == request.user:
                 GameSignup.objects.filter(nomination=nomination).delete()
                 nomination.delete()
-        
+        elif 'vote' in request.POST:
+            nomination_id = request.POST.get('nomination_id')
+            nomination = get_object_or_404(Game, id=nomination_id)
+            if not Vote.objects.filter(user=request.user, game=nomination, event=event).exists():
+                Vote.objects.create(user=request.user, game=nomination, event=event)
+        elif 'remove_vote' in request.POST:
+            nomination_id = request.POST.get('nomination_id')
+            nomination = get_object_or_404(Game, id=nomination_id)
+            if Vote.objects.filter(user=request.user, game=nomination, event=event).exists():    
+                Vote.objects.filter(user=request.user, game=nomination, event=event).delete()
         return redirect('event_details', event_id=event_id)
-
+    
+    vote_counts = {nomination.id: Vote.objects.filter(game=nomination).count() for nomination in nominations}
+    user_votes = Vote.objects.filter(user=request.user, event=event).values_list('game_id', flat=True)
     event_location = EventLocation.objects.filter(event=event).first()
 
     context = {
         'event': event,
         'event_location': event_location,
         'is_attending': is_attending,
+        'is_admin' : is_admin,
         'nominations': nominations,
         'waitlisted_games': waitlisted_games,
         'attendees': attendees,
-        'nominations_with_slots': nominations_with_slots,
+        'approved_nominations_with_slots': approved_nominations_with_slots,
+        'vote_counts':vote_counts,
+        'user_votes': user_votes
     }
+    print("Context:", context)  # Add this for debugging
     return render(request, 'boardgame/event_details.html', context)
 
 

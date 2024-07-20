@@ -196,4 +196,11 @@ class GameComment(models.Model):
     def __str__(self):
         return f"Comment by {self.user.username} on {self.nominated_game.name}"    
 
+class Vote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user.username} voted for {self.game.name} in event {self.event.id}"
 
