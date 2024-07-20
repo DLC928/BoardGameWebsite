@@ -9,6 +9,17 @@
         .tooltip-inner {
             text-align: left;
         }
+        .scrollable-checkboxes {
+        max-height: 110px; 
+        width: 300px; 
+        overflow-y: auto; /* Enables vertical scrolling */
+        border: 1px solid #ddd; /* Boarder */
+        padding: 10px; /* Padding */
+    }
+
+    .form-check {
+        margin-bottom: 5px; /* Space between checkboxes */
+    }
     </style>
 
 </head>
@@ -22,18 +33,23 @@
     {{ form.event_image.label_tag }} {{ form.event_image }} <br/>
     </div>
     <br/>
-   <!-- Categories and Tags with Multi-Select -->
-   <div class="form-group">
-    {{ form.categories.label_tag }}
-    {{ form.categories }}
-    </div>
-    <br/>
+    <!-- Categories Multi-Select Scrollable Box -->
     <div class="form-group">
-        {{ form.tags.label_tag }}
-        {{ form.tags }}
+        <label for="id_categories">{{ form.categories.label }}</label>
+        <div class="scrollable-checkboxes">
+            {{ form.categories }}
+        </div>
     </div>
     <br/>
 
+    <!-- Tags Multi-Select Scrollable Box -->
+    <div class="form-group">
+        <label for="id_tags">{{ form.tags.label }}</label>
+        <div class="scrollable-checkboxes">
+            {{ form.tags }}
+        </div>
+    </div>
+    <br/>
      <!-- Nomination Settings -->
      <div class="section">
         <h3>Game Nomination Settings</h3>
@@ -61,7 +77,6 @@
         <br />
     </div>
 
-    <br />
     <!-- Event Location input with Google Places Autocomplete -->
     <div class="form-group">
         <label for="event-location-input">Event Location</label>
