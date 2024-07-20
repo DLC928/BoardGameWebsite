@@ -78,13 +78,13 @@
                     <td>maximum {{ nomination.max_playtime }} mins</td>
                     <td>{{ vote_counts|get_item:nomination.id }}</td>
                     <td>
-                    <form method="post" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                        <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                        <button type="submit" name="action" value="delete" class="btn btn-secondary btn-sm">Delete</button>
-                    </form>
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                            <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
+                            <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
+                            <button type="submit" name="action" value="delete" class="btn btn-secondary btn-sm">Delete</button>
+                        </form>
                     </td>
                 </tr>
                 {% empty %}

@@ -624,18 +624,12 @@ def manage_event_dashboard(request, event_id, section=None):
         
     elif section == 'game_nominations':
         if request.method == 'POST':
-            if 'approve_nomination' in request.POST:
-                action = 'approve'
-            elif 'reject_nomination' in request.POST:
-                action = 'reject'
-            elif 'delete_nomination' in request.POST:
-                action = 'delete'
-            else:
-                action = None
-            
-            if action:
-                nomination_id = request.POST.get('nomination_id')
+            action = request.POST.get('action')
+            nomination_id = request.POST.get('nomination_id')
+
+            if action and nomination_id:
                 nomination = get_object_or_404(Game, id=nomination_id)
+
                 if action == 'approve':
                     nomination.nomination_status = 'Approved'
                     nomination.save()
@@ -656,7 +650,7 @@ def manage_event_dashboard(request, event_id, section=None):
                     nomination_settings.save()
                     messages.success(request, 'Event settings updated successfully.')
                     return redirect('manage_event_dashboard_with_section', event_id=event.id, section='game_nominations')
-        
+
         nominations = Game.objects.filter(event=event) 
               
         pending_nominations = Game.objects.filter(
