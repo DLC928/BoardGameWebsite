@@ -15,7 +15,6 @@ urlpatterns = [
     path('event/<int:event_id>/game_details/<int:game_id>/', views.game_details, name='game_details'),
     path('profile/', views.user_profile, name='user_profile'),
     path('profile-setup/', views.profile_setup, name='profile_setup'),
-    path('edit-event/<int:event_id>/', views.edit_event, name='edit_event'),
     path('groups/', views.groups, name='groups'),
     path('events/', views.events, name='events'),
     path('search/', views.search, name='search'),

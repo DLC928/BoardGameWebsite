@@ -92,9 +92,6 @@
                         </p>
                         <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event
                             Details</a>
-                        {% if is_admin %}
-                        <a href="{% url 'edit_event' event.id %}" class="btn btn-secondary btn-sm">Edit Event</a>
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -116,9 +113,6 @@
                         </p>
                         <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event
                             Details</a>
-                        {% if is_admin %}
-                        <a href="{% url 'edit_event' event.id %}" class="btn btn-secondary btn-sm">Edit Event</a>
-                        {% endif %}
                     </div>
                 </div>
             </div>

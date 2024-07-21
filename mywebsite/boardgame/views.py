@@ -537,19 +537,6 @@ def search(request):
     
     return render(request, 'boardgame/search.html', {})
 
-
-
-def edit_event(request, event_id):
-    event = get_object_or_404(Event, pk=event_id)
-    form = EventForm(request.POST or None, instance=event)
-    
-    if form.is_valid():
-        form.save()
-        return redirect('event_details', event_id=event_id)
-
-    return render(request, 'boardgame/edit_event.html', {'form': form, 'event': event})
-
-
 def manage_group_dashboard(request, group_slug, section=None):
     group = get_object_or_404(Group, slug=group_slug)
     section = section or request.GET.get('section', 'group_setup')
