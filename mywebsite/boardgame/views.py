@@ -540,7 +540,11 @@ def search(request):
 def manage_group_dashboard(request, group_slug, section=None):
     group = get_object_or_404(Group, slug=group_slug)
     section = section or request.GET.get('section', 'group_setup')
-
+    # Fetch the group location
+    group_location = None
+    if GroupLocation.objects.filter(group=group).exists():
+        group_location = GroupLocation.objects.get(group=group)
+    
     context = {'group': group, 'section': section}
     
     if section == 'group_setup':
@@ -548,12 +552,28 @@ def manage_group_dashboard(request, group_slug, section=None):
             form = GroupForm(request.POST, instance=group)
             if form.is_valid():
                 form.save()
+                # Fetch place details using utility function if place_id is provided
+                place_id = request.POST.get('place_id')
+                if place_id:
+                    place_details = fetch_place_details(place_id)
+                    if place_details:
+                        if group_location is None:
+                            group_location = GroupLocation(group=group)
+                        group_location.city = place_details.get('city', '')
+                        group_location.sublocality = place_details.get('sublocality', '')
+                        group_location.state = place_details.get('state', '')
+                        group_location.postcode = place_details.get('postcode', '')
+                        group_location.country = place_details.get('country', '')
+                        group_location.latitude = place_details.get('latitude', None)
+                        group_location.longitude = place_details.get('longitude', None)
+                        group_location.save()
+
                 messages.success(request, 'Group updated successfully.')
                 return redirect('manage_group_dashboard_with_section', group_slug=group.slug, section='group_setup')
         else:
             form = GroupForm(instance=group)
-        
-        context.update({'form': form})
+            
+        context.update({'form': form,'current_location': group_location})
 
     elif section == 'event_management':
         if request.method == 'POST':

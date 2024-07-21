@@ -53,47 +53,77 @@
 </nav>
 <br/>
 {% if section == 'group_setup' %}
-<!-- Group Setup -->
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
-            {{ form.name }}
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+    </div>
+    <br/>
+    <div class="form-group">
+        <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+        {{ form.description }}
+    </div>
+    <br/>
+    <div class="form-group">
+        <label for="{{ form.group_privacy.id_for_label }}">{{ form.group_privacy.label }}</label>
+        {{ form.group_privacy }}
+    </div>
+    <br/>
+    <div class="form-group">
+        <label for="{{ form.group_image.id_for_label }}">{{ form.group_image.label }}</label>
+        {{ form.group_image }}
+     </div>
+     <br/>
+     <!-- Categories Multi-Select Scrollable Box -->
+     <div class="form-group">
+        <label for="id_categories">{{ form.categories.label }}</label>
+        <div class="scrollable-checkboxes">
+            {{ form.categories }}
         </div>
-        <br/>
-        <div class="form-group">
-            <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
-            {{ form.description }}
+    </div>
+    <br/>
+    <!-- Tags Multi-Select Scrollable Box -->
+    <div class="form-group">
+        <label for="id_tags">{{ form.tags.label }}</label>
+        <div class="scrollable-checkboxes">
+            {{ form.tags }}
         </div>
-        <br/>
-        <div class="form-group">
-            <label for="{{ form.group_privacy.id_for_label }}">{{ form.group_privacy.label }}</label>
-            {{ form.group_privacy }}
-        </div>
-        <br/>
-        <div class="form-group">
-            <label for="{{ form.group_image.id_for_label }}">{{ form.group_image.label }}</label>
-            {{ form.group_image }}
-         </div>
-         <br/>
-         <!-- Categories Multi-Select Scrollable Box -->
-         <div class="form-group">
-            <label for="id_categories">{{ form.categories.label }}</label>
-            <div class="scrollable-checkboxes">
-                {{ form.categories }}
-            </div>
-        </div>
-        <br/>
-        <!-- Tags Multi-Select Scrollable Box -->
-        <div class="form-group">
-            <label for="id_tags">{{ form.tags.label }}</label>
-            <div class="scrollable-checkboxes">
-                {{ form.tags }}
-            </div>
-        </div>
-        <br/>
-        <button type="submit">Save Changes</button>
-    </form>
+    </div>
+    <br/>
+    <!-- Input field for location with autocomplete -->
+    <div class="form-group">
+        <label for="group-location">Group Location</label>
+        <input type="text" id="group-location" class="form-control" style="width: 50%;" name="location_city" value="{{ current_location.city }}, {{ current_location.state }}, {{ current_location.country }}">
+        <!-- Hidden input to store place ID -->
+        <input type="hidden" id="place-id" name="place_id">
+    </div>
+    <br/>
+    <button class="btn btn-primary btn-sm" type="submit">Save Changes</button>
+</form>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&libraries=places"></script>
+<script>
+    function initAutocomplete() {
+        var input = document.getElementById('group-location');
+        var autocomplete = new google.maps.places.Autocomplete(input, {
+            types: ['(regions)'],
+            fields: ['place_id', 'formatted_address', 'address_components', 'geometry']
+        });
+
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                return;
+            }
+
+            // Set hidden input value to store place ID
+            document.getElementById('place-id').value = place.place_id;
+        });
+    }
+    google.maps.event.addDomListener(window, 'load', initAutocomplete);
+</script>
+
 
     {% elif section == 'member_management' %}
     <!-- Member Management -->
