@@ -555,6 +555,15 @@ def manage_group_dashboard(request, group_slug, section=None):
         context.update({'form': form})
 
     elif section == 'event_management':
+        if request.method == 'POST':
+            action = request.POST.get('action')
+            event_id = request.POST.get('event_id')
+            
+            if action == 'delete_Event':
+                event = get_object_or_404(Event, id=event_id)
+                event.delete()
+                messages.success(request, 'Group successfully deleted.')
+                return redirect('manage_group_dashboard_with_section', group_slug=group.slug, section='event_management')
         now = datetime.now()
         upcoming_events = Event.objects.filter(group=group, date_time__gte=now).order_by('date_time')
         past_events = Event.objects.filter(group=group, date_time__lt=now).order_by('-date_time')

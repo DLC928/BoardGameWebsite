@@ -25,9 +25,9 @@
             color: #000000; /* Info button text color */
         }
         .nav-pills .nav-link.active {
-            background-color: #0a9ab9 !important; /* Even darker background for active state */
-            border-color: #098da8 !important; /* Even darker border color for active state */
-            color: #000000 !important; /* Info button text color */
+            background-color: #234147 !important; /* Even darker background for active state */
+            border-color: #064a57 !important; /* Even darker border color for active state */
+            color: #ffffff !important; /* Info button text color */
         }
     </style>
 </head>
@@ -183,21 +183,131 @@
     </div>
 {% elif section == 'event_management' %}
     <!-- Event Management -->
-    <ul>
-        {% for event in upcoming_events %}
-            <li>{{ event.title }} <a href="{% url 'manage_event_dashboard' event.id %}">Edit Event</a></li>
-        {% endfor %}
-    </ul>
-    <h3>Past Events</h3>
-    <ul>
-        {% for event in past_events %}
-            <li>{{ event.title }}</li>
-        {% endfor %}
-    </ul>
+    <h2>Upcoming Events</h2>
+    
+    <!-- Button to create a new event -->
+    <a href="{% url 'create_event' group.slug %}" class="btn btn-primary btn-sm mb-2">Create Event</a>
+    
+    <br>
+    <table class="table table-bordered table-hover" style="border-collapse: collapse; width: 80%;">
+        <thead>
+            <tr style="background-color: #f8f9fa; color: #495057; font-weight: bold;">
+                <th style="width: 200px; text-align: left; padding: 10px;">Title</th>
+                <th style="width: 150px; text-align: left; padding: 10px;">Date/Time</th>
+                <th style="width: 100px; text-align: center; padding: 10px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in upcoming_events %}
+            <tr>
+                <td style="padding: 10px;"><b>{{ event.title }}</b></td>
+                <td style="padding: 10px;">{{ event.date_time }}</td>
+                <td style="text-align: center; padding: 10px;">
+                    <a href="{% url 'manage_event_dashboard' event.id %}" class="btn btn-info btn-sm" style="background-color: #007bff; color: #ffffff; border: none; text-decoration: none; padding: 5px 10px; border-radius: 4px;">Edit</a>
+                    
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ event.id }}">
+                        Delete 
+                    </button>
+                    
+                    <!-- Modal -->
+                    <div class="modal fade" id="deleteModal{{ event.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ event.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="deleteModalLabel{{ event.id }}">Delete Warning</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete the event "{{ event.title }}"? This step cannot be undone.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                    <form method="post" action="" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_Event">
+                                        <input type="hidden" name="event_id" value="{{ event.id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm" style="background-color: #dc3545; color: #ffffff; border: none; padding: 5px 10px; border-radius: 4px;">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center; padding: 10px;">No upcoming events.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        
+        
+    </table>
+
+    <h2>Past Events</h2>
+    <table class="table table-bordered table-hover" style="border-collapse: collapse; width: 80%;">
+        <thead>
+            <tr style="background-color: #f8f9fa; color: #495057; font-weight: bold;">
+                <th style="width: 200px; text-align: left; padding: 10px;">Title</th>
+                <th style="width: 150px; text-align: left; padding: 10px;">Date/Time</th>
+                <th style="width: 100px; text-align: center; padding: 10px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in past_events %}
+            <tr>
+                <td style="padding: 10px;"><b>{{ event.title }}</b></td>
+                <td style="padding: 10px;">{{ event.date_time }}</td>
+                <td style="text-align: center; padding: 10px;">
+                    <a href="{% url 'manage_event_dashboard' event.id %}" class="btn btn-info btn-sm" style="background-color: #007bff; color: #ffffff; border: none; text-decoration: none; padding: 5px 10px; border-radius: 4px;">Edit</a>
+                    
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ event.id }}">
+                        Delete 
+                    </button>
+                    
+                    <!-- Modal -->
+                    <div class="modal fade" id="deleteModal{{ event.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ event.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="deleteModalLabel{{ event.id }}">Delete Warning</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete the event "{{ event.title }}"? This step cannot be undone.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                    <form method="post" action="" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_Event">
+                                        <input type="hidden" name="event_id" value="{{ event.id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm" style="background-color: #dc3545; color: #ffffff; border: none; padding: 5px 10px; border-radius: 4px;">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
 
 {% elif section == 'needs_review' %}
     <!-- Needs Review -->    
     <!-- Needs review functionality -->
 
 {% endif %}
+    <!-- Back to Group Button -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">Back to Group</a>
+        </div>
+    </div>
 {% endblock %}
+
+

@@ -244,9 +244,13 @@
     <!-- Needs review functionality -->
 
     {% endif %}
-    <!-- Back to Event Button -->
+    <!-- Back to Event and Group Buttons -->
     <div class="text-center mt-4">
-        <a href="{% url 'event_details' event.id %}" class="btn btn-primary">Back to Event</a>
+        <a href="{% url 'group_profile' event.group.slug %}" class="btn btn-primary btn-sm">Back to Group</a>
+        <a href="{% url 'event_details' event.id %}" class="btn btn-primary btn-sm">Back to Event</a>
     </div>
 
     {% endblock %}
+
+
+   
