@@ -171,10 +171,13 @@ def event_details(request, event_id):
     is_attending = False
     is_admin =False
     is_moderator =False
+    has_nomination = False  # Flag to check if the user has already nominated
+
     if request.user.is_authenticated:
         is_attending = attendees.filter(id=request.user.id).exists()
         is_admin = GroupMembers.objects.filter(user=request.user, group=event.group, is_admin=True).exists()
         is_moderator = GroupMembers.objects.filter(user=request.user, group=event.group, is_moderator=True).exists()
+        has_nomination = Game.objects.filter(event=event, nominator=request.user).exists()
 
     approved_nominations_with_slots = []
     waitlisted_games = []
@@ -249,7 +252,8 @@ def event_details(request, event_id):
             nomination_id = request.POST.get('nomination_id')
             nomination = get_object_or_404(Game, id=nomination_id)
             if not Vote.objects.filter(user=request.user, game=nomination, event=event).exists():
-                Vote.objects.create(user=request.user, game=nomination, event=event)
+                if Vote.objects.filter(user=request.user, event=event).count() < 3:
+                    Vote.objects.create(user=request.user, game=nomination, event=event)
         elif 'remove_vote' in request.POST:
             nomination_id = request.POST.get('nomination_id')
             nomination = get_object_or_404(Game, id=nomination_id)
@@ -257,9 +261,15 @@ def event_details(request, event_id):
                 Vote.objects.filter(user=request.user, game=nomination, event=event).delete()
         return redirect('event_details', event_id=event_id)
     
-    vote_counts = {nomination.id: Vote.objects.filter(game=nomination).count() for nomination in nominations}
+    # Calculate vote counts for each game
+    vote_counts = {}
+    for nomination in nominations:
+        count = Vote.objects.filter(game=nomination, event=event).count()
+        vote_counts[nomination.id] = count
+
     user_votes = Vote.objects.filter(user=request.user, event=event).values_list('game_id', flat=True)
     event_location = EventLocation.objects.filter(event=event).first()
+    total_user_votes = Vote.objects.filter(user=request.user, event=event).count()
 
     context = {
         'event': event,
@@ -272,7 +282,9 @@ def event_details(request, event_id):
         'attendees': attendees,
         'approved_nominations_with_slots': approved_nominations_with_slots,
         'vote_counts':vote_counts,
-        'user_votes': user_votes
+        'user_votes': user_votes,
+        'total_user_votes':total_user_votes,
+        'has_nomination':has_nomination
     }
 
     return render(request, 'boardgame/event_details.html', context)

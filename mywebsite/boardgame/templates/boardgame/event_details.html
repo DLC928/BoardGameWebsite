@@ -1,5 +1,6 @@
 {% extends 'boardgame/base.html' %}
 {% load static %}
+{% load custom_filters %}
 {% block content %}
 
 <head>
@@ -29,7 +30,7 @@
                         {% csrf_token %}
                         {% if is_attending %}
                         <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Event</button>
-                            {% if not event.admin_only_nominations or is_admin %}
+                        {% if not has_nomination%}
 
                             <!-- Button trigger modal -->
                             <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
@@ -54,15 +55,6 @@
                                 </div>
                                 </div>
                             </div>
-  
-
-
-
-
-
-
-
-                            
                             {% endif %}
                         {% else %}
                         <button type="submit" class="btn btn-secondary btn-sm" name="join">Join Event</button>
@@ -248,7 +240,8 @@
 
         {% if event.nominations_open %}
         <hr>
-        <h3>Game Nominations</h3>
+        <h3>Game Nominations - <span style="color: #28a745;">Vote for your top 3 favourites!</span></h3>
+
         <div class="row mt-4">
             {% for game in nominations %}
             <div class="col-md-4 mb-3">
@@ -264,7 +257,9 @@
                             <b>Difficulty:</b> {{ game.weight }} /5
                             <br /><br />
                             <b>Nominated by:</b> {{ game.nominator.username }}
-                            <br/> <br/>
+                            <br/> <br/> 
+                            <b>Vote Count:</b> {{ vote_counts|get_item:game.id }}
+                            <br/> <br/> 
                             <a href="{% url 'game_details' event.id game.id %}" class="btn btn-secondary btn-sm">View
                                 Details</a>
                         <div>
@@ -275,11 +270,12 @@
                                 {% if game.id in user_votes %}
                                     <button type="submit" class="btn btn-danger btn-sm" name="remove_vote">Remove Vote</button>
                                 {% else %}
-                                    <button type="submit" class="btn btn-primary btn-sm" name="vote">Vote</button>
+                                    {% if total_user_votes < 3 %}
+                                        <button type="submit" class="btn btn-primary btn-sm" name="vote">Vote</button>
+                                    {% endif %}
                                 {% endif %}
                                 {% if game.nominator == user %}
-                                <button type="submit" class="btn btn-danger btn-sm" name="remove_nomination">Remove
-                                    Nomination</button>
+                                <button type="submit" class="btn btn-danger btn-sm" name="remove_nomination">Remove Nomination</button>
                                 {% endif %}
                             </form>
                             {% else %}
