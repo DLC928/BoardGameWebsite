@@ -684,6 +684,7 @@ def manage_event_dashboard(request, event_id, section=None):
         ).order_by('-vote_count')
 
         approved_nominations = Game.objects.filter(event=event, nomination_status='Approved')
+        rejected_nominations = Game.objects.filter(event=event, nomination_status='Rejected')
 
         # Calculate vote counts for each game
         vote_counts = {}
@@ -693,7 +694,8 @@ def manage_event_dashboard(request, event_id, section=None):
 
         nomination_settings = EventNominationSettingsForm(instance=event)
         
-        context.update({'pending_nominations': pending_nominations, 'approved_nominations': approved_nominations,'vote_counts': vote_counts, 'nomination_settings': nomination_settings})
+        context.update({'pending_nominations': pending_nominations, 'approved_nominations': approved_nominations,
+                        'vote_counts': vote_counts, 'nomination_settings': nomination_settings,'rejected_nominations':rejected_nominations})
 
 
     elif section == 'attendee_management':

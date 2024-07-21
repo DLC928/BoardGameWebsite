@@ -236,7 +236,47 @@
             {% endfor %}
         </tbody>
     </table>
-
+    {% if rejected_nominations %}
+    <h3>Rejected Nominations</h3>
+    <table class="table table-danger table-hover">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Game Name</th>
+                <th scope="col">Nominator</th>
+                <th scope="col">Difficulty</th>
+                <th scope="col">Player Count</th>
+                <th scope="col">Play Time</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nomination in rejected_nominations %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ nomination.name }}</td>
+                <td>{{ nomination.nominator }}</td>
+                <td>{{ nomination.weight }}</td>
+                <td>{{ nomination.min_players }} - {{ nomination.max_players }}</td>
+                <td>maximum {{ nomination.max_playtime }} mins</td>
+                <td>
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                        <button type="submit" name="action" value="approve" class="btn btn-danger btn-sm">Approve</button>
+                        <button type="submit" name="action" value="delete"
+                            class="btn btn-secondary btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No rejected nominations.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
     {% elif section == 'attendee_management' %}
     <h2>Attendee Management</h2>
     
