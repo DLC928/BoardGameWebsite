@@ -538,11 +538,30 @@ def edit_event(request, event_id):
 
 def manage_group_dashboard(request, group_slug, section=None):
     group = get_object_or_404(Group, slug=group_slug)
-    section = section or request.GET.get('section', 'member_management')
+    section = section or request.GET.get('section', 'group_setup')
 
     context = {'group': group, 'section': section}
+    
+    if section == 'group_setup':
+        if request.method == 'POST':
+            form = GroupForm(request.POST, instance=group)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Group updated successfully.')
+                return redirect('manage_group_dashboard_with_section', group_slug=group.slug, section='group_setup')
+        else:
+            form = GroupForm(instance=group)
+        
+        context.update({'form': form})
 
-    if section == 'member_management':
+    elif section == 'event_management':
+        now = datetime.now()
+        upcoming_events = Event.objects.filter(group=group, date_time__gte=now).order_by('date_time')
+        past_events = Event.objects.filter(group=group, date_time__lt=now).order_by('-date_time')
+        
+        context.update({'upcoming_events': upcoming_events, 'past_events': past_events})
+          
+    elif section == 'member_management':
         if request.method == 'POST':
             action = request.POST.get('action')
             user_id = request.POST.get('user_id')
@@ -576,30 +595,11 @@ def manage_group_dashboard(request, group_slug, section=None):
         moderators = GroupMembers.objects.filter(group=group, is_moderator=True)
         users = GroupMembers.objects.filter(group=group, is_admin=False, is_moderator=False)
         context.update({'admins': admins, 'moderators': moderators, 'users': users})
-
-    elif section == 'event_management':
-        now = datetime.now()
-        upcoming_events = Event.objects.filter(group=group, date_time__gte=now).order_by('date_time')
-        past_events = Event.objects.filter(group=group, date_time__lt=now).order_by('-date_time')
-        
-        context.update({'upcoming_events': upcoming_events, 'past_events': past_events})
-
+    
     elif section == 'needs_review':
         pass
         # Will setup later 
-        
-    elif section == 'group_setup':
-        if request.method == 'POST':
-            form = GroupForm(request.POST, instance=group)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Group updated successfully.')
-                return redirect('manage_group_dashboard_with_section', group_slug=group.slug, section='group_setup')
-        else:
-            form = GroupForm(instance=group)
-        
-        context.update({'form': form})
-
+      
     return render(request, 'boardgame/manage_group_dashboard.html', context)
 
 

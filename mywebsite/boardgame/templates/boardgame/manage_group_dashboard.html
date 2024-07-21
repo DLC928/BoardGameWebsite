@@ -2,84 +2,187 @@
 {% load static %}
 
 {% block content %}
-<h1>Group Dashboard for {{ group.name }}</h1>
+<head>
+    <h1>Group Dashboard for {{ group.name }}</h1>
+    <style>
+        .scrollable-checkboxes {
+        max-height: 110px; 
+        width: 300px; 
+        overflow-y: auto; /* Enables vertical scrolling */
+        border: 1px solid #ddd; /* Boarder */
+        padding: 10px; /* Padding */
+        }
+        .form-check {
+            margin-bottom: 5px; /* Space between checkboxes */
+        }
+        .nav-pills .nav-link {
+            background-color: #0dcaf0; /* Bootstrap 5 info button background color */
+            color: #000000; /* Bootstrap 5 info button text color */
+            border: 1px solid #0dcaf0; /* Bootstrap 5 info button border color */
+        }
+        .nav-pills .nav-link:hover {
+            background-color: #0bb3d9; /* Darker info button background color */
+            color: #000000; /* Info button text color */
+        }
+        .nav-pills .nav-link.active {
+            background-color: #0a9ab9 !important; /* Even darker background for active state */
+            border-color: #098da8 !important; /* Even darker border color for active state */
+            color: #000000 !important; /* Info button text color */
+        }
+    </style>
+</head>
 <nav>
-    <ul>
-        <li><a href="{% url 'manage_group_dashboard_with_section' group.slug 'group_setup' %}">Group Setup</a></li>
-        <li><a href="{% url 'manage_group_dashboard_with_section' group.slug 'member_management' %}">Member Management</a></li>
-        <li><a href="{% url 'manage_group_dashboard_with_section' group.slug 'needs_review' %}">Needs Review</a></li>
-        <li><a href="{% url 'manage_group_dashboard_with_section' group.slug 'event_management' %}">Event Management</a></li>
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="btn btn-info btn-sm me-2 nav-link {% if section == 'group_setup' %}active{% endif %}"
+                href="{% url 'manage_group_dashboard_with_section' group.slug 'group_setup' %}">Group Setup</a>
+        </li>
+        <li class="nav-item">
+            <a class="btn btn-info btn-sm me-2 nav-link {% if section == 'event_management' %}active{% endif %}"
+                href="{% url 'manage_group_dashboard_with_section' group.slug 'event_management' %}">Event Management</a>
+        </li>
+        <li class="nav-item">
+            <a class="btn btn-info btn-sm me-2 nav-link {% if section == 'member_management' %}active{% endif %}"
+                href="{% url 'manage_group_dashboard_with_section' group.slug 'member_management' %}">Member Management</a>
+        </li>
+        <li class="nav-item">
+            <a class="btn btn-info btn-sm me-2 nav-link {% if section == 'needs_review' %}active{% endif %}"
+                href="{% url 'manage_group_dashboard_with_section' group.slug 'needs_review' %}">Needs Review</a>
+        </li>
     </ul>
 </nav>
-
+<br/>
 {% if section == 'group_setup' %}
-    <h2>Group Setup</h2>
+<!-- Group Setup -->
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        <div class="form-group">
+            <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+            {{ form.name }}
+        </div>
+        <br/>
+        <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+            {{ form.description }}
+        </div>
+        <br/>
+        <div class="form-group">
+            <label for="{{ form.group_privacy.id_for_label }}">{{ form.group_privacy.label }}</label>
+            {{ form.group_privacy }}
+        </div>
+        <br/>
+        <div class="form-group">
+            <label for="{{ form.group_image.id_for_label }}">{{ form.group_image.label }}</label>
+            {{ form.group_image }}
+         </div>
+         <br/>
+         <!-- Categories Multi-Select Scrollable Box -->
+         <div class="form-group">
+            <label for="id_categories">{{ form.categories.label }}</label>
+            <div class="scrollable-checkboxes">
+                {{ form.categories }}
+            </div>
+        </div>
+        <br/>
+        <!-- Tags Multi-Select Scrollable Box -->
+        <div class="form-group">
+            <label for="id_tags">{{ form.tags.label }}</label>
+            <div class="scrollable-checkboxes">
+                {{ form.tags }}
+            </div>
+        </div>
+        <br/>
         <button type="submit">Save Changes</button>
     </form>
 
-{% elif section == 'member_management' %}
-    <h2>Member Management</h2>
+    {% elif section == 'member_management' %}
+    <!-- Member Management -->
+    <br/>
     <div class="row">
         <div class="col-md-4">
             <h3>Current Admins</h3>
-            <ul class="list-group">
-                {% for admin in admins %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ admin.user.username }}
-                    <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management">
-                        {% csrf_token %}
-                        <input type="hidden" name="user_id" value="{{ admin.user.id }}">
-                        <button type="submit" name="action" value="remove_admin" class="btn btn-danger btn-sm">Remove</button>
-                    </form>
-                </li>
-                {% endfor %}
-            </ul>
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for admin in admins %}
+                    <tr>
+                        <td>{{ admin.user.username }}</td>
+                        <td>
+                            <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ admin.user.id }}">
+                                <button type="submit" name="action" value="remove_admin" class="btn btn-danger btn-sm">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
         <div class="col-md-4">
             <h3>Current Moderators</h3>
-            <ul class="list-group">
-                {% for mod in moderators %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ mod.user.username }}
-                    <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management">
-                        {% csrf_token %}
-                        <input type="hidden" name="user_id" value="{{ mod.user.id }}">
-                        <button type="submit" name="action" value="remove_mod" class="btn btn-danger btn-sm">Remove</button>
-                    </form>
-                </li>
-                {% endfor %}
-            </ul>
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mod in moderators %}
+                    <tr>
+                        <td>{{ mod.user.username }}</td>
+                        <td>
+                            <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ mod.user.id }}">
+                                <button type="submit" name="action" value="remove_mod" class="btn btn-danger btn-sm">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
         <div class="col-md-4">
             <h3>Regular Users</h3>
-            <ul class="list-group">
-                {% for user in users %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ user.user.username }}
-                    <div>
-                        <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management" class="d-inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="user_id" value="{{ user.user.id }}">
-                            <input type="hidden" name="group_id" value="{{ user.group.id }}">
-                            <button type="submit" name="action" value="set_admin" class="btn btn-success btn-sm">Set Admin</button>
-                        </form>
-                        <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management" class="d-inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="user_id" value="{{ user.user.id }}">
-                            <button type="submit" name="action" value="set_mod" class="btn btn-primary btn-sm">Set Moderator</button>
-                        </form>
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.user.username }}</td>
+                        <td>
+                            <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.user.id }}">
+                                <input type="hidden" name="group_id" value="{{ user.group.id }}">
+                                <button type="submit" name="action" value="set_admin" class="btn btn-success btn-sm">Set Admin</button>
+                            </form>
+                            <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.user.id }}">
+                                <button type="submit" name="action" value="set_mod" class="btn btn-primary btn-sm">Set Moderator</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-
 {% elif section == 'event_management' %}
-    <h2>Event Management</h2>
+    <!-- Event Management -->
     <ul>
         {% for event in upcoming_events %}
             <li>{{ event.title }} <a href="{% url 'manage_event_dashboard' event.id %}">Edit Event</a></li>
@@ -93,7 +196,7 @@
     </ul>
 
 {% elif section == 'needs_review' %}
-    <h2>Needs Review</h2>
+    <!-- Needs Review -->    
     <!-- Needs review functionality -->
 
 {% endif %}
