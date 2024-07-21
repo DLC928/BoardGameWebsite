@@ -182,8 +182,34 @@
                         <button type="submit" name="action" value="approve"
                             class="btn btn-success btn-sm">Approve</button>
                         <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                        <button type="submit" name="action" value="delete"
-                            class="btn btn-secondary btn-sm">Delete</button>
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ nomination.id }}">
+                            Delete 
+                        </button>
+                        
+                        <!-- Modal -->
+                        <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be undone.
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                        <form method="post" action="" style="display: inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" style="background-color: #dc3545; color: #ffffff; border: none; padding: 5px 10px; border-radius: 4px;">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </td>
             </tr>
@@ -224,8 +250,34 @@
                         {% csrf_token %}
                         <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
                         <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                        <button type="submit" name="action" value="delete"
-                            class="btn btn-secondary btn-sm">Delete</button>
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ nomination.id }}">
+                            Delete 
+                        </button>
+                        
+                        <!-- Modal -->
+                        <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be undone.
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                        <form method="post" action="" style="display: inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" style="background-color: #dc3545; color: #ffffff; border: none; padding: 5px 10px; border-radius: 4px;">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </td>
             </tr>
@@ -264,8 +316,34 @@
                         {% csrf_token %}
                         <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
                         <button type="submit" name="action" value="approve" class="btn btn-danger btn-sm">Approve</button>
-                        <button type="submit" name="action" value="delete"
-                            class="btn btn-secondary btn-sm">Delete</button>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ nomination.id }}">
+                        Delete 
+                    </button>
+                    
+                    <!-- Modal -->
+                    <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be undone.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                    <form method="post" action="" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm" style="background-color: #dc3545; color: #ffffff; border: none; padding: 5px 10px; border-radius: 4px;">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     </form>
                 </td>
             </tr>
