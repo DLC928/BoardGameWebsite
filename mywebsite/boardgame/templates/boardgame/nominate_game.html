@@ -1,40 +1,70 @@
+{% extends 'boardgame/base.html' %}
+{% block title %}Nominate Game{% endblock %}
+
 {% block content %}
-<form action="{% url 'nominate_game' event_id=event.id %}" method="POST">
+<div class="container mt-5">
+  <h1 class="text-center mb-4">Nominate a Game</h1>
+  <form action="{% url 'nominate_game' event_id=event.id %}" method="POST" class="mx-auto" style="max-width: 600px;">
     {% csrf_token %}
-    <div id="search-game">
-        <input type="text" name="game_name" class="game-autocomplete" placeholder="Search for a game...">
+    <div class="input-group mb-3">
+      <input type="text" name="game_name" class="form-control game-autocomplete" placeholder="Search for a game...">
+      <button class="btn btn-info" type="button" id="manual-entry-btn">Manual Entry</button>
     </div>
-    <div id="game-details" style="display: none;">
-        <p>Game Details:</p>
+    <div class="form-text text-muted mb-3">Type at least 3 characters to load dropdown results.</div>
+    <div id="game-details" class="card p-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">Game Details:</h5>
         <input type="hidden" name="game_id" id="game-id">
-        <label for="game-name-detail">Name:</label>
-        <input type="text" name="name" id="game-name-detail" placeholder="Game Name">
-        <br>
-        <label for="description">Description:</label>
-        <textarea name="description" id="description" rows="4" placeholder="Description"></textarea>
-        <br>
-        <label for="min-players">Min Players:</label>
-        <input type="number" name="min_players" id="min-players" placeholder="Min Players">
-        <br>
-        <label for="max-players">Max Players:</label>
-        <input type="number" name="max_players" id="max-players" placeholder="Max Players">
-        <br>
-        <label for="min-playtime">Min Playing Time:</label>
-        <input type="number" name="min_playtime" id="min-playtime" placeholder="Min Playing Time">
-        <br>
-        <label for="max-playtime">Max Playing Time:</label>
-        <input type="number" name="max_playtime" id="max-playtime" placeholder="Max Playing Time">
-        <br>
-        <label for="age">Age:</label>
-        <input type="number" name="age" id="age" placeholder="Age">
-        <br>
-        <label for="weight">Weight:</label>
-        <input type="text" name="weight" id="weight" placeholder="Weight">
+        <div class="mb-3">
+          <label for="game-name-detail" class="form-label">Name:</label>
+          <input type="text" name="name" id="game-name-detail" class="form-control" placeholder="Game Name">
+        </div>
+        <div class="mb-3">
+          <label for="description" class="form-label">Description:</label>
+          <textarea name="description" id="description" class="form-control" rows="4" placeholder="Description"></textarea>
+        </div>
+        <strong>Optional</strong>
+        <hr>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="min-players" class="form-label">Min Players:</label>
+            <input type="number" name="min_players" id="min-players" class="form-control" placeholder="Min Players">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="max-players" class="form-label">Max Players:</label>
+            <input type="number" name="max_players" id="max-players" class="form-control" placeholder="Max Players">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="min-playtime" class="form-label">Min Playing Time:</label>
+            <input type="number" name="min_playtime" id="min-playtime" class="form-control" placeholder="Min Playing Time">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="max-playtime" class="form-label">Max Playing Time:</label>
+            <input type="number" name="max_playtime" id="max-playtime" class="form-control" placeholder="Max Playing Time">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="age" class="form-label">Age:</label>
+            <input type="number" name="age" id="age" class="form-control" placeholder="Age">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="weight" class="form-label">Weight:</label>
+            <input type="text" name="weight" id="weight" class="form-control" placeholder="Weight">
+          </div>
+        </div>
         <input type="hidden" name="thumbnail" id="thumbnail">
+        <a href="" class="btn btn-secondary ms-2">Cancel</a>
+      </div>
     </div>
-    <input type="submit" value="Nominate Game" class="btn btn-secondary">
-    <button type="button" id="manual-entry-btn">Manually Add Game Details</button>
-</form>
+    <div class="text-center mt-3">
+      <input type="submit" value="Save Changes" class="btn btn-success">
+      <a href="{% url 'event_details' event.id %}" class="btn btn-secondary">Back to Event</a>
+    </div>
+  </form>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
