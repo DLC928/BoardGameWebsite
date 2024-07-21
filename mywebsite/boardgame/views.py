@@ -241,7 +241,9 @@ def event_details(request, event_id):
                     return redirect('event_details', event_id=event_id)
                 else:
                     GameSignup.objects.filter(nomination=nomination, user=request.user).delete()
-             
+        elif 'has_nomination' in request.POST:
+            if has_nomination:
+                messages.error(request, "You have already nominated a game. You can only nominate one game.")
         elif 'remove_nomination' in request.POST:
             nomination_id = request.POST.get('nomination_id')
             nomination = get_object_or_404(Game, id=nomination_id)
