@@ -1,5 +1,6 @@
 from datetime import datetime
-from django.contrib import messages  
+from django.contrib import messages 
+from django.http import HttpResponseRedirect 
 from django.shortcuts import render, get_object_or_404, redirect
 from boardgame.models import User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote
 from .forms import EventNominationSettingsForm, GroupForm, EventForm, EventLocationForm, GameDetailForm, UserProfileForm
@@ -303,6 +304,11 @@ def nominate_game(request, event_id):
             game.nominator = request.user
             game.name = request.POST.get('name')
             game.description = request.POST.get('description')
+            
+            # Check if the game already exists for the event
+            if Game.objects.filter(event=event, name=game.name).exists():
+                messages.error(request, 'This game has already been nominated for the event.')
+                return HttpResponseRedirect(request.path_info)  # Redirect to the same page to show the error message
             
             # Handle empty fields
             min_players = request.POST.get('min_players')
