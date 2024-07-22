@@ -92,7 +92,7 @@ def create_group(request):
             place_details = fetch_place_details(place_id)
 
             if place_details:
-                # Save location details to GroupLocation model or related model
+                # Save location details to GroupLocation model
                 GroupLocation.objects.create(
                     group=group,
                     city=place_details['city'],
@@ -418,7 +418,24 @@ def profile_setup(request):
             profile = profile_form.save(commit=False)
             profile.user = request.user  # Associate profile with current logged-in user
             profile.save()
-            return redirect('home')  # Redirect to home or profile view
+            
+            # Save ManyToMany relationships for category and tags
+            profile_form.save_m2m()
+            
+            # Fetch place details using utility function
+            place_id = request.POST.get('place_id')  # Get selected place ID
+            place_details = fetch_place_details(place_id)
+
+            if place_details:
+                # Update location details to UserProfile model
+                profile.city = place_details['city']
+                profile.state = place_details['state']
+                profile.country = place_details['country']
+                profile.latitude = place_details['latitude']
+                profile.longitude = place_details['longitude']
+                profile.save()
+                
+            return redirect('home')  # Redirect to home 
     else:
         profile_form = UserProfileForm(instance=user_profile)
     

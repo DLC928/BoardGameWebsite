@@ -6,19 +6,6 @@ import requests
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 
-# UserProfile model to store additional user information
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField(blank=True)
-    picture = models.ImageField(upload_to='profile_images', blank=True)
-
-    def __str__(self):
-        return self.user.username
-    
-# Create profile when new user signs up 
-def create_profile(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.create(user=instance)
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -31,7 +18,29 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
-    
+  
+# UserProfile model to store additional user information
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(blank=True)
+    favorite_games = models.TextField(blank=True)
+    picture = models.ImageField(upload_to='profile_images', blank=True)
+    categories = models.ManyToManyField(Category, related_name='profile', blank=True)
+    tags = models.ManyToManyField(Tag, related_name='profile', blank=True)
+    city = models.CharField(max_length=255, blank=True)
+    state = models.CharField(max_length=255, blank=True)
+    country = models.CharField(max_length=255, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+
+    def __str__(self):
+        return self.user.username
+
+# Create profile when new user signs up 
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+  
 class Group(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()

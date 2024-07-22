@@ -6,19 +6,6 @@
 <head>
     <h1>Create new group</h1>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&libraries=places"></script>
-    <style>
-        .scrollable-checkboxes {
-        max-height: 110px; 
-        width: 300px; 
-        overflow-y: auto; /* Enables vertical scrolling */
-        border: 1px solid #ddd; /* Boarder */
-        padding: 10px; /* Padding */
-    }
-
-        .form-check {
-        margin-bottom: 5px; /* Space between checkboxes */
-    }
-    </style>
 </head>
 
 <br/><br/>
@@ -54,7 +41,7 @@
         {{ form.group_image }}
      </div>
      <br/>
-     <!-- Categories Multi-Select Scrollable Box -->
+          <!-- Categories Multi-Select Scrollable Box -->
      <div class="form-group">
         <label for="id_categories">{{ form.categories.label }}</label>
         <div class="scrollable-checkboxes">

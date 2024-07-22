@@ -71,13 +71,16 @@ class GameDetailForm(forms.ModelForm):
             'description': forms.Textarea(),
             'thumbnail': forms.URLInput(),
         }
-
+ 
 class UserProfileForm(forms.ModelForm):
-    bio = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 4}))
-    picture = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control-file'}), required=False)
-
     class Meta:
         model = UserProfile
-        fields = ['bio', 'picture']
-
+        fields = ['bio', 'picture', 'favorite_games', 'categories', 'tags','city', 'state', 'country', 'latitude', 'longitude']
+        widgets = {
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'style': 'width: 50%;'}),
+            'favorite_games': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'style': 'width: 50%;'}),
+            'picture': forms.FileInput(attrs={'class': 'form-control-file'}),
+            'categories': forms.CheckboxSelectMultiple,
+            'tags': forms.CheckboxSelectMultiple,
+        }
         
