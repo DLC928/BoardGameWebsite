@@ -116,8 +116,101 @@
         </div>
         <br />
     </div>
+
+   
+    <!-- Event Location input with Google Places Autocomplete -->
+    <div class="form-group">
+        <label for="event-location-input">Event Location</label>
+        <input type="text" id="event-location-input" class="form-control" style="width: 50%;" name="location_address" autocomplete="off" value="{{ location_address }}">
+        <!-- Hidden input to store place ID -->
+        <input type="hidden" id="place-id" name="place_id" value="{{ place_id }}">
+    </div>
+    <br />
+
+    <!-- Hidden input field to indicate location addition -->
+    <input type="hidden" name="add_location" id="add_location" value="false">
+
+    <!-- Button to show/hide location form -->
+    <button type="button" class="btn btn-secondary" id="toggle-location-btn">Manually Add Location</button>
+
+    <!-- Location form, initially hidden -->
+    <div id="location-form" style="display: none; margin-top: 20px;">
+        <!-- Location Form Fields for manual entry -->
+        <div class="form-group">
+            <label for="id_address">Address:</label>
+            {{ location_form.address }}
+        </div>
+        <div class="form-group">
+            <label for="id_city">City:</label>
+            {{ location_form.city }}
+        </div>
+        <div class="form-group">
+            <label for="id_postcode">Postcode:</label>
+            {{ location_form.postcode }}
+        </div>
+        <div class="form-group">
+            <label for="id_country">Country:</label>
+            {{ location_form.country }}
+        </div>
+    </div>
+
+    <!-- Submit Button -->
     <button class="btn btn-primary btn-sm" type="submit">Save Changes</button>
 </form>
+
+<script>
+    function initMap() {
+        var autocomplete = new google.maps.places.Autocomplete(
+            document.getElementById('event-location-input'), { types: ['geocode'] });
+
+        autocomplete.addListener('place_changed', function () {
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                return;
+            }
+
+            // Populate hidden fields with place details
+            document.getElementById('place-id').value = place.place_id;
+            document.getElementById('id_address').value = place.formatted_address;
+            document.getElementById('id_city').value = '';  // Extract city details as needed
+            document.getElementById('id_postcode').value = '';  // Extract postcode details as needed
+            document.getElementById('id_country').value = '';  // Extract country details as needed
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('toggle-location-btn').addEventListener('click', function () {
+            var locationForm = document.getElementById('location-form');
+            var addLocationInput = document.getElementById('add_location');
+
+            if (locationForm.style.display === 'none') {
+                locationForm.style.display = 'block';
+                addLocationInput.value = 'true';  // Set the hidden input value to true when showing the location form
+                // Make location fields required when shown
+                document.getElementById('id_address').setAttribute('required', 'required');
+                document.getElementById('id_city').setAttribute('required', 'required');
+                document.getElementById('id_postcode').setAttribute('required', 'required');
+                document.getElementById('id_country').setAttribute('required', 'required');
+            } else {
+                locationForm.style.display = 'none';
+                addLocationInput.value = 'false';  // Set the hidden input value to false when hiding the location form
+                // Remove required attribute when hidden
+                document.getElementById('id_address').removeAttribute('required');
+                document.getElementById('id_city').removeAttribute('required');
+                document.getElementById('id_postcode').removeAttribute('required');
+                document.getElementById('id_country').removeAttribute('required');
+            }
+        });
+
+        // Load Google Maps API script
+        var script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&libraries=places&callback=initMap';
+        script.defer = true;
+        script.async = true;
+        document.head.appendChild(script);
+    });
+</script>
+
 
 {% elif section == 'game_nominations' %}
 <div class="section">
@@ -167,58 +260,61 @@
             </tr>
         </thead>
         <tbody>
-            {% for nomination in pending_nominations %}
-            <tr>
-                <th scope="row">{{ forloop.counter }}</th>
-                <td>{{ nomination.name }}</td>
-                <td>{{ nomination.nominator }}</td>
-                <td>{{ nomination.weight }}</td>
-                <td>{{ nomination.min_players }} - {{ nomination.max_players }}</td>
-                <td>maximum {{ nomination.max_playtime }} mins</td>
-                <td>{{ vote_counts|get_item:nomination.id }}</td>
-                <td>
-                    <form method="post" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                        <button type="submit" name="action" value="approve"
-                            class="btn btn-success btn-sm">Approve</button>
-                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                        <!-- Button trigger modal -->
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ nomination.id }}">
-                            Delete 
-                        </button>
-                        
-                        <!-- Modal -->
-                        <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning</h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be undone.
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                                        <form method="post" action="" style="display: inline;">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                                            <button type="submit" class="btn btn-danger btn-sm" style="background-color: #dc3545; color: #ffffff; border: none; padding: 5px 10px; border-radius: 4px;">Delete</button>
-                                        </form>
-                                    </div>
-                                </div>
+           <!-- For Pending Nominations -->
+        {% for nomination in pending_nominations %}
+        <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ nomination.name }}</td>
+            <td>{{ nomination.nominator }}</td>
+            <td>{{ nomination.weight }}</td>
+            <td>{{ nomination.min_players }} - {{ nomination.max_players }}</td>
+            <td>maximum {{ nomination.max_playtime }} mins</td>
+            <td>{{ vote_counts|get_item:nomination.id }}</td>
+            <td>
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
+                </form>
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
+                </form>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ nomination.id }}">
+                    Delete 
+                </button>
+                <!-- Modal for Deleting -->
+                <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be undone.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                <form method="post" action="" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
                             </div>
                         </div>
-                    </form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7">No pending nominations.</td>
-            </tr>
-            {% endfor %}
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8">No pending nominations.</td>
+        </tr>
+        {% endfor %}
+
         </tbody>
     </table>
 
@@ -237,6 +333,7 @@
             </tr>
         </thead>
         <tbody>
+            <!-- For Pending Nominations -->
             {% for nomination in approved_nominations %}
             <tr>
                 <th scope="row">{{ forloop.counter }}</th>
@@ -250,43 +347,47 @@
                     <form method="post" class="d-inline">
                         {% csrf_token %}
                         <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                        <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
+                    </form>
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
                         <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                        <!-- Button trigger modal -->
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ nomination.id }}">
-                            Delete 
-                        </button>
-                        
-                        <!-- Modal -->
-                        <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning</h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be undone.
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                                        <form method="post" action="" style="display: inline;">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                                            <button type="submit" class="btn btn-danger btn-sm" style="background-color: #dc3545; color: #ffffff; border: none; padding: 5px 10px; border-radius: 4px;">Delete</button>
-                                        </form>
-                                    </div>
+                    </form>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ nomination.id }}">
+                        Delete 
+                    </button>
+                    <!-- Modal for Deleting -->
+                    <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be undone.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                    <form method="post" action="" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7">No approved nominations.</td>
+                <td colspan="8">No approved nominations.</td>
             </tr>
             {% endfor %}
+
         </tbody>
     </table>
     {% if rejected_nominations %}
@@ -316,13 +417,17 @@
                     <form method="post" class="d-inline">
                         {% csrf_token %}
                         <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                        <button type="submit" name="action" value="approve" class="btn btn-danger btn-sm">Approve</button>
-                    <!-- Button trigger modal -->
+                        <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
+                    </form>
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
+                    </form>
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ nomination.id }}">
                         Delete 
                     </button>
-                    
-                    <!-- Modal -->
+                    <!-- Modal for Deleting -->
                     <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -339,18 +444,17 @@
                                         {% csrf_token %}
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                                        <button type="submit" class="btn btn-danger btn-sm" style="background-color: #dc3545; color: #ffffff; border: none; padding: 5px 10px; border-radius: 4px;">Delete</button>
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                     </form>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    </form>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7">No rejected nominations.</td>
+                <td colspan="8">No rejected nominations.</td>
             </tr>
             {% endfor %}
         </tbody>
