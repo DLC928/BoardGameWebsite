@@ -167,12 +167,13 @@ def event_details(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     attendees = event.attendees.all()
     nominations = Game.objects.filter(event=event)
-    approved_nominations = Game.objects.filter(event=event,nomination_status='Approved')
+    approved_nominations = Game.objects.filter(event=event, nomination_status='Approved')
+    event_location = EventLocation.objects.filter(event=event).first()
     
-    is_attending = False
-    is_admin =False
-    is_moderator =False
-    has_nomination = False  # Flag to check if the user has already nominated
+    # Initialize context variables
+    is_attending = is_admin = is_moderator = has_nomination = False
+    vote_counts = {}
+    user_votes = total_user_votes = 0
 
     if request.user.is_authenticated:
         is_attending = attendees.filter(id=request.user.id).exists()
@@ -180,8 +181,14 @@ def event_details(request, event_id):
         is_moderator = GroupMembers.objects.filter(user=request.user, group=event.group, is_moderator=True).exists()
         has_nomination = Game.objects.filter(event=event, nominator=request.user).exists()
 
+        # Calculate vote counts for each game
+        vote_counts = {nomination.id: Vote.objects.filter(game=nomination, event=event).count() for nomination in nominations}
+        user_votes = Vote.objects.filter(user=request.user, event=event).values_list('game_id', flat=True)
+        total_user_votes = Vote.objects.filter(user=request.user, event=event).count()
+    
     approved_nominations_with_slots = []
     waitlisted_games = []
+
     for nomination in approved_nominations:
         signed_up_count = GameSignup.objects.filter(nomination=nomination).count()
         remaining_slots = nomination.max_players - signed_up_count
@@ -196,7 +203,7 @@ def event_details(request, event_id):
                 'nomination': nomination,
                 'remaining_slots': remaining_slots,
                 'is_signed_up': is_signed_up,
-                'signed_up_count':signed_up_count,
+                'signed_up_count': signed_up_count,
                 'players_needed': players_needed
             })
         else:
@@ -205,89 +212,79 @@ def event_details(request, event_id):
                 'remaining_slots': remaining_slots,
                 'is_signed_up': is_signed_up
             })
-            
-    if request.method == 'POST':
-        if 'join' in request.POST:
-            if not is_attending:
-                EventAttendance.objects.create(user=request.user, event=event)
-        elif 'leave' in request.POST:
-            if is_attending:
-                EventAttendance.objects.filter(user=request.user, event=event).delete()
-                
-                # Remove game signups and nominations if the user leaves the event
-                for nomination in nominations:
-                    # Remove user from game signups
-                    GameSignup.objects.filter(user=request.user, nomination=nomination).delete()
-                    
-                    # Check if the user is the nominator and remove nomination
-                    if nomination.nominator == request.user:
-                        # Remove all signups for this nomination
-                        GameSignup.objects.filter(nomination=nomination).delete()
-                        # Remove the nomination itself
-                        nomination.delete()
     
-        elif 'sign_up' in request.POST:
-            nomination_id = request.POST.get('nomination_id')
-            nomination = get_object_or_404(Game, id=nomination_id)
-            if is_attending and not GameSignup.objects.filter(nomination=nomination, user=request.user).exists():
-                GameSignup.objects.create(nomination=nomination, user=request.user)
-        
-        elif 'leave_game' in request.POST:
-            nomination_id = request.POST.get('nomination_id')
-            nomination = get_object_or_404(Game, id=nomination_id)
-            if GameSignup.objects.filter(nomination=nomination, user=request.user).exists():
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            if 'join' in request.POST:
+                if not is_attending:
+                    EventAttendance.objects.create(user=request.user, event=event)
+            
+            elif 'leave' in request.POST:
+                if is_attending:
+                    EventAttendance.objects.filter(user=request.user, event=event).delete()
+                    for nomination in nominations:
+                        GameSignup.objects.filter(user=request.user, nomination=nomination).delete()
+                        if nomination.nominator == request.user:
+                            GameSignup.objects.filter(nomination=nomination).delete()
+                            nomination.delete()
+            
+            elif 'sign_up' in request.POST:
+                nomination_id = request.POST.get('nomination_id')
+                nomination = get_object_or_404(Game, id=nomination_id)
+                if is_attending and not GameSignup.objects.filter(nomination=nomination, user=request.user).exists():
+                    GameSignup.objects.create(nomination=nomination, user=request.user)
+            
+            elif 'leave_game' in request.POST:
+                nomination_id = request.POST.get('nomination_id')
+                nomination = get_object_or_404(Game, id=nomination_id)
+                if GameSignup.objects.filter(nomination=nomination, user=request.user).exists():
+                    if nomination.nominator == request.user:
+                        GameSignup.objects.filter(nomination=nomination).delete()
+                        nomination.delete()
+                        return redirect('event_details', event_id=event_id)
+                    else:
+                        GameSignup.objects.filter(nomination=nomination, user=request.user).delete()
+            
+            elif 'has_nomination' in request.POST:
+                if has_nomination:
+                    messages.error(request, "You have already nominated a game. You can only nominate one game.")
+            
+            elif 'remove_nomination' in request.POST:
+                nomination_id = request.POST.get('nomination_id')
+                nomination = get_object_or_404(Game, id=nomination_id)
                 if nomination.nominator == request.user:
                     GameSignup.objects.filter(nomination=nomination).delete()
                     nomination.delete()
-                    return redirect('event_details', event_id=event_id)
-                else:
-                    GameSignup.objects.filter(nomination=nomination, user=request.user).delete()
-        elif 'has_nomination' in request.POST:
-            if has_nomination:
-                messages.error(request, "You have already nominated a game. You can only nominate one game.")
-        elif 'remove_nomination' in request.POST:
-            nomination_id = request.POST.get('nomination_id')
-            nomination = get_object_or_404(Game, id=nomination_id)
-            if nomination.nominator == request.user:
-                GameSignup.objects.filter(nomination=nomination).delete()
-                nomination.delete()
-        elif 'vote' in request.POST:
-            nomination_id = request.POST.get('nomination_id')
-            nomination = get_object_or_404(Game, id=nomination_id)
-            if not Vote.objects.filter(user=request.user, game=nomination, event=event).exists():
-                if Vote.objects.filter(user=request.user, event=event).count() < 3:
-                    Vote.objects.create(user=request.user, game=nomination, event=event)
-        elif 'remove_vote' in request.POST:
-            nomination_id = request.POST.get('nomination_id')
-            nomination = get_object_or_404(Game, id=nomination_id)
-            if Vote.objects.filter(user=request.user, game=nomination, event=event).exists():    
-                Vote.objects.filter(user=request.user, game=nomination, event=event).delete()
-        return redirect('event_details', event_id=event_id)
+            
+            elif 'vote' in request.POST:
+                nomination_id = request.POST.get('nomination_id')
+                nomination = get_object_or_404(Game, id=nomination_id)
+                if not Vote.objects.filter(user=request.user, game=nomination, event=event).exists():
+                    if Vote.objects.filter(user=request.user, event=event).count() < 3:
+                        Vote.objects.create(user=request.user, game=nomination, event=event)
+            
+            elif 'remove_vote' in request.POST:
+                nomination_id = request.POST.get('nomination_id')
+                nomination = get_object_or_404(Game, id=nomination_id)
+                if Vote.objects.filter(user=request.user, game=nomination, event=event).exists():
+                    Vote.objects.filter(user=request.user, game=nomination, event=event).delete()
+            
+            return redirect('event_details', event_id=event_id)
     
-    # Calculate vote counts for each game
-    vote_counts = {}
-    for nomination in nominations:
-        count = Vote.objects.filter(game=nomination, event=event).count()
-        vote_counts[nomination.id] = count
-
-    user_votes = Vote.objects.filter(user=request.user, event=event).values_list('game_id', flat=True)
-    event_location = EventLocation.objects.filter(event=event).first()
-    total_user_votes = Vote.objects.filter(user=request.user, event=event).count()
-
     context = {
         'event': event,
         'event_location': event_location,
         'is_attending': is_attending,
-        'is_admin' : is_admin,
+        'is_admin': is_admin,
         'is_moderator': is_moderator,
         'nominations': nominations,
         'waitlisted_games': waitlisted_games,
         'attendees': attendees,
         'approved_nominations_with_slots': approved_nominations_with_slots,
-        'vote_counts':vote_counts,
+        'vote_counts': vote_counts,
         'user_votes': user_votes,
-        'total_user_votes':total_user_votes,
-        'has_nomination':has_nomination
+        'total_user_votes': total_user_votes,
+        'has_nomination': has_nomination
     }
 
     return render(request, 'boardgame/event_details.html', context)
