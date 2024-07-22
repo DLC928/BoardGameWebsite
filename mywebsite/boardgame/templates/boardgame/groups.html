@@ -83,11 +83,17 @@
                             <h4>{{ group.name }}</h4>
                         </div>
                         <div class="card-body">
-                            <p class="card-text">
-                                <b>Description:</b> {{ group.description }}<br />
-                                <b>Location:</b> {{ group.location }}<br /><br />
+                            <div class="group-profile">
+                                {% if group.group_image %}
+                                <img src="{{ group.group_image.url }}" class="profile-image rounded">
+                                {% else %}
+                                <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded">
+                                {% endif %}
+                                <br/><br/>
+                                {{ group.group_members.all.count }} members
+                                <p><b>Location:</b> {{ group.grouplocation.city }}{% if group.grouplocation.state %}, {{ group.grouplocation.state }}{% endif %}</p>
                                 <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
-                            </p>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -393,13 +393,12 @@ def game_details(request, event_id, game_id):
 
 def user_profile(request):
     user = request.user
-    # Fetch all groups where the user is a member
+    user_profile = UserProfile.objects.filter(user=user).first()  
     user_groups = GroupMembers.objects.filter(user=user).select_related('group')
-    
-    # Fetch all events where the user is attending
     user_events = EventAttendance.objects.filter(user=user).select_related('event')
     
     context = {
+        'user_profile': user_profile,
         'user_groups': user_groups,
         'user_events': user_events,
     }
@@ -418,7 +417,7 @@ def profile_setup(request):
             
             # Save ManyToMany relationships for category and tags
             profile_form.save_m2m()
-            
+
             # Fetch place details using utility function
             place_id = request.POST.get('place_id')  # Get selected place ID
             place_details = fetch_place_details(place_id)
@@ -435,7 +434,7 @@ def profile_setup(request):
             return redirect('home')  # Redirect to home 
     else:
         profile_form = UserProfileForm(instance=user_profile)
-    
+
     return render(request, 'boardgame/profile_setup.html', {'profile_form': profile_form})
 
 # ---------------------------NAVBAR---------------------------

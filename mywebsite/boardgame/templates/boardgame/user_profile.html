@@ -3,67 +3,134 @@
 {% block content %}
 <title>Profile</title>
 
-Profile for {{user.username}}<br/>
-Bio:  {{user.userprofile.bio}}
+<div class="container mt-4">
+    <!-- Profile Header -->
+    <div class="card mb-4" style="background-color: #f8f9fa; border: none;">
+        <div class="card-body text-center">
+            {% if user_profile.picture %}
+                <img src="{{ user_profile.picture.url }}" class="rounded-circle mb-3" style="width: 200px; height: 200px; object-fit: cover; border: 2px solid #ddd;">
+            {% else %}
+                <img src="{% static 'boardgame/images/default_profile.jpg' %}" class="rounded-circle mb-3" style="width: 200px; height: 200px; object-fit: cover; border: 2px solid #ddd;">
+            {% endif %}
+            <h2>{{ user.username }}</h2>
+            <p>{{ user_profile.location_city }}</p>
+        </div>
+    </div>
 
- <!-- Display user's groups -->
- <h3>Your Groups</h3>
- <br />
- <div class="row">
-     {% if user_groups %}
-     {% for group_member in user_groups %}
-     <div class="col-md-4 mb-3">
-         <div class="card">
-             <div class="card-header">
-                 <h4>{{ group_member.group.name }}</h4>
-             </div>
-             <div class="card-body">
-                 <p class="card-text">
-                     <b>Description:</b> {{ group_member.group.description }}<br />
-                     <b>Location:</b> {{ group_member.group.location }}<br /><br />
-                     <a href="{% url 'group_profile' group_member.group.slug %}"
-                         class="btn btn-secondary btn-sm">View Group</a>
-                 </p>
-             </div>
-         </div>
-     </div>
-     {% endfor %}
-     {% else %}
-     <p>You are not a member of any groups yet.</p>
-     {% endif %}
- </div>
+    <!-- Profile Information -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                <div class="card-body">
+                    <h4>About Me</h4>
+                    <p>{{ user_profile.bio }}</p>
+                </div>
+            </div>
+            <div class="card mb-4" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                <div class="card-body">
+                    <h4>Favorite Games</h4>
+                    <p>{{ user_profile.favorite_games }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                <div class="card-body">
+                    <h4>Game Interests</h4>
+                    <div>
+                        {% for category in user_profile.categories.all %}
+                            <a href="#" class="badge bg-primary text-decoration-none">{{ category.name }}</a>
+                        {% empty %}
+                            <p>No game interests listed.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-4" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                <div class="card-body">
+                    <h4>Meetup Interests</h4>
+                    <div>
+                        {% for tag in user_profile.tags.all %}
+                            <a href="#" class="badge bg-info text-decoration-none">{{ tag.name }}</a>
+                        {% empty %}
+                            <p>No meetup interests listed.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- User's Groups -->
+    <div class="card mb-4" style="background-color: #f8f9fa; border: none;">
+        <div class="card-header" style="background-color: #e9ecef;">
+            <h3>Your Groups</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% if user_groups %}
+                    {% for group_member in user_groups %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                                <div class="card-header" style="background-color: #e9ecef;">
+                                    <h4>{{ group_member.group.name }}</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="group-profile">
+                                        {% if group_member.group.group_image %}
+                                        <img src="{{ group_member.group.group_image.url }}" class="profile-image rounded">
+                                        {% else %}
+                                        <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded">
+                                        {% endif %}
+                                        <br/><br/>
+                                        {{ group_member.group.group_members.all.count }} members
+                                        <p><b>Location:</b> {{ group_member.group.grouplocation.city }}{% if group_member.group.grouplocation.state %}, {{ group_member.group.grouplocation.state }}{% endif %}</p>
+                                        <a href="{% url 'group_profile' group_member.group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>You are not a member of any groups yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
- <!-- Display user's events -->
- <h3>Your Events</h3>
- <br />
- <div class="row">
-     {% if user_events %}
-     {% for event_attendance in user_events %}
-     <div class="col-md-4 mb-3">
-         <div class="card">
-             <div class="card-header">
-                 <h4>{{ event_attendance.event.title }}</h4>
-             </div>
-             <div class="card-body">
-                 <p class="card-text">
-                     <b>Description:</b> {{ event_attendance.event.description }}<br />
-                     <b>Location:</b> {{ event_attendance.event.location }}<br /><br />
-                     <a href="{% url 'event_details' event_attendance.event.id %}"
-                         class="btn btn-secondary btn-sm">View Event</a>
-                 </p>
-             </div>
-         </div>
-     </div>
-     {% endfor %}
-     {% else %}
-     <p>You are not attending any events yet.</p>
-     {% endif %}
- </div>
- 
-<!-- Link back to home -->
-<br /><br />
-<div>
-    <a href="{% url 'home' %}">Back to Home</a>
+    <!-- User's Events -->
+    <div class="card mb-4" style="background-color: #f8f9fa; border: none;">
+        <div class="card-header" style="background-color: #e9ecef;">
+            <h3>Your Events</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% if user_events %}
+                    {% for event_attendance in user_events %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                                <div class="card-header" style="background-color: #e9ecef;">
+                                    <h4>{{ event_attendance.event.title }}</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p><b>Description:</b> {{ event_attendance.event.description }}</p>
+                                    <p><b>Location:</b> {{ event_attendance.event.location }}</p>
+                                    <a href="{% url 'event_details' event_attendance.event.id %}" class="btn btn-secondary btn-sm">View Event</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>You are not attending any events yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Link back to home -->
+    <div class="text-center">
+        <a href="{% url 'home' %}" class="btn btn-primary mt-3">Back to Home</a>
+    </div>
 </div>
+
 {% endblock %}
