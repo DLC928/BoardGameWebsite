@@ -10,30 +10,46 @@
         .tooltip-inner {
             text-align: left;
         }
+
         .scrollable-checkboxes {
-        max-height: 110px; 
-        width: 300px; 
-        overflow-y: auto; /* Enables vertical scrolling */
-        border: 1px solid #ddd; /* Boarder */
-        padding: 10px; /* Padding */
+            max-height: 110px;
+            width: 300px;
+            overflow-y: auto;
+            /* Enables vertical scrolling */
+            border: 1px solid #ddd;
+            /* Boarder */
+            padding: 10px;
+            /* Padding */
         }
 
         .form-check {
-            margin-bottom: 5px; /* Space between checkboxes */
+            margin-bottom: 5px;
+            /* Space between checkboxes */
         }
+
         .nav-pills .nav-link {
-            background-color: #0dcaf0; /* Bootstrap 5 info button background color */
-            color: #000000; /* Bootstrap 5 info button text color */
-            border: 1px solid #0dcaf0; /* Bootstrap 5 info button border color */
+            background-color: #0dcaf0;
+            /* Bootstrap 5 info button background color */
+            color: #000000;
+            /* Bootstrap 5 info button text color */
+            border: 1px solid #0dcaf0;
+            /* Bootstrap 5 info button border color */
         }
+
         .nav-pills .nav-link:hover {
-            background-color: #0bb3d9; /* Darker info button background color */
-            color: #000000; /* Info button text color */
+            background-color: #0bb3d9;
+            /* Darker info button background color */
+            color: #000000;
+            /* Info button text color */
         }
+
         .nav-pills .nav-link.active {
-            background-color: #234147 !important; /* Even darker background for active state */
-            border-color: #064a57 !important; /* Even darker border color for active state */
-            color: #ffffff !important; /* Info button text color */
+            background-color: #234147 !important;
+            /* Even darker background for active state */
+            border-color: #064a57 !important;
+            /* Even darker border color for active state */
+            color: #ffffff !important;
+            /* Info button text color */
         }
     </style>
 
@@ -51,7 +67,8 @@
         </li>
         <li class="nav-item">
             <a class="btn btn-info btn-sm me-2 nav-link {% if section == 'attendee_management' %}active{% endif %}"
-                href="{% url 'manage_event_dashboard_with_section' event.id 'attendee_management' %}">Attendee Management</a>
+                href="{% url 'manage_event_dashboard_with_section' event.id 'attendee_management' %}">Attendee
+                Management</a>
         </li>
         <li class="nav-item">
             <a class="btn btn-info btn-sm me-2 nav-link {% if section == 'needs_review' %}active{% endif %}"
@@ -72,7 +89,17 @@
     {{ form.date_time.label_tag }} {{ form.date_time }} <br/>
     {{ form.event_image.label_tag }} {{ form.event_image }} <br/>
     </div>
+    
     <br/>
+     <!-- Event Location input with Google Places Autocomplete -->
+     <div class="form-group">
+        <label for="event-location-input">Event Location</label>
+        <input type="text" id="event-location-input" class="form-control" style="width: 50%;" name="address"
+            autocomplete="off" value="{{ event_location.address|default:'' }}">
+        <input type="hidden" id="place-id" name="place_id" value="{{ event_location.place_id|default:'' }}">
+    </div>
+    <br />
+
     <!-- Categories Multi-Select Scrollable Box -->
     <div class="form-group">
         <label for="id_categories">{{ form.categories.label }}</label>
@@ -116,102 +143,35 @@
         </div>
         <br />
     </div>
-
-   
-    <!-- Event Location input with Google Places Autocomplete -->
-    <div class="form-group">
-        <label for="event-location-input">Event Location</label>
-        <input type="text" id="event-location-input" class="form-control" style="width: 50%;" name="location_address" autocomplete="off" value="{{ location_address }}">
-        <!-- Hidden input to store place ID -->
-        <input type="hidden" id="place-id" name="place_id" value="{{ place_id }}">
-    </div>
-    <br />
-
-    <!-- Hidden input field to indicate location addition -->
-    <input type="hidden" name="add_location" id="add_location" value="false">
-
-    <!-- Button to show/hide location form -->
-    <button type="button" class="btn btn-secondary" id="toggle-location-btn">Manually Add Location</button>
-
-    <!-- Location form, initially hidden -->
-    <div id="location-form" style="display: none; margin-top: 20px;">
-        <!-- Location Form Fields for manual entry -->
-        <div class="form-group">
-            <label for="id_address">Address:</label>
-            {{ location_form.address }}
-        </div>
-        <div class="form-group">
-            <label for="id_city">City:</label>
-            {{ location_form.city }}
-        </div>
-        <div class="form-group">
-            <label for="id_postcode">Postcode:</label>
-            {{ location_form.postcode }}
-        </div>
-        <div class="form-group">
-            <label for="id_country">Country:</label>
-            {{ location_form.country }}
-        </div>
-    </div>
-
-    <!-- Submit Button -->
     <button class="btn btn-primary btn-sm" type="submit">Save Changes</button>
 </form>
 
 <script>
-    function initMap() {
-        var autocomplete = new google.maps.places.Autocomplete(
-            document.getElementById('event-location-input'), { types: ['geocode'] });
-
-        autocomplete.addListener('place_changed', function () {
-            var place = autocomplete.getPlace();
-            if (!place.geometry) {
-                return;
-            }
-
-            // Populate hidden fields with place details
-            document.getElementById('place-id').value = place.place_id;
-            document.getElementById('id_address').value = place.formatted_address;
-            document.getElementById('id_city').value = '';  // Extract city details as needed
-            document.getElementById('id_postcode').value = '';  // Extract postcode details as needed
-            document.getElementById('id_country').value = '';  // Extract country details as needed
+        function initMap() {
+            var autocomplete = new google.maps.places.Autocomplete(
+                document.getElementById('event-location-input'), { types: ['geocode'] });
+    
+            autocomplete.addListener('place_changed', function () {
+                var place = autocomplete.getPlace();
+                if (!place.geometry) {
+                    return;
+                }
+    
+                // Populate hidden fields with place details
+                document.getElementById('place-id').value = place.place_id;
+                document.getElementById('event-location-input').value = place.formatted_address;
+            });
+        }
+    
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load Google Maps API script
+            var script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&libraries=places&callback=initMap';
+            script.defer = true;
+            script.async = true;
+            document.head.appendChild(script);
         });
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('toggle-location-btn').addEventListener('click', function () {
-            var locationForm = document.getElementById('location-form');
-            var addLocationInput = document.getElementById('add_location');
-
-            if (locationForm.style.display === 'none') {
-                locationForm.style.display = 'block';
-                addLocationInput.value = 'true';  // Set the hidden input value to true when showing the location form
-                // Make location fields required when shown
-                document.getElementById('id_address').setAttribute('required', 'required');
-                document.getElementById('id_city').setAttribute('required', 'required');
-                document.getElementById('id_postcode').setAttribute('required', 'required');
-                document.getElementById('id_country').setAttribute('required', 'required');
-            } else {
-                locationForm.style.display = 'none';
-                addLocationInput.value = 'false';  // Set the hidden input value to false when hiding the location form
-                // Remove required attribute when hidden
-                document.getElementById('id_address').removeAttribute('required');
-                document.getElementById('id_city').removeAttribute('required');
-                document.getElementById('id_postcode').removeAttribute('required');
-                document.getElementById('id_country').removeAttribute('required');
-            }
-        });
-
-        // Load Google Maps API script
-        var script = document.createElement('script');
-        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&libraries=places&callback=initMap';
-        script.defer = true;
-        script.async = true;
-        document.head.appendChild(script);
-    });
-</script>
-
-
+    </script>
 {% elif section == 'game_nominations' %}
 <div class="section">
     <h3>Nomination Settings</h3>
@@ -244,23 +204,23 @@
     <hr>
     <a href="{% url 'nominate_game' event.id %}" class="btn btn-secondary btn-sm">Nominate Game</a>
 </div>
-    <br />
-    <h3>Pending Nominations</h3>
-    <table class="table table-warning table-hover">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Game Name</th>
-                <th scope="col">Nominator</th>
-                <th scope="col">Difficulty</th>
-                <th scope="col">Player Count</th>
-                <th scope="col">Play Time</th>
-                <th scope="col">Attendee Votes</th>
-                <th scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-           <!-- For Pending Nominations -->
+<br />
+<h3>Pending Nominations</h3>
+<table class="table table-warning table-hover">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Game Name</th>
+            <th scope="col">Nominator</th>
+            <th scope="col">Difficulty</th>
+            <th scope="col">Player Count</th>
+            <th scope="col">Play Time</th>
+            <th scope="col">Attendee Votes</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- For Pending Nominations -->
         {% for nomination in pending_nominations %}
         <tr>
             <th scope="row">{{ forloop.counter }}</th>
@@ -281,22 +241,29 @@
                     <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
                     <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
                 </form>
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ nomination.id }}">
-                    Delete 
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#deleteModal{{ nomination.id }}">
+                    Delete
                 </button>
                 <!-- Modal for Deleting -->
-                <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}" aria-hidden="true">
+                <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static"
+                    data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}"
+                    aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning
+                                </h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be undone.
+                                Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be
+                                undone.
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary btn-sm"
+                                    data-bs-dismiss="modal">Close</button>
                                 <form method="post" action="" style="display: inline;">
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="delete">
@@ -315,197 +282,208 @@
         </tr>
         {% endfor %}
 
-        </tbody>
-    </table>
+    </tbody>
+</table>
 
-    <h3>Approved Nominations</h3>
-    <table class="table table-success table-hover">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Game Name</th>
-                <th scope="col">Nominator</th>
-                <th scope="col">Difficulty</th>
-                <th scope="col">Player Count</th>
-                <th scope="col">Play Time</th>
-                <th scope="col">Attendee Votes</th>
-                <th scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- For Pending Nominations -->
-            {% for nomination in approved_nominations %}
-            <tr>
-                <th scope="row">{{ forloop.counter }}</th>
-                <td>{{ nomination.name }}</td>
-                <td>{{ nomination.nominator }}</td>
-                <td>{{ nomination.weight }}</td>
-                <td>{{ nomination.min_players }} - {{ nomination.max_players }}</td>
-                <td>maximum {{ nomination.max_playtime }} mins</td>
-                <td>{{ vote_counts|get_item:nomination.id }}</td>
-                <td>
-                    <form method="post" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                        <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                    </form>
-                    <form method="post" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                    </form>
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ nomination.id }}">
-                        Delete 
-                    </button>
-                    <!-- Modal for Deleting -->
-                    <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning</h1>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be undone.
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                                    <form method="post" action="" style="display: inline;">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                    </form>
-                                </div>
+<h3>Approved Nominations</h3>
+<table class="table table-success table-hover">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Game Name</th>
+            <th scope="col">Nominator</th>
+            <th scope="col">Difficulty</th>
+            <th scope="col">Player Count</th>
+            <th scope="col">Play Time</th>
+            <th scope="col">Attendee Votes</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- For Pending Nominations -->
+        {% for nomination in approved_nominations %}
+        <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ nomination.name }}</td>
+            <td>{{ nomination.nominator }}</td>
+            <td>{{ nomination.weight }}</td>
+            <td>{{ nomination.min_players }} - {{ nomination.max_players }}</td>
+            <td>maximum {{ nomination.max_playtime }} mins</td>
+            <td>{{ vote_counts|get_item:nomination.id }}</td>
+            <td>
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
+                </form>
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
+                </form>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#deleteModal{{ nomination.id }}">
+                    Delete
+                </button>
+                <!-- Modal for Deleting -->
+                <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static"
+                    data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning
+                                </h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be
+                                undone.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary btn-sm"
+                                    data-bs-dismiss="modal">Close</button>
+                                <form method="post" action="" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
                             </div>
                         </div>
                     </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8">No approved nominations.</td>
-            </tr>
-            {% endfor %}
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8">No approved nominations.</td>
+        </tr>
+        {% endfor %}
 
-        </tbody>
-    </table>
-    {% if rejected_nominations %}
-    <h3>Rejected Nominations</h3>
-    <table class="table table-danger table-hover">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Game Name</th>
-                <th scope="col">Nominator</th>
-                <th scope="col">Difficulty</th>
-                <th scope="col">Player Count</th>
-                <th scope="col">Play Time</th>
-                <th scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for nomination in rejected_nominations %}
-            <tr>
-                <th scope="row">{{ forloop.counter }}</th>
-                <td>{{ nomination.name }}</td>
-                <td>{{ nomination.nominator }}</td>
-                <td>{{ nomination.weight }}</td>
-                <td>{{ nomination.min_players }} - {{ nomination.max_players }}</td>
-                <td>maximum {{ nomination.max_playtime }} mins</td>
-                <td>
-                    <form method="post" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                        <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                    </form>
-                    <form method="post" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                    </form>
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ nomination.id }}">
-                        Delete 
-                    </button>
-                    <!-- Modal for Deleting -->
-                    <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning</h1>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be undone.
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                                    <form method="post" action="" style="display: inline;">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                    </form>
-                                </div>
+    </tbody>
+</table>
+{% if rejected_nominations %}
+<h3>Rejected Nominations</h3>
+<table class="table table-danger table-hover">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Game Name</th>
+            <th scope="col">Nominator</th>
+            <th scope="col">Difficulty</th>
+            <th scope="col">Player Count</th>
+            <th scope="col">Play Time</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for nomination in rejected_nominations %}
+        <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ nomination.name }}</td>
+            <td>{{ nomination.nominator }}</td>
+            <td>{{ nomination.weight }}</td>
+            <td>{{ nomination.min_players }} - {{ nomination.max_players }}</td>
+            <td>maximum {{ nomination.max_playtime }} mins</td>
+            <td>
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
+                </form>
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
+                </form>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#deleteModal{{ nomination.id }}">
+                    Delete
+                </button>
+                <!-- Modal for Deleting -->
+                <div class="modal fade" id="deleteModal{{ nomination.id }}" data-bs-backdrop="static"
+                    data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ nomination.id }}"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="deleteModalLabel{{ nomination.id }}">Delete Warning
+                                </h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete the game "{{ nomination.name }}"? This step cannot be
+                                undone.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary btn-sm"
+                                    data-bs-dismiss="modal">Close</button>
+                                <form method="post" action="" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
                             </div>
                         </div>
                     </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8">No rejected nominations.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-    {% elif section == 'attendee_management' %}
-    <h2>Attendee Management</h2>
-    
-    <!-- Table to display attendees -->
-    <table class="table table-bordered table-hover" style="border-collapse: collapse; width: 80%;">
-        <thead>
-            <tr style="background-color: #f8f9fa; color: #495057; font-weight: bold;">
-                <th style="width: 200px; text-align: left; padding: 10px;">Username</th>
-                <th style="width: 150px; text-align: left; padding: 10px;">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for attendee in attendees %}
-            <tr>
-                <td>{{ attendee.username }}</td>
-                <td>
-                    <!-- Form to remove an attendee -->
-                    <form method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="user_id" value="{{ attendee.id }}">
-                        <button type="submit" name="action" value="remove" class="btn btn-danger btn-sm">Remove</button>
-                    </form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="2" class="text-center">No attendees yet.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8">No rejected nominations.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% elif section == 'attendee_management' %}
+<h2>Attendee Management</h2>
+
+<!-- Table to display attendees -->
+<table class="table table-bordered table-hover" style="border-collapse: collapse; width: 80%;">
+    <thead>
+        <tr style="background-color: #f8f9fa; color: #495057; font-weight: bold;">
+            <th style="width: 200px; text-align: left; padding: 10px;">Username</th>
+            <th style="width: 150px; text-align: left; padding: 10px;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for attendee in attendees %}
+        <tr>
+            <td>{{ attendee.username }}</td>
+            <td>
+                <!-- Form to remove an attendee -->
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_id" value="{{ attendee.id }}">
+                    <button type="submit" name="action" value="remove" class="btn btn-danger btn-sm">Remove</button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2" class="text-center">No attendees yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 
-    {% elif section == 'needs_review' %}
-    <h2>Needs Review</h2>
-    <!-- Needs review functionality -->
+{% elif section == 'needs_review' %}
+<h2>Needs Review</h2>
+<!-- Needs review functionality -->
 
-    {% endif %}
-    <!-- Back to Event and Group Buttons -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <a href="{% url 'group_profile' event.group.slug %}" class="btn btn-secondary btn-sm">Back to Group</a>
-            <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">Back to Event</a>
-        </div>
+{% endif %}
+<!-- Back to Event and Group Buttons -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <a href="{% url 'group_profile' event.group.slug %}" class="btn btn-secondary btn-sm">Back to Group</a>
+        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">Back to Event</a>
     </div>
-    {% endblock %}
-
-
-   
+</div>
+{% endblock %}

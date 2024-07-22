@@ -638,52 +638,40 @@ def manage_event_dashboard(request, event_id, section=None):
     event = get_object_or_404(Event, id=event_id)
     section = section or request.GET.get('section', 'event_setup')
     
-    #Fetch the event location
     event_location = None
     if EventLocation.objects.filter(event=event).exists():
         event_location = EventLocation.objects.get(event=event)
     
     context = {'event': event, 'section': section}
+
     if section == 'event_setup':
         if request.method == 'POST':
             form = EventForm(request.POST, instance=event)
-            location_form = EventLocationForm(request.POST, instance=event_location)
-            if form.is_valid() and location_form.is_valid():
+            
+            if form.is_valid():
                 form.save()
-
-                add_location = request.POST.get('add_location', False)
-
-                if add_location == 'true':
-                    event_location = location_form.save(commit=False)
-                    event_location.event = event
-                    event_location.save()
-                else:
-                    place_id = request.POST.get('place_id', None)
-                    if place_id:
-                        place_details = fetch_place_details(place_id)
-                        if place_details:
-                            if event_location is None:
-                                event_location = EventLocation(event=event)
-                            event_location.address = place_details.get('formatted_address', '')
-                            event_location.city = place_details.get('city', '')
-                            event_location.state = place_details.get('state', '')
-                            event_location.postcode = place_details.get('postcode', '')
-                            event_location.country = place_details.get('country', '')
-                            event_location.latitude = place_details.get('latitude', None)
-                            event_location.longitude = place_details.get('longitude', None)
-                            event_location.save()
-
+                # Fetch place details using utility function if place_id is provided
+                place_id = request.POST.get('place_id')
+                if place_id:
+                    place_details = fetch_place_details(place_id)
+                    if place_details:
+                        if event_location is None:
+                            event_location = EventLocation(event=event)
+                        event_location.address = place_details.get('formatted_address', '')
+                        event_location.city = place_details.get('city', '')
+                        event_location.state = place_details.get('state', '')
+                        event_location.postcode = place_details.get('postcode', '')
+                        event_location.country = place_details.get('country', '')
+                        event_location.latitude = place_details.get('latitude', None)
+                        event_location.longitude = place_details.get('longitude', None)
+                        event_location.save()
                 messages.success(request, 'Event updated successfully.')
                 return redirect('manage_event_dashboard_with_section', event_id=event.id, section='event_setup')
         else:
             form = EventForm(instance=event)
-            location_form = EventLocationForm(instance=event_location)
         
-        context.update({
-            'form': form,
-            'location_form': location_form,
-            'current_location': event_location
-        })  
+        context.update({'form': form,'event_location':event_location})
+        
     elif section == 'game_nominations':
         if request.method == 'POST':
             action = request.POST.get('action')
@@ -758,3 +746,8 @@ def manage_event_dashboard(request, event_id, section=None):
     return render(request, 'boardgame/manage_event_dashboard.html', context)
 
 
+
+
+
+
+                        
