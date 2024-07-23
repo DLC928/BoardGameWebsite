@@ -1,27 +1,35 @@
 {% extends 'boardgame/base.html' %}
 
 {% block content %}
-<h1>Login</h1>
-<br />
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="shadow p-4 mb-5 bg-body rounded">
+                <h1 class="text-center mb-4">Login</h1>
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="InputUsername" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="InputUsername" name="username" aria-describedby="usernameHelp" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="InputPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="InputPassword" name="password" required>
+                    </div>
 
-<form action="" method="POST">
-    {% csrf_token %}
-    <div class="mb-3">
-        <label for="InputUsername" class="form-label">Username</label>
-        <input type="text" class="form-control" name="username" aria-describedby="usernameHelp">
+                    <div class="mb-3">
+                        <small id="register" class="form-text text-muted">
+                            Not a member? <a href="{% url 'register' %}" class="fw-bold text-decoration-underline">Sign up</a>
+                        </small>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <input type="submit" value="Login" class="btn btn-primary">
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <div class="mb-3">
-        <label for="InputPassword" class="form-label">Password</label>
-        <input type="password" class="form-control" name="password">
-    </div>
-
-    <small id="registerHelp" class="form-text text-muted">Not a member? <a href="{% url 'register' %}">Sign up</a></small>
-    <br/><br/>
- 
-
-
-    <input type="submit" value="Login" class="btn btn-secondary">
-</form>
-
-<br /><br />
+</div>
 {% endblock %}
