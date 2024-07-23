@@ -84,8 +84,9 @@
                                 {% else %}
                                 <img src="{% static 'boardgame/images/event_image_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
                                 {% endif %}
-                                <b>Attendees:</b> {{ event.attendees.count }}
+                                <b>Date:</b> {{ event.date_time }}<br>
                                 <p><b>Location:</b> {{ event.eventlocation.city }}{% if event.eventlocation.state %}, {{ event.eventlocation.state }}{% endif %}</p>
+                              
                                 <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event</a>
                             </div>
                         </div>
@@ -155,7 +156,8 @@
                                     {% else %}
                                     <img src="{% static 'boardgame/images/event_image_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
                                     {% endif %}
-                                    <b>Attendees:</b> {{ event_attendance.event.attendees.count }}
+                                    <br/>
+                                    <b>Date:</b> {{ event_attendance.event.date_time }}<br>
                                     <p><b>Location:</b> {{ event_attendance.event.eventlocation.city }}{% if event_attendance.event.eventlocation.state %}, {{ event_attendance.event.eventlocation.state }}{% endif %}</p>
                                     <a href="{% url 'event_details' event_attendance.event.id %}" class="btn btn-secondary btn-sm">View Event</a>
                                 </div>

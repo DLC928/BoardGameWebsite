@@ -64,6 +64,7 @@
 
 <hr>
 
+
 <!-- Events -->
 <h3>Events</h3>
 <ul class="nav nav-tabs" id="eventTabs" role="tablist">
@@ -78,20 +79,24 @@
 </ul>
 <div class="tab-content" id="eventTabsContent">
     <div class="tab-pane fade show active" id="upcoming-events" role="tabpanel" aria-labelledby="upcoming-events-tab">
-        <div class="event-container">
+        <div class="row" id="event-cards">
             {% for event in upcoming_events %}
             <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>{{ event.title }}</h5>
+                <div class="card" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                    <div class="card-header" style="background-color: #e9ecef;">
+                        <h4>{{ event.title }}</h4>
                     </div>
                     <div class="card-body">
+                        {% if event.event_image %}
+                        <img src="{{ event.event_image.url }}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                        {% else %}
+                        <img src="{% static 'boardgame/images/event_image_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                        {% endif %}
                         <p class="card-text">
                             <strong>Date:</strong> {{ event.date_time }}<br>
-                            {{ event.description }}
+                            <b>Attendees:</b> {{ event.attendees.count }}
                         </p>
-                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event
-                            Details</a>
+                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event</a>
                     </div>
                 </div>
             </div>
@@ -99,20 +104,24 @@
         </div>
     </div>
     <div class="tab-pane fade" id="past-events" role="tabpanel" aria-labelledby="past-events-tab">
-        <div class="event-container">
+        <div class="row" id="event-cards">
             {% for event in past_events %}
             <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-header">
+                <div class="card" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                    <div class="card-header" style="background-color: #e9ecef;">
                         <h5>{{ event.title }}</h5>
                     </div>
                     <div class="card-body">
+                        {% if event.event_image %}
+                        <img src="{{ event.event_image.url }}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                        {% else %}
+                        <img src="{% static 'boardgame/images/event_image_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                        {% endif %}
                         <p class="card-text">
                             <strong>Date:</strong> {{ event.date_time }}<br>
-                            {{ event.description }}
+                            <b>Attendees:</b> {{ event.attendees.count }}
                         </p>
-                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event
-                            Details</a>
+                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event Details</a>
                     </div>
                 </div>
             </div>
@@ -120,6 +129,7 @@
         </div>
     </div>
 </div>
+
 
 <hr>
 
