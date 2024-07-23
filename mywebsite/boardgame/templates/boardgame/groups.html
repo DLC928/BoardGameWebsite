@@ -78,22 +78,19 @@
                 {% if groups %}
                 {% for group in groups %}
                 <div class="col-md-4 mb-3">
-                    <div class="card">
-                        <div class="card-header">
+                    <div class="card" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                        <div class="card-header" style="background-color: #e9ecef;">
                             <h4>{{ group.name }}</h4>
                         </div>
                         <div class="card-body">
-                            <div class="group-profile">
-                                {% if group.group_image %}
-                                <img src="{{ group.group_image.url }}" class="profile-image rounded" style="width: 100%; height: auto;">
-                                {% else %}
-                                <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded" style="width: 100%; height: auto;">
-                                {% endif %}
-                                <br/><br/>
-                                {{ group.group_members.all.count }} members
-                                <p><b>Location:</b> {{ group.grouplocation.city }}{% if group.grouplocation.state %}, {{ group.grouplocation.state }}{% endif %}</p>
-                                <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
-                            </div>
+                            {% if group.group_image %}
+                            <img src="{{ group.group_image.url }}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                            {% else %}
+                            <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                            {% endif %}
+                            <b>Members:</b> {{ group.group_members.all.count }}
+                            <p><b>Location:</b> {{ group.grouplocation.city }}{% if group.grouplocation.state %}, {{ group.grouplocation.state }}{% endif %}</p>
+                            <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
                         </div>
                     </div>
                 </div>
