@@ -93,7 +93,25 @@ class GroupMembers(models.Model):
 
     def __str__(self):
         return f"{self.user.username} in {self.group.name}"
-    
+ 
+class GroupPost(models.Model):
+    group = models.ForeignKey(Group, related_name='group_posts', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Post by {self.user.username} in {self.group.name}"
+
+class GroupPostComment(models.Model):
+    post = models.ForeignKey(GroupPost, related_name='group_comments', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.post.id}"
+  
 # Event model
 class Event(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)

@@ -2,8 +2,8 @@ from datetime import datetime
 from django.contrib import messages 
 from django.http import HttpResponseRedirect 
 from django.shortcuts import render, get_object_or_404, redirect
-from boardgame.models import User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote
-from .forms import EventNominationSettingsForm, GroupForm, EventForm, EventLocationForm, GameDetailForm, UserProfileForm
+from boardgame.models import GroupPost, User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote
+from .forms import EventNominationSettingsForm, GroupCommentForm, GroupForm, EventForm, EventLocationForm, GameDetailForm, GroupPostForm, UserProfileForm
 from .utils import fetch_place_details
 from django.db.models import Count, Q
 
@@ -62,9 +62,29 @@ def group_profile(request, group_slug):
         elif 'leave' in request.POST:
             if is_member:
                 GroupMembers.objects.filter(user=request.user, group=group).delete()
-        return redirect('group_profile', group_slug=group.slug)
+        elif 'post_content' in request.POST:
+                post_form = GroupPostForm(request.POST)
+                if post_form.is_valid():
+                    post = post_form.save(commit=False)
+                    post.group = group
+                    post.user = request.user
+                    post.save()
+                    return redirect('group_profile', group_slug=group.slug)
+        elif 'comment_content' in request.POST:
+                comment_form = GroupCommentForm(request.POST)
+                post_id = request.POST.get('post_id')
+                if post_id and comment_form.is_valid():
+                    comment = comment_form.save(commit=False)
+                    comment.post_id = post_id
+                    comment.user = request.user
+                    comment.save()
+                    return redirect('group_profile', group_slug=group.slug)
 
     group_location = GroupLocation.objects.filter(group=group).first()
+    post_form = GroupPostForm()
+    comment_form = GroupCommentForm()
+    posts = GroupPost.objects.filter(group=group).order_by('-date_added')
+
     # Pass the group object and related data to the template
     context = {
         'group': group,
@@ -75,6 +95,9 @@ def group_profile(request, group_slug):
         'past_events': past_events,
         'members': members,
         'is_member': is_member,
+        'post_form': post_form,
+        'comment_form': comment_form,
+        'posts': posts,
     }
     return render(request, 'boardgame/group_profile.html', context)
 

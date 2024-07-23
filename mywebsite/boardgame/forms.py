@@ -1,5 +1,5 @@
 from django import forms 
-from .models import Category, Group,Event, EventLocation, Game, Tag, UserProfile
+from .models import Category, Group,Event, EventLocation, Game, GroupPost, GroupPostComment, Tag, UserProfile
 
 # Create a group form
 class GroupForm(forms.ModelForm):
@@ -83,4 +83,13 @@ class UserProfileForm(forms.ModelForm):
             'categories': forms.CheckboxSelectMultiple,
             'tags': forms.CheckboxSelectMultiple,
         }
-        
+  
+class GroupPostForm(forms.ModelForm):
+    class Meta:
+        model = GroupPost
+        fields = ['content']
+
+class GroupCommentForm(forms.ModelForm):
+    class Meta:
+        model = GroupPostComment
+        fields = ['content']      
