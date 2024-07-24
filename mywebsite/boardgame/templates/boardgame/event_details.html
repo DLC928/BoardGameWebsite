@@ -7,149 +7,167 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ event.title }}</title>
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
+    <link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'boardgame/group_profile_style.css' %}">
 </head>
 
 <body>
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-3">
-                {% if event.event_image %}
-                <img src="{{ event.event_image.url }}" class="profile-image img-fluid rounded" alt="Event Image">
+
+    <div class="row">
+        <div class="col-md-3">
+            {% if event.event_image %}
+            <img src="{{ event.event_image.url }}" class="profile-image img-fluid rounded" alt="Event Image">
+            {% else %}
+            <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image img-fluid rounded"
+                alt="Default Image">
+            {% endif %}
+        </div>
+        <div class="col-md-9">
+            <h1>{{ event.title }}</h1>
+            <div>
+                {% if user.is_authenticated %}
+                <form method="post" action="">
+                    {% csrf_token %}
+                    {% if is_attending %}
+                    <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Event</button>
+
+                    {% if event.nominations_open %}
+                    {% if not has_nomination %}
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#staticBackdrop">
+                        Nominate Game
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+                        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Game Nomination Disclaimer
+                                    </h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    By nominating a game, you are agreeing to bring it to the event. Do you wish to
+                                    continue?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary btn-sm"
+                                        data-bs-dismiss="modal">Close</button>
+                                    <a href="{% url 'nominate_game' event.id %}"
+                                        class="btn btn-secondary btn-sm">Continue</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <button type="submit" class="btn btn-secondary btn-sm" name="has_nomination">Nominate Game</button>
+                    {% endif %}
+                    {% endif %}
+                    {% else %}
+                    <button type="submit" class="btn btn-secondary btn-sm" name="join">Join Event</button>
+                    {% endif %}
+                    {% if is_admin or is_moderator %}
+                    <a href="{% url 'manage_event_dashboard' event.id %}" class="btn btn-primary btn-sm">Manage
+                        Event</a>
+                    {% endif %}
+                </form>
                 {% else %}
-                <img src="{% static 'boardgame/images/group_profile_default.jpg' %}"
-                    class="profile-image img-fluid rounded" alt="Default Image">
+                <p>You must <a href="{% url 'login' %}">login</a> first to join the event.</p>
                 {% endif %}
             </div>
-            <div class="col-md-9">
-                <h1>{{ event.title }}</h1>
-                <div>
-                    {% if user.is_authenticated %}
-                    <form method="post" action="">
-                        {% csrf_token %}
-                        {% if is_attending %}
-                            <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Event</button>
-
-                            {% if event.nominations_open %}
-                                {% if not has_nomination %}
-                                    <!-- Button trigger modal -->
-                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-                                        Nominate Game
-                                    </button>
-                                    <!-- Modal -->
-                                    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Game Nomination Disclaimer</h1>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    By nominating a game, you are agreeing to bring it to the event. Do you wish to continue?
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                                                    <a href="{% url 'nominate_game' event.id %}" class="btn btn-secondary btn-sm">Continue</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% else %}
-                                <button type="submit" class="btn btn-secondary btn-sm" name="has_nomination">Nominate Game</button>
-                                {% endif %}
-                            {% endif %}
-                        {% else %}
-                            <button type="submit" class="btn btn-secondary btn-sm" name="join">Join Event</button>
-                        {% endif %}
-                        {% if is_admin or is_moderator %}
-                            <a href="{% url 'manage_event_dashboard' event.id %}" class="btn btn-primary btn-sm">Manage Event</a>
-                        {% endif %}
-                    </form>
-                    {% else %}
-                    <p>You must <a href="{% url 'login' %}">login</a> first to join the event.</p>
-                    {% endif %}
-                </div>
-                <br />
-                <!-- Categories -->
-                <div class="mb-1">
-                    <strong class="small">Categories</strong>
-                    <p class="small">
-                        {% for category in event.categories.all %}
-                        <a href="#" class="badge bg-primary text-decoration-none small py-1 px-2">{{ category.name }}</a>
-                        {% empty %}
-                        <span class="badge bg-secondary small py-1 px-2">No categories</span>
-                        {% endfor %}
-                    </p>
-                </div>
-                <!-- Tags -->
-                <div class="mb-1">
-                    <strong class="small">Tags</strong>
-                    <p class="small">
-                        {% for tag in event.tags.all %}
-                        <a href="#" class="badge bg-info text-decoration-none small py-1 px-2">{{ tag.name }}</a>
-                        {% empty %}
-                        <span class="badge bg-secondary small py-1 px-2">No tags</span>
-                        {% endfor %}
-                    </p>
-                </div>
-
-                <br />
+            <br />
+            <!-- Categories -->
+            <div class="mb-1">
+                <strong class="small">Categories</strong>
+                <p class="small">
+                    {% for category in event.categories.all %}
+                    <a href="#" class="badge bg-primary text-decoration-none small py-1 px-2">{{ category.name }}</a>
+                    {% empty %}
+                    <span class="badge bg-secondary small py-1 px-2">No categories</span>
+                    {% endfor %}
+                </p>
             </div>
+            <!-- Tags -->
+            <div class="mb-1">
+                <strong class="small">Tags</strong>
+                <p class="small">
+                    {% for tag in event.tags.all %}
+                    <a href="#" class="badge bg-info text-decoration-none small py-1 px-2">{{ tag.name }}</a>
+                    {% empty %}
+                    <span class="badge bg-secondary small py-1 px-2">No tags</span>
+                    {% endfor %}
+                </p>
+            </div>
+
             <br />
         </div>
-        <hr>
-        <div class="row">
-            <div class="col-sm-6">
-                <p><b>Date:</b> {{ event.date_time|date:"F j, Y" }}</p>
-                <p><b>Time:</b> {{ event.date_time|date:"g:i A" }}</p>
-                <p><b>Description:</b> {{ event.description }}</p>
-            </div>
-            <div class="col-sm-6">
-                <div class="card location-card">
-                    <div class="card-body">
-                        <h5 class="card-title">Event Location</h5>
-                        {% if event_location %}
-                        <strong class="card-subtitle mb-2 text-muted">{{ event_location.name }}</strong>
-                        <p class="card-text"><i class="bi bi-geo-alt-fill"></i> {{ event_location.address }}</p>
-                        {% if event_location.latitude and event_location.longitude %}
-                        <iframe class="card-img-bottom" width="100%" height="200" frameborder="0" style="border:0"
-                            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&q={{ event_location.latitude }},{{ event_location.longitude }}"
-                            allowfullscreen>
-                        </iframe>
-                        {% endif %}
-                        {% else %}
-                        <p>No location specified for this event.</p>
-                        {% endif %}
-                    </div>
+        <br />
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-sm-6">
+            <p><b>Date:</b> {{ event.date_time|date:"F j, Y" }}</p>
+            <p><b>Time:</b> {{ event.date_time|date:"g:i A" }}</p>
+            <p><b>Description:</b> {{ event.description }}</p>
+        </div>
+        <div class="col-sm-6">
+            <div class="card location-card">
+                <div class="card-body">
+                    <h5 class="card-title">Event Location</h5>
+                    {% if event_location %}
+                    <strong class="card-subtitle mb-2 text-muted">{{ event_location.name }}</strong>
+                    <p class="card-text"><i class="bi bi-geo-alt-fill"></i> {{ event_location.address }}</p>
+                    {% if event_location.latitude and event_location.longitude %}
+                    <iframe class="card-img-bottom" width="100%" height="200" frameborder="0" style="border:0"
+                        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&q={{ event_location.latitude }},{{ event_location.longitude }}"
+                        allowfullscreen>
+                    </iframe>
+                    {% endif %}
+                    {% else %}
+                    <p>No location specified for this event.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        {% if event.signups_open %}
-        <hr>
-        <ul class="nav nav-tabs" id="eventTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <a class="nav-link active" id="nominated-games-tab" data-bs-toggle="tab" href="#nominated-games"
-                    role="tab" aria-controls="nominated-games" aria-selected="true">Game Sign-Up</a>
-            </li>
-            <li class="nav-item" role="presentation">
-                <a class="nav-link" id="waitlisted-games-tab" data-bs-toggle="tab" href="#waitlisted-games" role="tab"
-                    aria-controls="waitlisted-games" aria-selected="false">Waitlisted Games</a>
-            </li>
-        </ul>
-        <div class="tab-content" id="eventTabsContent">
-            <div class="tab-pane fade show active" id="nominated-games" role="tabpanel"
-                aria-labelledby="nominated-games-tab">
-                <div class="row mt-4">
+    </div>
+    <hr>
+    <!-- Tabs for Content Sections -->
+    <ul class="nav nav-tabs" id="groupTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="games-tab" data-bs-toggle="tab" href="#games" role="tab"
+                aria-controls="games" aria-selected="true">Games</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="discussions-tab" data-bs-toggle="tab" href="#discussions" role="tab"
+                aria-controls="discussions" aria-selected="false">Discussions</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="attendees-tab" data-bs-toggle="tab" href="#attendees" role="tab"
+                aria-controls="attendees" aria-selected="false">Attendees</a>
+        </li>
+    </ul>
+    <div class="tab-content mt-3" id="groupTabsContent">
+        <div class="tab-pane fade show active" id="games" role="tabpanel" aria-labelledby="games-tab">
+            <!-- Content for Games Section -->
+        
+            {% if event.signups_open %}
+            <!-- Game Sign-Up Section -->
+            <h3>Game Sign-Up</h3>
+            <div class="row mt-4">
+                {% if approved_nominations_with_slots %}
                     {% for item in approved_nominations_with_slots %}
                     <div class="col-md-4 mb-3">
-                        <div class="card">
+                        <div class="card card-custom">
                             <div class="card-header">
                                 <h5>{{ item.nomination.name }}</h5>
                             </div>
                             <div class="card-body">
                                 <p class="card-text">
-                                    <b>Description:</b> {{ item.nomination.description|truncatewords:25|striptags|safe }}... <a href="{% url 'game_details' event.id item.nomination.id %}">See Details</a>
+                                    <b>Description:</b> {{ item.nomination.description|truncatewords:25|striptags|safe }}... <a
+                                        href="{% url 'game_details' event.id item.nomination.id %}">See Details</a>
                                     <br /><br />
                                     <b>Difficulty:</b> {{ item.nomination.weight }} /5
                                     <br /><br />
@@ -159,54 +177,59 @@
                                     <br />
                                     {% if item.nomination.min_players > item.signed_up_count %}
                                     {% if item.players_needed == 1 %}
-                                <p style="color: red;">We need {{ item.players_needed }} more player!</p>
-                                {% else %}
-                                <p style="color: red;">We need {{ item.players_needed }} more players!</p>
-                                {% endif %}
-                                {% endif %}
-                                <br />
-                                <a href="{% url 'game_details' event.id item.nomination.id %}"
-                                    class="btn btn-secondary btn-sm">View Details</a>
-                                <div>
-                                    <br />
-                                    {% if user.is_authenticated and is_attending %}
-                                    <form method="post">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
-                                        {% if item.is_signed_up %}
-                                        <button type="submit" class="btn btn-secondary btn-sm" name="leave_game">Leave
-                                            Game</button>
-                                        {% elif item.remaining_slots > 0 %}
-                                        <button type="submit" class="btn btn-primary btn-sm" name="sign_up">Sign
-                                            up</button>
-                                        {% endif %}
-                                        {% if item.nomination.nominator == user %}
-                                        <button type="submit" class="btn btn-danger btn-sm"
-                                            name="remove_nomination">Remove Nomination</button>
-                                        {% endif %}
-                                    </form>
+                                    <p style="color: red;">We need {{ item.players_needed }} more player!</p>
                                     {% else %}
-                                    <p>You must join event to sign up to play.</p>
+                                    <p style="color: red;">We need {{ item.players_needed }} more players!</p>
                                     {% endif %}
-                                </div>
+                                    {% endif %}
+                                    <br />
+                                    <a href="{% url 'game_details' event.id item.nomination.id %}"
+                                        class="btn btn-secondary btn-sm">View Details</a>
+                                    <div>
+                                        <br />
+                                        {% if user.is_authenticated and is_attending %}
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
+                                            {% if item.is_signed_up %}
+                                            <button type="submit" class="btn btn-secondary btn-sm" name="leave_game">Leave Game</button>
+                                            {% elif item.remaining_slots > 0 %}
+                                            <button type="submit" class="btn btn-primary btn-sm" name="sign_up">Sign Up</button>
+                                            {% endif %}
+                                            {% if item.nomination.nominator == user %}
+                                            <button type="submit" class="btn btn-danger btn-sm" name="remove_nomination">Remove Nomination</button>
+                                            {% endif %}
+                                        </form>
+                                        {% else %}
+                                        <p>You must join the event to sign up to play.</p>
+                                        {% endif %}
+                                    </div>
                                 </p>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
-                </div>
+                {% else %}
+                    <div class="col-12">
+                        <p>No games are currently available for sign-up.</p>
+                    </div>
+                {% endif %}
             </div>
-            <div class="tab-pane fade" id="waitlisted-games" role="tabpanel" aria-labelledby="waitlisted-games-tab">
-                <div class="row mt-4">
+             
+            <!-- Waitlisted Games Section -->
+            <h3>Waitlisted Games</h3>
+            <div class="row mt-4">
+                {% if waitlisted_games %}
                     {% for item in waitlisted_games %}
                     <div class="col-md-4 mb-3">
-                        <div class="card">
+                        <div class="card card-custom">
                             <div class="card-header">
                                 <h5>{{ item.nomination.name }}</h5>
                             </div>
                             <div class="card-body">
                                 <p class="card-text">
-                                    <b>Description:</b> {{ item.nomination.description|truncatewords:25|striptags|safe }} ... <a href="{% url 'game_details' event.id item.nomination.id %}">See Details</a>
+                                    <b>Description:</b> {{ item.nomination.description|truncatewords:25|striptags|safe }} ... <a
+                                        href="{% url 'game_details' event.id item.nomination.id %}">See Details</a>
                                     <br /><br />
                                     <b>Difficulty:</b> {{ item.nomination.weight }} /5
                                     <br /><br />
@@ -216,109 +239,115 @@
                                     <br /><br />
                                     <a href="{% url 'game_details' event.id item.nomination.id %}"
                                         class="btn btn-secondary btn-sm">View Details</a>
-                                <div>
-                                    {% if user.is_authenticated and is_attending %}
-                                    <form method="post">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
-                                        {% if item.is_signed_up %}
-                                        <button type="submit" class="btn btn-secondary btn-sm" name="leave_game">Leave
-                                            Game</button>
+                                    <div>
+                                        {% if user.is_authenticated and is_attending %}
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
+                                            {% if item.is_signed_up %}
+                                            <button type="submit" class="btn btn-secondary btn-sm" name="leave_game">Leave Game</button>
+                                            {% endif %}
+                                        </form>
+                                        {% else %}
+                                        <p>You must join the event to sign up to play.</p>
                                         {% endif %}
-                                    </form>
-                                    {% else %}
-                                    <p>You must join event to sign up to play.</p>
-                                    {% endif %}
-                                </div>
+                                    </div>
                                 </p>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
-                </div>
-            </div>
-        </div>
-        </hr>
-        {% endif %}
-
-        {% if event.nominations_open %}
-        <hr>
-        <h3>Game Nominations - <span style="color: #28a745;">Vote for your top 3 favourites!</span></h3>
-
-        <div class="row mt-4">
-            {% for game in nominations %}
-            <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>{{ game.name }}</h5>
+                {% else %}
+                    <div class="col-12">
+                        <p>No games have reached the maximum player count yet.</p>
                     </div>
-                    <div class="card-body">
-                        <p class="card-text">
-                            <b>Description:</b> {{ game.description|truncatewords:25|striptags|safe }}... <a
-                                href="{% url 'game_details' event.id game.id %}">See Details</a>
-                            <br /><br />
-                            <b>Difficulty:</b> {{ game.weight }} /5
-                            <br /><br />
-                            <b>Nominated by:</b> {{ game.nominator.username }}
-                            <br/> <br/> 
-                            <b>Vote Count:</b> {{ vote_counts|get_item:game.id }}
-                            <br/> <br/> 
-                            <a href="{% url 'game_details' event.id game.id %}" class="btn btn-secondary btn-sm">View
-                                Details</a>
-                        <div>
-                            {% if user.is_authenticated and is_attending %}
-                            <form method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="nomination_id" value="{{ game.id }}">
-                                {% if game.id in user_votes %}
-                                    <button type="submit" class="btn btn-danger btn-sm" name="remove_vote">Remove Vote</button>
-                                {% else %}
-                                    {% if total_user_votes < 3 %}
-                                        <button type="submit" class="btn btn-primary btn-sm" name="vote">Vote</button>
-                                    {% endif %}
-                                {% endif %}
-                                {% if game.nominator == user %}
-                                <button type="submit" class="btn btn-danger btn-sm" name="remove_nomination">Remove Nomination</button>
-                                {% endif %}
-                            </form>
-                            {% else %}
-                            <p>You must join event to vote.</p>
-                            {% endif %}
-                        </div>
-                        </p>
-                    </div>
-                </div>
+                {% endif %}
             </div>
-            {% endfor %}
-        </div>
-        <hr>
-        {% endif %}
-        <hr>
-        <!-- Discussions -->
-        <h3 class="mb-4">Discussions</h3>
+            {% endif %}
         
-        <!-- Button to Open Modal -->
+            
+            {% if event.nominations_open %}
+            <!-- Game Nominations Section -->
+            <h3>Game Nominations - <span style="color: #28a745;">Vote for your top 3 favourites!</span></h3>
+            <div class="row mt-4">
+                {% if nominations %}
+                    {% for game in nominations %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card card-custom">
+                            <div class="card-header">
+                                <h5>{{ game.name }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">
+                                    <b>Description:</b> {{ game.description|truncatewords:25|striptags|safe }}... <a
+                                        href="{% url 'game_details' event.id game.id %}">See Details</a>
+                                    <br /><br />
+                                    <b>Difficulty:</b> {{ game.weight }} /5
+                                    <br /><br />
+                                    <b>Nominated by:</b> {{ game.nominator.username }}
+                                    <br /> <br />
+                                    <b>Vote Count:</b> {{ vote_counts|get_item:game.id }}
+                                    <br /> <br />
+                                    <a href="{% url 'game_details' event.id game.id %}" class="btn btn-secondary btn-sm">View Details</a>
+                                    <div>
+                                        {% if user.is_authenticated and is_attending %}
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="nomination_id" value="{{ game.id }}">
+                                            {% if game.id in user_votes %}
+                                            <button type="submit" class="btn btn-danger btn-sm" name="remove_vote">Remove Vote</button>
+                                            {% else %}
+                                            {% if total_user_votes < 3 %}
+                                            <button type="submit" class="btn btn-primary btn-sm" name="vote">Vote</button>
+                                            {% endif %}
+                                            {% endif %}
+                                            {% if game.nominator == user %}
+                                            <button type="submit" class="btn btn-danger btn-sm" name="remove_nomination">Remove Nomination</button>
+                                            {% endif %}
+                                        </form>
+                                        {% else %}
+                                        <p>You must join the event to vote.</p>
+                                        {% endif %}
+                                    </div>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <p>No games have been nominated yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Discussions Tab -->
+    <div class="tab-pane fade" id="discussions" role="tabpanel" aria-labelledby="discussions-tab">
         {% if is_attending %}
         <div class="mb-3">
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postModal">Add a Post</button>
         </div>
         {% else %}
-        <p class="text-danger">You must join the event to participate in discussions.</p>
+        <p class="text-danger">You must join the event to join the discussion.</p>
         {% endif %}
-        
+
         <!-- Modal for Adding a Post -->
         <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content bg-light border-primary">
+                <div class="modal-content bg-light">
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="postModalLabel">Add a Post</h5>
-                        <button type="button" class="btn-close btn-light" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-light" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <form method="POST" action="">
                         {% csrf_token %}
                         <div class="modal-body">
                             <div class="form-group">
-                                <textarea class="form-control" id="content" name="content" rows="7" placeholder="Write your post here..." required></textarea>
+                                <textarea class="form-control" id="content" name="content" rows="7"
+                                    placeholder="Write your post here..." required></textarea>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -329,56 +358,72 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Display Posts -->
         <div class="mt-4">
             {% for post in posts %}
-            <div class="card mb-4 border-light shadow-sm">
-                <div class="card-body bg-light">
+            <div class="card mb-4 card-custom">
+                <div class="card-body">
                     <div class="d-flex align-items-start mb-3">
-                        {% if post.user.userprofile.picture %}
-                            <img src="{{ post.user.userprofile.picture.url }}" class="rounded-circle me-2" style="width: 50px; height: 50px; object-fit: cover;">
-                        {% else %}
-                            <img src="{% static 'boardgame/images/default_profile.jpg' %}" class="rounded-circle me-2" style="width: 50px; height: 50px; object-fit: cover;">
-                        {% endif %}
+                        <a class="text-decoration-none text-reset d-flex align-items-center"
+                            href="{% url 'user_profile' post.user.id %}">
+                            {% if post.user.userprofile.picture %}
+                            <img src="{{ post.user.userprofile.picture.url }}" class="rounded-circle me-2"
+                                style="width: 50px; height: 50px; object-fit: cover;">
+                            {% else %}
+                            <img src="{% static 'boardgame/images/default_profile.jpg' %}" class="rounded-circle me-2"
+                                style="width: 50px; height: 50px; object-fit: cover;">
+                            {% endif %}</a>
                         <div>
-                            <h5 class="card-title text-primary mb-0">{{ post.user.username }}</h5>
-                            <p class="card-text">{{ post.content }}</p>
-                            <p class="card-text"><small class="text-muted">{{ post.date_added }}</small></p>
+                            <a class="text-decoration-none text-reset d-flex align-items-center"
+                                href="{% url 'user_profile' post.user.id %}">
+                                <h5 class="card-title text-primary mb-0">{{ post.user.username }}</h5>
+                            </a>
+                            <p class="mb-1 fs-6">{{ post.content }}</p>
+                            <p class="text-muted mb-0"><small>{{ post.date_added }}</small></p>
+
                         </div>
                     </div>
-        
                     <!-- Display Comments -->
-                    <div class="mt-3 border-top pt-3 bg-light">
+                    <div class="mt-3 border-top pt-3">
                         {% for comment in post.event_comments.all %}
                         <div class="d-flex align-items-start mb-2">
-                            {% if comment.user.userprofile.picture %}
-                                <img src="{{ comment.user.userprofile.picture.url }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                            {% else %}
-                                <img src="{% static 'boardgame/images/default_profile.jpg' %}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                            {% endif %}
-                            <div class="card border-light">
-                                <div class="card-body bg-white">
-                                    <h6 class="card-title text-success mb-1">{{ comment.user.username }}</h6>
-                                    <p class="card-text">{{ comment.content }}</p>
-                                    <p class="card-text"><small class="text-muted">{{ comment.date_added }}</small></p>
-                                </div>
+                            <a class="text-decoration-none text-reset d-flex align-items-center"
+                                href="{% url 'user_profile' comment.user.id %}">
+                                {% if comment.user.userprofile.picture %}
+                                <img src="{{ comment.user.userprofile.picture.url }}" class="rounded-circle me-2"
+                                    style="width: 40px; height: 40px; object-fit: cover;">
+                                {% else %}
+                                <img src="{% static 'boardgame/images/default_profile.jpg' %}"
+                                    class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                {% endif %}
+                            </a>
+                            <div class="comment-bubble">
+                                <a class="text-decoration-none text-reset d-flex align-items-center"
+                                    href="{% url 'user_profile' comment.user.id %}">
+                                    <h6 class="mb-1 fw-bold">{{ comment.user.username }}</h6>
+                                </a>
+                                {{ comment.content }}
+                                <p class="text-muted mb-0"><small>{{ comment.date_added }}</small></p>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
-        
+
+
                     <!-- Comment Form -->
                     {% if is_attending %}
-                    <div class="mt-4 bg-light p-3 rounded">
+                    <div class="mt-4 comment-form">
                         <form method="POST" action="">
                             {% csrf_token %}
                             <input type="hidden" name="post_id" value="{{ post.id }}">
                             <div class="form-group">
-                                <textarea class="form-control" id="content" name="content" rows="2" placeholder="Add a comment..." required></textarea>
+                                <textarea class="form-control add-comment-bubble bg-light" id="content" name="content" rows="2"
+                                    placeholder="Add a comment..." required></textarea>
                             </div>
                             <div class="mt-2 text-end">
-                                <button type="submit" class="btn btn-info btn-sm" name="comment_content">Comment</button>
+                                <button type="submit" class="btn btn-info btn-sm"
+                                    name="comment_content">Comment</button>
                             </div>
                         </form>
                     </div>
@@ -387,32 +432,50 @@
             </div>
             {% endfor %}
         </div>
-        <hr>
-        
-        <div class="row mt-4">
-            <div class="col-md-4">
-                <div class="card">
+
+    </div>
+        <div class="tab-pane fade" id="attendees" role="tabpanel" aria-labelledby="attendees-tab">
+            <!-- Content for Attendees Tab -->
+                <div class="card card-custom mb-3">
                     <div class="card-header">
-                        Attendees
+                        <h4>Attendees</h4>
                     </div>
                     <div class="card-body">
-                        <ul class="list-group list-group-flush">
+                        <p class="card-text">
+                        <ul>
                             {% for attendee in attendees %}
-                            <li class="list-group-item">{{ attendee.username }}</li>
+                            <a class="text-decoration-none text-reset d-flex align-items-center"
+                                href="{% url 'user_profile' attendee.id %}">
+                                {% if attendee.userprofile.picture %}
+                                <img src="{{ attendee.userprofile.picture.url }}" class="rounded-circle me-2"
+                                    style="width: 40px; height: 40px; object-fit: cover;">
+                                {% else %}
+                                <img src="{% static 'boardgame/images/default_profile.jpg' %}" class="rounded-circle me-2"
+                                    style="width: 40px; height: 40px; object-fit: cover;">
+                                {% endif %}
+                                {{ attendee.username }}
+                            </a><br />
                             {% endfor %}
                         </ul>
+                        </p>
                     </div>
                 </div>
-            </div>
-        </div>
-        <hr>
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <a href="{% url 'group_profile' event.group.slug %}" class="btn btn-secondary btn-sm">Back to Group</a>
-                <a href="{% url 'home' %}" class="btn btn-secondary btn-sm">Back to Home</a>
-            </div>
+           
+
+
         </div>
     </div>
+
+
+    <hr>
+    <!-- Link back to home or group -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a href="{% url 'group_profile' event.group.slug %}" class="btn btn-secondary btn-sm">Back to Group</a>
+            <a href="{% url 'home' %}" class="btn btn-secondary btn-sm">Back to Home</a>
+        </div>
+    </div>
+
 
 </body>
 
