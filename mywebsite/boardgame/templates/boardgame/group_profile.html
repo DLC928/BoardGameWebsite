@@ -1,6 +1,10 @@
 {% extends 'boardgame/base.html' %}
 {% load static %}
 {% block content %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'boardgame/group_profile_style.css' %}">
+</head>
 <div class="row">
     <div class="col-md-3">
         {% if group.group_image %}
@@ -16,14 +20,15 @@
         <form method="POST" action="">
             {% csrf_token %}
             {% if is_member %}
-            <button type="submit" class="btn btn-secondary btn-sm mb-2" name="leave">Leave Group</button>
+            <button type="submit" class="btn btn-danger btn-sm mb-2" name="leave">Leave Group</button>
             {% else %}
-            <button type="submit" class="btn btn-secondary btn-sm mb-2" name="join">Join Group</button>
+            <button type="submit" class="btn btn-primary btn-sm mb-2" name="join">Join Group</button>
             {% endif %}
             <!-- Show Create Event button if user is group admin -->
             {% if is_admin or is_moderator %}
             <a href="{% url 'create_event' group.slug %}" class="btn btn-primary btn-sm mb-2">Create Event</a>
-            <a href="{% url 'manage_group_dashboard' group.slug %}" class="btn btn-primary btn-sm mb-2">Manage Group</a>
+            <a href="{% url 'manage_group_dashboard' group.slug %}" class="btn btn-secondary btn-sm mb-2">Manage
+                Group</a>
             {% endif %}
         </form>
         {% else %}
@@ -58,39 +63,45 @@
                 {% endfor %}
             </p>
         </div>
-
     </div>
 </div>
 
 <hr>
 
-
-<!-- Events -->
-<h3>Events</h3>
-<ul class="nav nav-tabs" id="eventTabs" role="tablist">
+<!-- Tabs for Content Sections -->
+<ul class="nav nav-tabs" id="groupTabs" role="tablist">
     <li class="nav-item" role="presentation">
-        <a class="nav-link active" id="upcoming-events-tab" data-bs-toggle="tab" href="#upcoming-events" role="tab"
-            aria-controls="upcoming-events" aria-selected="true">Upcoming Events</a>
+        <a class="nav-link active" id="events-tab" data-bs-toggle="tab" href="#events" role="tab" aria-controls="events"
+            aria-selected="true">Events</a>
     </li>
     <li class="nav-item" role="presentation">
-        <a class="nav-link" id="past-events-tab" data-bs-toggle="tab" href="#past-events" role="tab"
-            aria-controls="past-events" aria-selected="false">Past Events</a>
+        <a class="nav-link" id="discussions-tab" data-bs-toggle="tab" href="#discussions" role="tab"
+            aria-controls="discussions" aria-selected="false">Discussions</a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" id="members-tab" data-bs-toggle="tab" href="#members" role="tab" aria-controls="members"
+            aria-selected="false">Members</a>
     </li>
 </ul>
-<div class="tab-content" id="eventTabsContent">
-    <div class="tab-pane fade show active" id="upcoming-events" role="tabpanel" aria-labelledby="upcoming-events-tab">
-        <div class="row" id="event-cards">
+
+<div class="tab-content mt-3" id="groupTabsContent">
+    <!-- Events Tab -->
+    <div class="tab-pane fade show active" id="events" role="tabpanel" aria-labelledby="events-tab">
+        <h3 class="mt-3">Upcoming Events</h3>
+        <div class="row">
             {% for event in upcoming_events %}
             <div class="col-md-4 mb-3">
-                <div class="card" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-                    <div class="card-header" style="background-color: #e9ecef;">
-                        <h4>{{ event.title }}</h4>
+                <div class="card card-custom">
+                    <div class="card-header">
+                        <h5>{{ event.title }}</h5>
                     </div>
                     <div class="card-body">
                         {% if event.event_image %}
-                        <img src="{{ event.event_image.url }}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                        <img src="{{ event.event_image.url }}" class="profile-image rounded mb-3"
+                            style="max-width: 100%;">
                         {% else %}
-                        <img src="{% static 'boardgame/images/event_image_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                        <img src="{% static 'boardgame/images/event_image_default.jpg' %}"
+                            class="profile-image rounded mb-3" style="max-width: 100%;">
                         {% endif %}
                         <p class="card-text">
                             <strong>Date:</strong> {{ event.date_time }}<br>
@@ -102,153 +113,174 @@
             </div>
             {% endfor %}
         </div>
-    </div>
-    <div class="tab-pane fade" id="past-events" role="tabpanel" aria-labelledby="past-events-tab">
-        <div class="row" id="event-cards">
+
+        <h3 class="mt-3">Past Events</h3>
+        <div class="row">
             {% for event in past_events %}
             <div class="col-md-4 mb-3">
-                <div class="card" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-                    <div class="card-header" style="background-color: #e9ecef;">
+                <div class="card card-custom">
+                    <div class="card-header">
                         <h5>{{ event.title }}</h5>
                     </div>
                     <div class="card-body">
                         {% if event.event_image %}
-                        <img src="{{ event.event_image.url }}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                        <img src="{{ event.event_image.url }}" class="profile-image rounded mb-3"
+                            style="max-width: 100%;">
                         {% else %}
-                        <img src="{% static 'boardgame/images/event_image_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                        <img src="{% static 'boardgame/images/event_image_default.jpg' %}"
+                            class="profile-image rounded mb-3" style="max-width: 100%;">
                         {% endif %}
                         <p class="card-text">
                             <strong>Date:</strong> {{ event.date_time }}<br>
                             <b>Attendees:</b> {{ event.attendees.count }}
                         </p>
-                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event Details</a>
+                        <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event
+                            Details</a>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
-</div>
-<hr>
-<!-- Discussions -->
-<h3 class="mb-4">Discussions</h3>
 
-<!-- Button to Open Modal -->
-{% if is_member %}
-<div class="mb-3">
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postModal">Add a Post</button>
-</div>
-{% else %}
-<p class="text-danger">You must <a href="{% url 'login' %}" class="text-decoration-none text-danger">login</a> first to join the discussion.</p>
-{% endif %}
-
-<!-- Modal for Adding a Post -->
-<div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-light border-primary">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="postModalLabel">Add a Post</h5>
-                <button type="button" class="btn-close btn-light" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" action="">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <div class="form-group">
-                        <textarea class="form-control" id="content" name="content" rows="7" placeholder="Write your post here..." required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary" name="post_content">Post</button>
-                </div>
-            </form>
+    <!-- Discussions Tab -->
+    <div class="tab-pane fade" id="discussions" role="tabpanel" aria-labelledby="discussions-tab">
+        {% if is_member %}
+        <div class="mb-3">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postModal">Add a Post</button>
         </div>
-    </div>
-</div>
+        {% else %}
+        <p class="text-danger">You must <a href="{% url 'login' %}" class="text-decoration-none text-danger">login</a>
+            first to join the discussion.</p>
+        {% endif %}
 
-<!-- Display Posts -->
-<div class="mt-4">
-    {% for post in posts %}
-    <div class="card mb-4 border-light shadow-sm">
-        <div class="card-body bg-light">
-            <div class="d-flex align-items-start mb-3">
-                <a class="text-decoration-none text-reset d-flex align-items-center" href="{% url 'user_profile' post.user.id %}">
-                {% if post.user.userprofile.picture %}
-                    <img src="{{ post.user.userprofile.picture.url }}" class="rounded-circle me-2" style="width: 50px; height: 50px; object-fit: cover;">
-                {% else %}
-                    <img src="{% static 'boardgame/images/default_profile.jpg' %}" class="rounded-circle me-2" style="width: 50px; height: 50px; object-fit: cover;">
-                {% endif %}</a>
-                <div>
-                    <a class="text-decoration-none text-reset d-flex align-items-center" href="{% url 'user_profile' post.user.id %}">
-                    <h5 class="card-title text-primary mb-0">{{ post.user.username }}</h5></a>
-                    <p class="card-text">{{ post.content }}</p>
-                    <p class="card-text"><small class="text-muted">{{ post.date_added }}</small></p>
+        <!-- Modal for Adding a Post -->
+        <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-light">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="postModalLabel">Add a Post</h5>
+                        <button type="button" class="btn-close btn-light" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <textarea class="form-control" id="content" name="content" rows="7"
+                                    placeholder="Write your post here..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" name="post_content">Post</button>
+                        </div>
+                    </form>
                 </div>
             </div>
+        </div>
 
-            <!-- Display Comments -->
-            <div class="mt-3 border-top pt-3 bg-light">
-                {% for comment in post.group_comments.all %}
-                <div class="d-flex align-items-start mb-2">
-                    <a class="text-decoration-none text-reset d-flex align-items-center" href="{% url 'user_profile' comment.user.id %}">
-                    {% if comment.user.userprofile.picture %}
-                        <img src="{{ comment.user.userprofile.picture.url }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                    {% else %}
-                        <img src="{% static 'boardgame/images/default_profile.jpg' %}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                    {% endif %}</a>
-                    <div class="card border-light">
-                        <div class="card-body bg-white">
-                            <a class="text-decoration-none text-reset d-flex align-items-center" href="{% url 'user_profile' comment.user.id %}">
-                            <h6 class="card-title text-success mb-1">{{ comment.user.username }}</h6></a>
-                            <p class="card-text">{{ comment.content }}</p>
-                            <p class="card-text"><small class="text-muted">{{ comment.date_added }}</small></p>
+        <!-- Display Posts -->
+        <div class="mt-4">
+            {% for post in posts %}
+            <div class="card mb-4 card-custom">
+                <div class="card-body">
+                    <div class="d-flex align-items-start mb-3">
+                        <a class="text-decoration-none text-reset d-flex align-items-center"
+                            href="{% url 'user_profile' post.user.id %}">
+                            {% if post.user.userprofile.picture %}
+                            <img src="{{ post.user.userprofile.picture.url }}" class="rounded-circle me-2"
+                                style="width: 50px; height: 50px; object-fit: cover;">
+                            {% else %}
+                            <img src="{% static 'boardgame/images/default_profile.jpg' %}" class="rounded-circle me-2"
+                                style="width: 50px; height: 50px; object-fit: cover;">
+                            {% endif %}</a>
+                        <div>
+                            <a class="text-decoration-none text-reset d-flex align-items-center"
+                                href="{% url 'user_profile' post.user.id %}">
+                                <h5 class="card-title text-primary mb-0">{{ post.user.username }}</h5>
+                            </a>
+                            <p class="mb-1 fs-6">{{ post.content }}</p>
+                            <p class="text-muted mb-0"><small>{{ post.date_added }}</small></p>
+
                         </div>
                     </div>
-                </div>
-                {% endfor %}
-            </div>
-            <!-- Comment Form -->
-            {% if is_member %}
-            <div class="mt-4 bg-light p-3 rounded">
-                <form method="POST" action="">
-                    {% csrf_token %}
-                    <input type="hidden" name="post_id" value="{{ post.id }}">
-                    <div class="form-group">
-                        <textarea class="form-control" id="content" name="content" rows="2" placeholder="Add a comment..." required></textarea>
+                    <!-- Display Comments -->
+                    <div class="mt-3 border-top pt-3">
+                        {% for comment in post.group_comments.all %}
+                        <div class="d-flex align-items-start mb-2">
+                            <a class="text-decoration-none text-reset d-flex align-items-center"
+                                href="{% url 'user_profile' comment.user.id %}">
+                                {% if comment.user.userprofile.picture %}
+                                <img src="{{ comment.user.userprofile.picture.url }}" class="rounded-circle me-2"
+                                    style="width: 40px; height: 40px; object-fit: cover;">
+                                {% else %}
+                                <img src="{% static 'boardgame/images/default_profile.jpg' %}"
+                                    class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                {% endif %}
+                            </a>
+                            <div class="comment-bubble">
+                                <a class="text-decoration-none text-reset d-flex align-items-center"
+                                    href="{% url 'user_profile' comment.user.id %}">
+                                    <h6 class="mb-1 fw-bold">{{ comment.user.username }}</h6>
+                                </a>
+                                {{ comment.content }}
+                                <p class="text-muted mb-0"><small>{{ comment.date_added }}</small></p>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
-                    <div class="mt-2 text-end">
-                        <button type="submit" class="btn btn-info btn-sm" name="comment_content">Comment</button>
-                    </div>
-                </form>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-    {% endfor %}
-</div>
-<hr>
 
-<!-- Group Members -->
-<div class="col-md-4 mb-3">
-    <div class="card">
-        <div class="card-header">
-            Members
+
+                    <!-- Comment Form -->
+                    {% if is_member %}
+                    <div class="mt-4 comment-form">
+                        <form method="POST" action="">
+                            {% csrf_token %}
+                            <input type="hidden" name="post_id" value="{{ post.id }}">
+                            <div class="form-group">
+                                <textarea class="form-control add-comment-bubble bg-light" id="content" name="content" rows="2"
+                                    placeholder="Add a comment..." required></textarea>
+                            </div>
+                            <div class="mt-2 text-end">
+                                <button type="submit" class="btn btn-info btn-sm"
+                                    name="comment_content">Comment</button>
+                            </div>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
         </div>
-        <div class="card-body">
-            <p class="card-text">
+
+    </div>
+
+    <!-- Members Tab -->
+    <div class="tab-pane fade" id="members" role="tabpanel" aria-labelledby="members-tab">
+        <div class="card card-custom mb-3">
+            <div class="card-header">
+                <h4>Members</h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
                 <ul>
                     {% for member in members %}
-                    <a class="text-decoration-none text-reset d-flex align-items-center" href="{% url 'user_profile' member.id %}">
+                    <a class="text-decoration-none text-reset d-flex align-items-center"
+                        href="{% url 'user_profile' member.id %}">
                         {% if member.userprofile.picture %}
-                            <img src="{{ member.userprofile.picture.url }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                        <img src="{{ member.userprofile.picture.url }}" class="rounded-circle me-2"
+                            style="width: 40px; height: 40px; object-fit: cover;">
                         {% else %}
-                            <img src="{% static 'boardgame/images/default_profile.jpg' %}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                        <img src="{% static 'boardgame/images/default_profile.jpg' %}" class="rounded-circle me-2"
+                            style="width: 40px; height: 40px; object-fit: cover;">
                         {% endif %}
                         {{ member.username }}
-                    </a><br/>
+                    </a><br />
                     {% endfor %}
                 </ul>
-            </p>
+                </p>
+            </div>
         </div>
     </div>
 </div>
@@ -258,15 +290,4 @@
     <a href="{% url 'home' %}" class="btn btn-secondary btn-sm">Back to Home</a>
 </div>
 
-<style>
-    .event-container {
-        display: flex;
-        overflow-x: auto;
-    }
-
-    .event-container .col-md-4 {
-        flex: 0 0 auto;
-        margin-right: 10px;
-    }
-</style>
 {% endblock %}

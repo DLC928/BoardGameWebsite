@@ -1,0 +1,52 @@
+/* Styling for the tabs */
+.nav-tabs {
+    border-bottom: 2px solid #dee2e6; /* Bottom border for the tabs container */
+}
+
+.nav-tabs .nav-link {
+    color: #000; /* Default text color */
+    font-size: 1.25rem; /* Font size */
+    padding: 0.75rem 1.25rem; /* Padding for better spacing */
+    border: none; /* Remove default tab border */
+}
+
+.nav-tabs .nav-link.active {
+    color: #007bff; /* Text color when active */
+    border-bottom: 2px solid #007bff; /* Underline color when active */
+    font-weight: bold; /* Bold text */
+}
+
+.nav-tabs .nav-link:hover {
+    color: #007bff; /* Change text color on hover */
+}
+
+/* Styling for tab content */
+.tab-content {
+    background-color: #f8f9fa; /* Light grey background */
+    padding: 20px;
+    border-radius: 10px;
+}
+
+   /* Styling for cards */
+   .card-custom {
+    border: none;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px; /* Rounded corners for cards */
+}
+
+/* Styling for comment bubbles */
+.comment-bubble {
+    background-color: #f0f0f0; /* Light grey background for comment bubbles */
+    border-radius: 20px; /* Rounded corners for the comment bubbles */
+    padding: 10px; /* Padding inside the bubbles */
+    margin-left: 10px; /* Space between the profile image and the comment bubble */
+    max-width: 80%; /* Prevent the bubble from stretching too wide */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); 
+}
+
+/* Styling for add comment box */
+.add-comment-bubble {
+    border-radius: 10px; /* Rounded corners for bubbles */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
