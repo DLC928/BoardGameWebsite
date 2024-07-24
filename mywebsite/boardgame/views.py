@@ -2,8 +2,8 @@ from datetime import datetime
 from django.contrib import messages 
 from django.http import HttpResponseRedirect 
 from django.shortcuts import render, get_object_or_404, redirect
-from boardgame.models import GroupPost, User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote
-from .forms import EventNominationSettingsForm, GroupCommentForm, GroupForm, EventForm, EventLocationForm, GameDetailForm, GroupPostForm, UserProfileForm
+from boardgame.models import EventPost, GroupPost, User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote
+from .forms import EventCommentForm, EventNominationSettingsForm, EventPostForm, GroupCommentForm, GroupForm, EventForm, EventLocationForm, GameDetailForm, GroupPostForm, UserProfileForm
 from .utils import fetch_place_details
 from django.db.models import Count, Q
 
@@ -267,7 +267,23 @@ def event_details(request, event_id):
                         return redirect('event_details', event_id=event_id)
                     else:
                         GameSignup.objects.filter(nomination=nomination, user=request.user).delete()
-            
+            elif 'post_content' in request.POST:
+                post_form = EventPostForm(request.POST)
+                if post_form.is_valid():
+                    post = post_form.save(commit=False)
+                    post.event = event
+                    post.user = request.user
+                    post.save()
+                    return redirect('event_details', event_id=event_id)
+            elif 'comment_content' in request.POST:
+                comment_form = EventCommentForm(request.POST)
+                post_id = request.POST.get('post_id')
+                if post_id and comment_form.is_valid():
+                    comment = comment_form.save(commit=False)
+                    comment.post_id = post_id
+                    comment.user = request.user
+                    comment.save()
+                    return redirect('event_details', event_id=event_id)
             elif 'has_nomination' in request.POST:
                 if has_nomination:
                     messages.error(request, "You have already nominated a game. You can only nominate one game.")
@@ -293,6 +309,10 @@ def event_details(request, event_id):
                     Vote.objects.filter(user=request.user, game=nomination, event=event).delete()
             
             return redirect('event_details', event_id=event_id)
+        
+    post_form = EventPostForm()
+    comment_form = EventCommentForm()
+    posts = EventPost.objects.filter(event=event).order_by('-date_added')
     
     context = {
         'event': event,
@@ -307,7 +327,10 @@ def event_details(request, event_id):
         'vote_counts': vote_counts,
         'user_votes': user_votes,
         'total_user_votes': total_user_votes,
-        'has_nomination': has_nomination
+        'has_nomination': has_nomination,
+        'post_form': post_form,
+        'comment_form': comment_form,
+        'posts': posts,
     }
 
     return render(request, 'boardgame/event_details.html', context)
@@ -414,13 +437,14 @@ def game_details(request, event_id, game_id):
 
 # ---------------------------USER PROFILES---------------------------
 
-def user_profile(request):
-    user = request.user
+def user_profile(request,id):
+    user = get_object_or_404(User,id=id)
     user_profile = UserProfile.objects.filter(user=user).first()  
     user_groups = GroupMembers.objects.filter(user=user).select_related('group')
     user_events = EventAttendance.objects.filter(user=user).select_related('event')
     
     context = {
+        'user': user,
         'user_profile': user_profile,
         'user_groups': user_groups,
         'user_events': user_events,

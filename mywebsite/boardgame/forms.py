@@ -1,5 +1,5 @@
 from django import forms 
-from .models import Category, Group,Event, EventLocation, Game, GroupPost, GroupPostComment, Tag, UserProfile
+from .models import Category, EventPost, EventPostComment, Group,Event, EventLocation, Game, GroupPost, GroupPostComment, Tag, UserProfile
 
 # Create a group form
 class GroupForm(forms.ModelForm):
@@ -93,3 +93,13 @@ class GroupCommentForm(forms.ModelForm):
     class Meta:
         model = GroupPostComment
         fields = ['content']      
+ 
+class EventPostForm(forms.ModelForm):
+    class Meta:
+        model = EventPost
+        fields = ['content']
+
+class EventCommentForm(forms.ModelForm):
+    class Meta:
+        model = EventPostComment
+        fields = ['content']              

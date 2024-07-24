@@ -156,6 +156,25 @@ class EventLocation(models.Model):
     def __str__(self):
         return f"{self.address}, {self.city}, {self.country}"
 
+class EventPost(models.Model):
+    event = models.ForeignKey(Event, related_name='event_posts', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Post by {self.user.username} in {self.event.title}"
+
+class EventPostComment(models.Model):
+    post = models.ForeignKey(EventPost, related_name='event_comments', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.post.id}"
+  
+  
 class Game(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='nominated_games')
     nominator = models.ForeignKey(User, on_delete=models.CASCADE)

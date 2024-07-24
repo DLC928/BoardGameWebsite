@@ -154,7 +154,6 @@
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="form-group">
-                        <!-- Use textarea with custom height -->
                         <textarea class="form-control" id="content" name="content" rows="7" placeholder="Write your post here..." required></textarea>
                     </div>
                 </div>
@@ -234,11 +233,18 @@
         </div>
         <div class="card-body">
             <p class="card-text">
-            <ul>
-                {% for member in members %}
-                <li>{{ member.username }}</li>
-                {% endfor %}
-            </ul>
+                <ul>
+                    {% for member in members %}
+                    <a class="text-decoration-none text-reset d-flex align-items-center" href="{% url 'user_profile' member.id %}">
+                        {% if member.userprofile.picture %}
+                            <img src="{{ member.userprofile.picture.url }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                        {% else %}
+                            <img src="{% static 'boardgame/images/default_profile.jpg' %}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                        {% endif %}
+                        {{ member.username }}
+                    </a><br/>
+                    {% endfor %}
+                </ul>
             </p>
         </div>
     </div>
