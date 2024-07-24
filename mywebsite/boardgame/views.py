@@ -53,7 +53,8 @@ def group_profile(request, group_slug):
     now = datetime.now()
     upcoming_events = Event.objects.filter(group=group, date_time__gte=now).order_by('date_time')
     past_events = Event.objects.filter(group=group, date_time__lt=now).order_by('-date_time')
-
+    post_form = GroupPostForm()
+    comment_form = GroupCommentForm()
     # Process join/leave group actions
     if request.method == 'POST' and request.user.is_authenticated:
         if 'join' in request.POST:
@@ -69,7 +70,6 @@ def group_profile(request, group_slug):
                     post.group = group
                     post.user = request.user
                     post.save()
-                    return redirect('group_profile', group_slug=group.slug)
         elif 'comment_content' in request.POST:
                 comment_form = GroupCommentForm(request.POST)
                 post_id = request.POST.get('post_id')
@@ -78,11 +78,8 @@ def group_profile(request, group_slug):
                     comment.post_id = post_id
                     comment.user = request.user
                     comment.save()
-                    return redirect('group_profile', group_slug=group.slug)
-
+        return redirect('group_profile', group_slug=group.slug)
     group_location = GroupLocation.objects.filter(group=group).first()
-    post_form = GroupPostForm()
-    comment_form = GroupCommentForm()
     posts = GroupPost.objects.filter(group=group).order_by('-date_added')
 
     # Pass the group object and related data to the template
