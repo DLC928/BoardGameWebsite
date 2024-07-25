@@ -35,10 +35,6 @@
             <a class="btn btn-info btn-sm me-2 nav-link {% if section == 'member_management' %}active{% endif %}"
                 href="{% url 'manage_group_dashboard_with_section' group.slug 'member_management' %}">Member Management</a>
         </li>
-        <li class="nav-item">
-            <a class="btn btn-info btn-sm me-2 nav-link {% if section == 'needs_review' %}active{% endif %}"
-                href="{% url 'manage_group_dashboard_with_section' group.slug 'needs_review' %}">Needs Review</a>
-        </li>
     </ul>
 </nav>
 <br/>
@@ -315,12 +311,6 @@
             {% endfor %}
         </tbody>
     </table>
-
-
-{% elif section == 'needs_review' %}
-    <!-- Needs Review -->    
-    <!-- Needs review functionality -->
-
 {% endif %}
     <!-- Back to Group Button -->
     <div class="row mt-4">

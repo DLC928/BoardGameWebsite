@@ -54,10 +54,6 @@
                 href="{% url 'manage_event_dashboard_with_section' event.id 'attendee_management' %}">Attendee
                 Management</a>
         </li>
-        <li class="nav-item">
-            <a class="btn btn-info btn-sm me-2 nav-link {% if section == 'needs_review' %}active{% endif %}"
-                href="{% url 'manage_event_dashboard_with_section' event.id 'needs_review' %}">Needs Review</a>
-        </li>
     </ul>
 </nav>
 <br />
@@ -456,12 +452,6 @@
         {% endfor %}
     </tbody>
 </table>
-
-
-{% elif section == 'needs_review' %}
-<h2>Needs Review</h2>
-<!-- Needs review functionality -->
-
 {% endif %}
 <!-- Back to Event and Group Buttons -->
 <div class="row mt-4">

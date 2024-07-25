@@ -1,16 +1,14 @@
 from datetime import datetime
 from django.contrib import messages 
 from django.http import HttpResponseRedirect 
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 from boardgame.models import EventPost, GroupPost, User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote
 from .forms import EventCommentForm, EventNominationSettingsForm, EventPostForm, GroupCommentForm, GroupForm, EventForm, EventLocationForm, GameDetailForm, GroupPostForm, UserProfileForm
 from .utils import fetch_place_details
 from django.db.models import Count, Q
 
-
 def home(request):
     now = datetime.now()
-     # Fetch all groups and events with their locations
     group_list = Group.objects.all().select_related('grouplocation').order_by('name')
     event_list = Event.objects.filter(date_time__gte=now).select_related('eventlocation').order_by('title')
     # Initialize user-related variables
@@ -19,7 +17,7 @@ def home(request):
     user_profile = None
     user = request.user
     recommended_groups = []
-    # Check if the user is authenticated
+
     if user.is_authenticated:
         # Fetch user-specific groups and events
         user_groups = GroupMembers.objects.filter(user=user).select_related('group')
@@ -29,7 +27,9 @@ def home(request):
         if user_profile:
             city = user_profile.city
             if city: 
-                recommended_groups = Group.objects.filter(grouplocation__city=city)
+                all_recommendations = Group.objects.filter(grouplocation__city=city)
+                joined_groups = user_groups.values_list('group_id', flat=True)
+                recommended_groups = all_recommendations.exclude(id__in=joined_groups)
     context = {
         'groups': group_list,
         'events': event_list,
@@ -40,13 +40,9 @@ def home(request):
     }
     return render(request, 'boardgame/home.html', context=context)
 # ---------------------------GROUPS---------------------------
-
 def group_profile(request, group_slug):
-    # Retrieve the group object using the slug
-    group = get_object_or_404(Group, slug=group_slug)
+    group = Group.objects.get(slug=group_slug)
     members = group.members.all()
-
-    # Determine if the user is authenticated and whether they are a member or admin
     is_member = False
     is_admin = False
     is_moderator = False
@@ -54,7 +50,6 @@ def group_profile(request, group_slug):
         is_member = members.filter(id=request.user.id).exists()
         is_admin = GroupMembers.objects.filter(user=request.user, group=group, is_admin=True).exists()
         is_moderator = GroupMembers.objects.filter(user=request.user, group=group, is_moderator=True).exists()
-
     # Fetch events associated with the group
     now = datetime.now()
     upcoming_events = Event.objects.filter(group=group, date_time__gte=now).order_by('date_time')
@@ -87,8 +82,6 @@ def group_profile(request, group_slug):
         return redirect('group_profile', group_slug=group.slug)
     group_location = GroupLocation.objects.filter(group=group).first()
     posts = GroupPost.objects.filter(group=group).order_by('-date_added')
-
-    # Pass the group object and related data to the template
     context = {
         'group': group,
         'group_location': group_location,
@@ -110,9 +103,8 @@ def create_group(request):
         if group_form.is_valid():
             group = group_form.save(commit=False)
             group.save()
-
-            group_form.save_m2m()
-
+            group_form.save_m2m() #For tags and categories 
+            
             # Fetch place details using utility function
             place_id = request.POST.get('place_id')  # Get selected place ID
             place_details = fetch_place_details(place_id)
@@ -130,8 +122,6 @@ def create_group(request):
                 )
             # Add user as a member of the group
             GroupMembers.objects.create(user=request.user, group=group, is_admin=True)
-
-            # Redirect to group profile page
             return redirect('group_profile', group_slug=group.slug)
     else:
         group_form = GroupForm()
@@ -139,9 +129,8 @@ def create_group(request):
     return render(request, 'boardgame/create_group.html', {'form': group_form})
 
 # ---------------------------EVENTS---------------------------
-
 def create_event(request, group_slug):
-    group = get_object_or_404(Group, slug=group_slug)
+    group = Group.objects.get(slug=group_slug)
     event_form = EventForm(request.POST or None, request.FILES or None)
     location_form = None
 
@@ -179,9 +168,7 @@ def create_event(request, group_slug):
                             latitude=place_details.get('latitude', None),
                             longitude=place_details.get('longitude', None),
                         )
-
             return redirect('group_profile', group_slug=group_slug)
-    
     context = {
         'form': event_form,
         'location_form': location_form,
@@ -190,7 +177,7 @@ def create_event(request, group_slug):
     return render(request, 'boardgame/create_event.html', context)
 
 def event_details(request, event_id):
-    event = get_object_or_404(Event, id=event_id)
+    event = Event.objects.get(id=event_id)
     attendees = event.attendees.all()
     nominations = Game.objects.filter(event=event)
     approved_nominations = Game.objects.filter(event=event, nomination_status='Approved')
@@ -206,7 +193,6 @@ def event_details(request, event_id):
         is_admin = GroupMembers.objects.filter(user=request.user, group=event.group, is_admin=True).exists()
         is_moderator = GroupMembers.objects.filter(user=request.user, group=event.group, is_moderator=True).exists()
         has_nomination = Game.objects.filter(event=event, nominator=request.user).exists()
-
         # Calculate vote counts for each game
         vote_counts = {nomination.id: Vote.objects.filter(game=nomination, event=event).count() for nomination in nominations}
         user_votes = Vote.objects.filter(user=request.user, event=event).values_list('game_id', flat=True)
@@ -214,7 +200,6 @@ def event_details(request, event_id):
     
     approved_nominations_with_slots = []
     waitlisted_games = []
-
     for nomination in approved_nominations:
         signed_up_count = GameSignup.objects.filter(nomination=nomination).count()
         remaining_slots = nomination.max_players - signed_up_count
@@ -238,13 +223,11 @@ def event_details(request, event_id):
                 'remaining_slots': remaining_slots,
                 'is_signed_up': is_signed_up
             })
-    
     if request.method == 'POST':
         if request.user.is_authenticated:
             if 'join' in request.POST:
                 if not is_attending:
                     EventAttendance.objects.create(user=request.user, event=event)
-            
             elif 'leave' in request.POST:
                 if is_attending:
                     EventAttendance.objects.filter(user=request.user, event=event).delete()
@@ -253,16 +236,14 @@ def event_details(request, event_id):
                         if nomination.nominator == request.user:
                             GameSignup.objects.filter(nomination=nomination).delete()
                             nomination.delete()
-            
             elif 'sign_up' in request.POST:
                 nomination_id = request.POST.get('nomination_id')
-                nomination = get_object_or_404(Game, id=nomination_id)
+                nomination = Game.objects.get(id=nomination_id)
                 if is_attending and not GameSignup.objects.filter(nomination=nomination, user=request.user).exists():
                     GameSignup.objects.create(nomination=nomination, user=request.user)
-            
             elif 'leave_game' in request.POST:
                 nomination_id = request.POST.get('nomination_id')
-                nomination = get_object_or_404(Game, id=nomination_id)
+                nomination = Game.objects.get(id=nomination_id)
                 if GameSignup.objects.filter(nomination=nomination, user=request.user).exists():
                     if nomination.nominator == request.user:
                         GameSignup.objects.filter(nomination=nomination).delete()
@@ -293,21 +274,21 @@ def event_details(request, event_id):
             
             elif 'remove_nomination' in request.POST:
                 nomination_id = request.POST.get('nomination_id')
-                nomination = get_object_or_404(Game, id=nomination_id)
+                nomination = Game.objects.get(id=nomination_id)
                 if nomination.nominator == request.user:
                     GameSignup.objects.filter(nomination=nomination).delete()
                     nomination.delete()
             
             elif 'vote' in request.POST:
                 nomination_id = request.POST.get('nomination_id')
-                nomination = get_object_or_404(Game, id=nomination_id)
+                nomination = Game.objects.get(id=nomination_id)
                 if not Vote.objects.filter(user=request.user, game=nomination, event=event).exists():
                     if Vote.objects.filter(user=request.user, event=event).count() < 3:
                         Vote.objects.create(user=request.user, game=nomination, event=event)
             
             elif 'remove_vote' in request.POST:
                 nomination_id = request.POST.get('nomination_id')
-                nomination = get_object_or_404(Game, id=nomination_id)
+                nomination = Game.objects.get(id=nomination_id)
                 if Vote.objects.filter(user=request.user, game=nomination, event=event).exists():
                     Vote.objects.filter(user=request.user, game=nomination, event=event).delete()
             
@@ -340,8 +321,7 @@ def event_details(request, event_id):
 
 
 def nominate_game(request, event_id):
-    event = get_object_or_404(Event, id=event_id)
-    
+    event = Event.objects.get(id=event_id)
     if request.method == 'POST':
         form = GameDetailForm(request.POST)
         if form.is_valid():
@@ -385,8 +365,8 @@ def nominate_game(request, event_id):
     return render(request, 'boardgame/nominate_game.html', {'form': form, 'event': event})
 
 def game_details(request, event_id, game_id):
-    event = get_object_or_404(Event, id=event_id)
-    game = get_object_or_404(Game, id=game_id)
+    event = Event.objects.get(id=event_id)
+    game = Game.objects.get(id=game_id)
     
     is_attending = False
     is_signed_up = False
@@ -426,8 +406,6 @@ def game_details(request, event_id, game_id):
 
         # Redirect back to the same page after processing the form
         return redirect('game_details', event_id=event_id, game_id=game_id)
-
-
     context = {
         'event': event,
         'game': game,
@@ -441,7 +419,7 @@ def game_details(request, event_id, game_id):
 # ---------------------------USER PROFILES---------------------------
 
 def user_profile(request,id):
-    user = get_object_or_404(User,id=id)
+    user = User.objects.get(id=id)
     user_profile = UserProfile.objects.filter(user=user).first()  
     user_groups = GroupMembers.objects.filter(user=user).select_related('group')
     user_events = EventAttendance.objects.filter(user=user).select_related('event')
@@ -453,7 +431,6 @@ def user_profile(request,id):
         'user_events': user_events,
     }
     return render(request, 'boardgame/user_profile.html', context)
-
 
 def profile_setup(request):
     user_profile = UserProfile.objects.filter(user=request.user).first()
@@ -532,7 +509,6 @@ def groups(request):
     }
     return render(request, 'boardgame/groups.html', context=context)
 
-
 def events(request):
     tag_name = request.GET.get('tag')
     category_name = request.GET.get('category')
@@ -607,7 +583,7 @@ def search(request):
     return render(request, 'boardgame/search.html', {})
 
 def manage_group_dashboard(request, group_slug, section=None):
-    group = get_object_or_404(Group, slug=group_slug)
+    group = Group.objects.get(slug=group_slug)
     section = section or request.GET.get('section', 'group_setup')
     # Fetch the group location
     group_location = None
@@ -650,7 +626,7 @@ def manage_group_dashboard(request, group_slug, section=None):
             event_id = request.POST.get('event_id')
             
             if action == 'delete_Event':
-                event = get_object_or_404(Event, id=event_id)
+                event = Event.objects.get(id=event_id)
                 event.delete()
                 messages.success(request, 'Group successfully deleted.')
                 return redirect('manage_group_dashboard_with_section', group_slug=group.slug, section='event_management')
@@ -694,17 +670,10 @@ def manage_group_dashboard(request, group_slug, section=None):
         moderators = GroupMembers.objects.filter(group=group, is_moderator=True)
         users = GroupMembers.objects.filter(group=group, is_admin=False, is_moderator=False)
         context.update({'admins': admins, 'moderators': moderators, 'users': users})
-    
-    elif section == 'needs_review':
-        pass
-        # Will setup later 
-      
     return render(request, 'boardgame/manage_group_dashboard.html', context)
 
-
-
 def manage_event_dashboard(request, event_id, section=None):
-    event = get_object_or_404(Event, id=event_id)
+    event = Event.objects.get(id=event_id)
     section = section or request.GET.get('section', 'event_setup')
     
     event_location = None
@@ -747,7 +716,7 @@ def manage_event_dashboard(request, event_id, section=None):
             nomination_id = request.POST.get('nomination_id')
 
             if action and nomination_id:
-                nomination = get_object_or_404(Game, id=nomination_id)
+                nomination = Game.objects.get(id=nomination_id)
 
                 if action == 'approve':
                     nomination.nomination_status = 'Approved'
@@ -787,13 +756,10 @@ def manage_event_dashboard(request, event_id, section=None):
         for nomination in nominations:
             count = Vote.objects.filter(game=nomination, event=event).count()
             vote_counts[nomination.id] = count
-
         nomination_settings = EventNominationSettingsForm(instance=event)
-        
         context.update({'pending_nominations': pending_nominations, 'approved_nominations': approved_nominations,
                         'vote_counts': vote_counts, 'nomination_settings': nomination_settings,'rejected_nominations':rejected_nominations})
-
-
+    
     elif section == 'attendee_management':
         attendees = event.attendees.all()
         if request.method == 'POST':
@@ -805,13 +771,8 @@ def manage_event_dashboard(request, event_id, section=None):
                 event.attendees.remove(selected_user)
                 messages.success(request, f"{selected_user.username} has been removed from the event.")
             
-            return redirect('manage_event_dashboard_with_section', event_id=event.id, section='attendee_management')
-        
+            return redirect('manage_event_dashboard_with_section', event_id=event.id, section='attendee_management')     
         context.update({'attendees': attendees})
-
-    elif section == 'needs_review':
-        # will setup later 
-        pass
     return render(request, 'boardgame/manage_event_dashboard.html', context)
 
 

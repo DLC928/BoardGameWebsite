@@ -150,8 +150,7 @@
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postModal">Add a Post</button>
         </div>
         {% else %}
-        <p class="text-danger">You must <a href="{% url 'login' %}" class="text-decoration-none text-danger">login</a>
-            first to join the discussion.</p>
+        <p class="text-danger">You must join the group to join the discussion.</p>
         {% endif %}
 
         <!-- Modal for Adding a Post -->
