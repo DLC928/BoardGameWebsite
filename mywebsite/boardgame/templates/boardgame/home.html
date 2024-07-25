@@ -101,7 +101,39 @@
             </div>
         </div>
         {% else %}
-
+      
+    <!-- Recommended Groups for users with a location -->
+    {% if user.is_authenticated and recommended_groups %}
+    <div class="card mb-4" style="background-color: #f8f9fa; border: none;">
+        <div class="card-header" style="background-color: #e9ecef;">
+            <h3>Recommended Groups Near You</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for group in recommended_groups %}
+                <div class="col-md-4 mb-3">
+                    <div class="card" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                        <div class="card-header" style="background-color: #e9ecef;">
+                            <h4>{{ group.name }}</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if group.group_image %}
+                            <img src="{{ group.group_image.url }}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                            {% else %}
+                            <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                            {% endif %}
+                            <br/>
+                            <b>Members:</b> {{ group.group_members.all.count }}
+                            <p><b>Location:</b> {{ group.grouplocation.city }}{% if group.grouplocation.state %}, {{ group.grouplocation.state }}{% endif %}</p>
+                            <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
     <!-- User's Groups -->
     <div class="card mb-4" style="background-color: #f8f9fa; border: none;">
         <div class="card-header" style="background-color: #e9ecef;">

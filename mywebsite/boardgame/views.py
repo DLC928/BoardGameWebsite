@@ -9,30 +9,36 @@ from django.db.models import Count, Q
 
 
 def home(request):
+    now = datetime.now()
      # Fetch all groups and events with their locations
     group_list = Group.objects.all().select_related('grouplocation').order_by('name')
-    event_list = Event.objects.all().select_related('eventlocation').order_by('title')
-
+    event_list = Event.objects.filter(date_time__gte=now).select_related('eventlocation').order_by('title')
     # Initialize user-related variables
     user_groups = None
     user_events = None
+    user_profile = None
     user = request.user
-    
+    recommended_groups = []
     # Check if the user is authenticated
     if user.is_authenticated:
         # Fetch user-specific groups and events
         user_groups = GroupMembers.objects.filter(user=user).select_related('group')
-        user_events = EventAttendance.objects.filter(user=user).select_related('event')
-
+        user_events = EventAttendance.objects.filter(user=user, event__date_time__gte=now).select_related('event')
+        user_profile = UserProfile.objects.get(user=user)
+        
+        if user_profile:
+            city = user_profile.city
+            if city: 
+                recommended_groups = Group.objects.filter(grouplocation__city=city)
     context = {
         'groups': group_list,
         'events': event_list,
         'user_groups': user_groups,
         'user_events': user_events,
+        'user_profile':user_profile,
+        'recommended_groups':recommended_groups,
     }
-
     return render(request, 'boardgame/home.html', context=context)
-
 # ---------------------------GROUPS---------------------------
 
 def group_profile(request, group_slug):
