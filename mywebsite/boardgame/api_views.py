@@ -10,15 +10,17 @@ def search_games(request):
     if query:
         url = f'https://www.boardgamegeek.com/xmlapi/search?search={query}&type=boardgame'
         response = requests.get(url)
-
-        if response.status_code == 200:
+        try:
+            response = requests.get(url)
+            response.raise_for_status()  # Will raise HTTPError for 4xx and 5xx errors
             root = ET.fromstring(response.content)
+
             exact_matches = []
             partial_matches = []
 
             for item in root.findall('boardgame'):
                 name_elem = item.find('name')
-                year_elem = item.find('yearpublished')  # Extract publication year
+                year_elem = item.find('yearpublished') 
                 if name_elem is not None:
                     game_name = name_elem.text
                     game = {
@@ -34,6 +36,24 @@ def search_games(request):
             # Combine exact matches and partial matches, with exact matches first
             games = exact_matches + partial_matches
             return JsonResponse(games, safe=False)
+
+        except requests.exceptions.HTTPError as http_err:
+            # Handle HTTP errors
+            if response.status_code in [500, 503]:
+                return JsonResponse({
+                    'error': 'The game database is currently unavailable. Please try again later or enter game details manually.'
+                }, status=response.status_code)
+            else:
+                return JsonResponse({
+                    'error': f'HTTP error occurred: {http_err}'
+                }, status=response.status_code)
+        
+        except requests.RequestException as req_err:
+            # Handle non-HTTP errors
+            return JsonResponse({
+                'error': f'Error occurred: {req_err}'
+            }, status=500)
+
 
     return JsonResponse({'error': 'BGG API error'}, status=400)
 
