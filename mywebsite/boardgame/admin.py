@@ -18,18 +18,13 @@ class EventAttendanceInline(admin.TabularInline):
     model = EventAttendance
     extra = 1  # Display one extra blank form by default
 
-class GameInLine(admin.StackedInline):
-    model = Game
-    extra = 1  # Display one extra blank form by default
-
-
 class EventLocationInline(admin.StackedInline):
     model = EventLocation
     can_delete = False  # Prevents deletion of existing EventLocation from Event admin
     verbose_name_plural = 'Event Location'  # Display name for inline
 
 class EventAdmin(admin.ModelAdmin):
-    inlines = [EventAttendanceInline, GameInLine, EventLocationInline]
+    inlines = [EventAttendanceInline, EventLocationInline]
 
 # Add profile information to user model
 class UserProfileInline(admin.StackedInline):

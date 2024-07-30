@@ -113,9 +113,16 @@
                                     <h4>{{ event_attendance.event.title }}</h4>
                                 </div>
                                 <div class="card-body">
-                                    <p><b>Description:</b> {{ event_attendance.event.description }}</p>
-                                    <p><b>Location:</b> {{ event_attendance.event.location }}</p>
-                                    <a href="{% url 'event_details' event_attendance.event.id %}" class="btn btn-secondary btn-sm">View Event</a>
+                                    <div class="event-profile">
+                                        {% if event_attendance.event.event_image %}
+                                        <img src="{{ event_attendance.event.event_image.url }}" class="profile-image rounded">
+                                        {% else %}
+                                        <img src="{% static 'boardgame/images/event_profile_default.jpg' %}" class="profile-image rounded">
+                                        {% endif %}
+                                        <br/><br/>
+                                        <p><b>Location:</b> {{event_attendance.event.eventlocation.city }}{% if event_attendance.event.eventlocation.state %}, {{ event_attendance.event.eventlocation.state }}{% endif %}</p>
+                                        <a href="{% url 'event_details' event_attendance.event.id %}" class="btn btn-secondary btn-sm">View Event</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -77,14 +77,18 @@
                 {% if events %}
                 {% for event in events %}
                 <div class="col-md-4 mb-3">
-                    <div class="card">
-                        <div class="card-header">
+                    <div class="card" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                        <div class="card-header" style="background-color: #e9ecef;">
                             <h4>{{ event.title }}</h4>
                         </div>
                         <div class="card-body">
+                            {% if event.event_image %}
+                            <img src="{{ event.event_image.url }}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                            {% else %}
+                            <img src="{% static 'boardgame/images/event_profile_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                            {% endif %}
                             <p class="card-text">
-                                <b>Description:</b> {{ event.description }}<br />
-                                <b>Location:</b> {{ event.location }}<br /><br />
+                                <p><b>Location:</b> {{event.eventlocation.city }}{% if event.eventlocation.state %}, {{ event.eventlocation.state }}{% endif %}</p>
                                 <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event</a>
                             </p>
                         </div>
