@@ -1,19 +1,83 @@
 {% extends 'boardgame/base.html' %}
+{% load static %}
 
-<title>Edit Profile </title>>
+{% block content %}
+<title>Edit Profile</title>
 
-
-<div class="shadow p-4 mb-5 bg-body rounded">
-    <h1>Register</h1>
-    <br />
-
-    <form action="{% url 'register' %}" method=POST>
+<div class="container mt-4">
+    <h2>Edit Profile</h2>
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button class="btn btn-secondary"> Update Profile </button>
-        
+        <div class="form-group">
+            <label for="{{ profile_form.bio.id_for_label }}">About Me</label>
+            {{ profile_form.bio }}
+        </div>
+        <br/>
+        <div class="form-group">
+            <label for="{{ profile_form.favorite_games.id_for_label }}">What are your favourite games?</label>
+            {{ profile_form.favorite_games }}
+        </div>
+        <br/>
+        <!-- Input field for location with autocomplete -->
+        <div class="form-group">
+            <label for="user-location">Location</label>
+            <input type="text" id="user-location" class="form-control" style="width: 50%;" name="location_city" placeholder="City or town" value="{{ profile_form.location_city.value }}">
+            <!-- Hidden input to store place ID -->
+            <input type="hidden" id="place-id" name="place_id" value="{{ profile_form.place_id.value }}">
+        </div>
+        <br/>
+        <!-- Categories Multi-Select Scrollable Box -->
+        <div class="form-group">
+            <label for="{{ profile_form.categories.id_for_label }}">Game Interests</label>
+            <div class="scrollable-checkboxes">
+                {{ profile_form.categories }}
+            </div>
+        </div>
+        <br/>
+        <!-- Tags Multi-Select Scrollable Box -->
+        <div class="form-group">
+            <label for="{{ profile_form.tags.id_for_label }}">Meetup Interests</label>
+            <div class="scrollable-checkboxes">
+                {{ profile_form.tags }}
+            </div>
+        </div>
+        <br/>
+        <div class="form-group">
+            <label for="{{ profile_form.picture.id_for_label }}" class="form-label">Profile Picture</label>
+            <input type="file" id="{{ profile_form.picture.id_for_label }}" name="picture" class="form-control form-control-sm" style="max-width: 400px;">
+            {% if profile_form.picture.value %}
+                <img src="{{ profile_form.picture.value.url }}" class="rounded-circle mt-2" style="width: 100px; height: 100px; object-fit: cover; border: 2px solid #ddd;">
+            {% endif %}
+        </div>
+        <br/>
+        <div class="form-group" style="display: flex; align-items: center;">
+            <button type="submit" class="btn btn-primary btn-sm" style="margin-right: 15px;">Save Profile</button>
+            <p style="margin: 0;">
+                <a href="{% url 'user_profile' id=request.user.id %}" class="text-muted">
+                    <i class="fas fa-times-circle"></i> Cancel
+                </a>
+            </p>
+        </div>
     </form>
-
 </div>
+<!-- JavaScript for Google Places Autocomplete -->
+<script>
+    function initAutocomplete() {
+        var input = document.getElementById('user-location');
+        var autocomplete = new google.maps.places.Autocomplete(input, {
+            types: ['(regions)'],
+            fields: ['place_id', 'formatted_address', 'address_components', 'geometry']
+        });
 
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                return;
+            }
+            console.log(place);
+            document.getElementById('place-id').value = place.place_id;
+        });
+    }
+    google.maps.event.addDomListener(window, 'load', initAutocomplete);
+</script>
 {% endblock %}

@@ -1,9 +1,6 @@
 import requests
 from django.http import JsonResponse
 import xml.etree.ElementTree as ET
-from django.views.decorators.csrf import csrf_exempt
-
-@csrf_exempt
 def search_games(request):
     query = request.GET.get('query', '').lower()
 
@@ -12,7 +9,7 @@ def search_games(request):
         response = requests.get(url)
         try:
             response = requests.get(url)
-            response.raise_for_status()  # Will raise HTTPError for 4xx and 5xx errors
+            response.raise_for_status()  
             root = ET.fromstring(response.content)
 
             exact_matches = []
@@ -58,14 +55,11 @@ def search_games(request):
     return JsonResponse({'error': 'BGG API error'}, status=400)
 
 
-@csrf_exempt
 def load_game_details(request):
     game_id = request.GET.get('game_id', '')
-
     if game_id:
         url = f'https://www.boardgamegeek.com/xmlapi/boardgame/{game_id}?stats=1'
         response = requests.get(url)
-
         if response.status_code == 200:
             root = ET.fromstring(response.content)
             item = root.find('boardgame')
@@ -82,7 +76,7 @@ def load_game_details(request):
                 'weight': '',
                 'thumbnail': ''
             }
-            
+        
             if item is not None:
                 # Retrieve primary name if available
                 primary_name = ''
@@ -90,7 +84,6 @@ def load_game_details(request):
                     if name_elem.attrib.get('primary', '') == 'true':
                         primary_name = name_elem.text
                         break
-                
                 game['name'] = primary_name if primary_name else ''
                 game['description'] = item.find('description').text if item.find('description') is not None else ''
                 game['min_players'] = item.find('minplayers').text if item.find('minplayers') is not None else ''

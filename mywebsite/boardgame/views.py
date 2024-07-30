@@ -464,6 +464,38 @@ def profile_setup(request):
 
     return render(request, 'boardgame/profile_setup.html', {'profile_form': profile_form})
 
+
+def edit_profile(request):
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    if request.method == 'POST':
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
+        if profile_form.is_valid():
+            profile = profile_form.save(commit=False)
+            profile.user = request.user  # Ensure the profile is associated with the current user
+            profile.save()
+            
+            # Save ManyToMany for category and tags
+            profile_form.save_m2m()
+
+            # Fetch place details if location is updated
+            place_id = request.POST.get('place_id')
+            if place_id:
+                place_details = fetch_place_details(place_id)
+                if place_details:
+                    profile.city = place_details.get('city')
+                    profile.state = place_details.get('state')
+                    profile.country = place_details.get('country')
+                    profile.latitude = place_details.get('latitude')
+                    profile.longitude = place_details.get('longitude')
+                    profile.save()
+
+            return redirect('user_profile', id=request.user.id)
+    else:
+        profile_form = UserProfileForm(instance=user_profile)
+
+    return render(request, 'boardgame/edit_profile.html', {'profile_form': profile_form})
+
 # ---------------------------NAVBAR---------------------------
 
 def groups(request):
