@@ -1,3 +1,4 @@
+{% load static %}
 <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(to right, #a0dfee, #b9a7d1); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); padding: 10px;">
   <div class="container-fluid">
     <a class="navbar-brand" href="{% url 'home' %}">BoardGameMeet</a>
@@ -21,13 +22,14 @@
           <a class="nav-link" href="{% url 'events' %}" style="color: white;">Events</a>
         </li>
         {% if user.is_authenticated %}
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: white;">
+        <li class="nav-item dropdown d-flex align-items-center">
+          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: white;">
+            <img src="{% if user.userprofile.picture %}{{ user.userprofile.picture.url }}{% else %}{% static 'boardgame/images/default_profile.jpg' %}{% endif %}" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
             Profile
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li><a class="dropdown-item" href="{% url 'user_profile' request.user.id %}">View Profile</a></li>
-            <li><a class="dropdown-item" href="{% url 'profile_edit'  %}">Edit Profile</a></li>
+            <li><a class="dropdown-item" href="{% url 'profile_edit' %}">Edit Profile</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
           </ul>

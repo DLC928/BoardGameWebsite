@@ -457,7 +457,7 @@ def profile_setup(request):
                 profile.latitude = place_details['latitude']
                 profile.longitude = place_details['longitude']
                 profile.save()
-                
+            messages.success(request, 'Account successfully created')    
             return redirect('home')  # Redirect to home 
     else:
         profile_form = UserProfileForm(instance=user_profile)
