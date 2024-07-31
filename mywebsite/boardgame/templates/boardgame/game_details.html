@@ -16,28 +16,27 @@
         <div class="col-md-8">
             <h1>{{ game.name }}</h1>
             <br>
-            {% if user.is_authenticated %}
+            {% if user.is_authenticated and event.signups_open %}
             <form method="post" action="">
                 {% csrf_token %}
                 {% if is_signed_up %}
                 <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Game</button>
                 {% else %}
-                {% if remaining_slots > 0 and is_attending %}
-                <button type="submit" class="btn btn-primary btn-sm" name="sign_up">Sign up</button>
-                {% else %}
-                {% if is_attending %}
-                <button type="button" class="btn btn-secondary btn-sm" disabled>Waitlist</button>
-                {% endif %}
-                {% endif %}
+                    {% if remaining_slots > 0 and is_attending %}
+                    <button type="submit" class="btn btn-primary btn-sm" name="sign_up">Sign up</button>
+                    {% elif is_attending%}
+                    <button type="button" class="btn btn-secondary btn-sm" disabled>Waitlist</button>
+                    {% endif %}
                 {% endif %}
             </form>
             {% else %}
-            <p>You must <a href="{% url 'login' %}">login</a> first to sign up for the game.</p>
             {% endif %}
             <br>
             <p><b>Players:</b> {{ game.min_players }} - {{ game.max_players }}</p>
             <p><b>Difficulty:</b> {{ game.weight }} / 5</p>
+            {% if event.signups_open %}
             <p><b>Remaining Sign-up Slots:</b> {{ remaining_slots }}</p>
+            {% endif%}
             <p><b>Description:</b></p>
             {% if game.description|length > 100 %}
             <div id="description-container">
