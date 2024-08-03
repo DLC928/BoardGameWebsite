@@ -399,7 +399,7 @@ def game_details(request, event_id, game_id):
                 else:
                     # Remove the GameSignup entry for the current user
                     GameSignup.objects.filter(nomination=game, user=request.user).delete()
-        elif 'comment' in request.POST:
+        elif 'comment_content' in request.POST:
             comment_content = request.POST.get('comment_content')
             if comment_content:
                 GameComment.objects.create(nominated_game=game, user=request.user, content=comment_content)
