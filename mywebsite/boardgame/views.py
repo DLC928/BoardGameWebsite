@@ -405,6 +405,8 @@ def game_details(request, event_id, game_id):
 
     # Retrieve the list of players signed up for this game
     game_signup_set = GameSignup.objects.filter(nomination=game)
+    # Retrieve the list of wait listed players signed up for this game
+    game_signup_wait_set = Waitlist.objects.filter(nomination=game)
 
     if request.method == 'POST':
         if 'sign_up' in request.POST:
@@ -424,6 +426,18 @@ def game_details(request, event_id, game_id):
                 else:
                     # Remove the GameSignup entry for the current user
                     GameSignup.objects.filter(nomination=game, user=request.user).delete()
+                    
+                 # Check for waitlist and allocate spot if available
+                    waitlist_entries = Waitlist.objects.filter(nomination=game).order_by('id')
+
+                    if waitlist_entries.exists():
+                        next_waitlist_entry = waitlist_entries.first()
+                        if game.max_players > GameSignup.objects.filter(nomination=game).count():
+                            # Move user from waitlist to game
+                            GameSignup.objects.create(nomination=game, user=next_waitlist_entry.user)
+                            waitlist_entries.first().delete()  # Delete the waitlist entry that was moved to the game
+                            
+                            # Notify the user - adding logic later     
         elif 'comment_content' in request.POST:
             comment_content = request.POST.get('comment_content')
             if comment_content:
@@ -437,7 +451,8 @@ def game_details(request, event_id, game_id):
         'is_attending': is_attending,
         'is_signed_up': is_signed_up,
         'remaining_slots': remaining_slots,
-        'game_signup_set': game_signup_set,  # Include game_signup_set in the context
+        'game_signup_set': game_signup_set,
+        'game_signup_wait_set':game_signup_wait_set  
     }
     return render(request, 'boardgame/game_details.html', context)
 
