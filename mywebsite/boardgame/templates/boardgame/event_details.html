@@ -240,17 +240,20 @@
                                     <a href="{% url 'game_details' event.id item.nomination.id %}"
                                         class="btn btn-secondary btn-sm">View Details</a>
                                     <div>
-                                        {% if user.is_authenticated and is_attending %}
+                                        {% if user.is_authenticated and is_attending%}
                                         <form method="post">
                                             {% csrf_token %}
                                             <input type="hidden" name="nomination_id" value="{{ item.nomination.id }}">
-                                            {% if item.is_signed_up %}
-                                            <button type="submit" class="btn btn-secondary btn-sm" name="leave_game">Leave Game</button>
+                                            {% if item.is_signed_up_wait %}
+                                                <button type="submit" class="btn btn-danger btn-sm" name="leave_waitlist">Leave Waitlist</button>
+                                            {% elif item.is_signed_up %}    
+                                                <button type="submit" class="btn btn-secondary btn-sm" name="leave_game">Leave Game</button>
+                                            {% else %}
+                                                <button type="submit" class="btn btn-primary btn-sm" name="join_waitlist">Join Waitlist</button>
                                             {% endif %}
                                         </form>
-                                        {% else %}
-                                        <p>You must join the event to sign up to play.</p>
-                                        {% endif %}
+                                    {% endif %}
+                                    
                                     </div>
                                 </p>
                             </div>

@@ -232,6 +232,13 @@ class GameSignup(models.Model):
     def __str__(self):
         return f"{self.user.username} signed up for {self.nomination.name} at {self.nomination.event.title}"
 
+class Waitlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    nomination = models.ForeignKey(Game, on_delete=models.CASCADE)
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'nomination')
 
 class GameComment(models.Model):
     nominated_game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='comments')

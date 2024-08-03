@@ -2,7 +2,7 @@ from datetime import datetime
 from django.contrib import messages 
 from django.http import HttpResponseRedirect 
 from django.shortcuts import render, redirect
-from boardgame.models import EventPost, GroupPost, User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote
+from boardgame.models import EventPost, GroupPost, User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote, Waitlist
 from .forms import EventCommentForm, EventNominationSettingsForm, EventPostForm, GroupCommentForm, GroupForm, EventForm, EventLocationForm, GameDetailForm, GroupPostForm, UserProfileForm
 from .utils import fetch_place_details
 from django.db.models import Count, Q
@@ -206,8 +206,10 @@ def event_details(request, event_id):
         players_needed = max(0, nomination.min_players - signed_up_count)
         
         is_signed_up = False
+        is_signed_up_wait = False
         if request.user.is_authenticated:
             is_signed_up = GameSignup.objects.filter(nomination=nomination, user=request.user).exists()
+            is_signed_up_wait = Waitlist.objects.filter(nomination=nomination, user=request.user).exists()
         
         if remaining_slots > 0:
             approved_nominations_with_slots.append({
@@ -221,7 +223,8 @@ def event_details(request, event_id):
             waitlisted_games.append({
                 'nomination': nomination,
                 'remaining_slots': remaining_slots,
-                'is_signed_up': is_signed_up
+                'is_signed_up': is_signed_up,
+                'is_signed_up_wait': is_signed_up_wait
             })
     if request.method == 'POST':
         if request.user.is_authenticated:
@@ -244,13 +247,28 @@ def event_details(request, event_id):
             elif 'leave_game' in request.POST:
                 nomination_id = request.POST.get('nomination_id')
                 nomination = Game.objects.get(id=nomination_id)
+                # Remove the user from the game
                 if GameSignup.objects.filter(nomination=nomination, user=request.user).exists():
                     if nomination.nominator == request.user:
+                        # If the user leaving is the nominator, remove all sign-ups and the nomination itself
                         GameSignup.objects.filter(nomination=nomination).delete()
                         nomination.delete()
-                        return redirect('event_details', event_id=event_id)
                     else:
+                        # Just remove the specific user's sign-up
                         GameSignup.objects.filter(nomination=nomination, user=request.user).delete()
+                        
+                     # Check for waitlist and allocate spot if available
+                    waitlist_entries = Waitlist.objects.filter(nomination=nomination).order_by('id')
+
+                    if waitlist_entries.exists():
+                        next_waitlist_entry = waitlist_entries.first()
+                        if nomination.max_players > GameSignup.objects.filter(nomination=nomination).count():
+                            # Move user from waitlist to game
+                            GameSignup.objects.create(nomination=nomination, user=next_waitlist_entry.user)
+                            waitlist_entries.first().delete()  # Delete the waitlist entry that was moved to the game
+                            
+                            # Notify the user - adding logic later 
+                              
             elif 'post_content' in request.POST:
                 post_form = EventPostForm(request.POST)
                 if post_form.is_valid():
@@ -271,26 +289,33 @@ def event_details(request, event_id):
             elif 'has_nomination' in request.POST:
                 if has_nomination:
                     messages.error(request, "You have already nominated a game. You can only nominate one game.")
-            
             elif 'remove_nomination' in request.POST:
                 nomination_id = request.POST.get('nomination_id')
                 nomination = Game.objects.get(id=nomination_id)
                 if nomination.nominator == request.user:
                     GameSignup.objects.filter(nomination=nomination).delete()
                     nomination.delete()
-            
             elif 'vote' in request.POST:
                 nomination_id = request.POST.get('nomination_id')
                 nomination = Game.objects.get(id=nomination_id)
                 if not Vote.objects.filter(user=request.user, game=nomination, event=event).exists():
                     if Vote.objects.filter(user=request.user, event=event).count() < 3:
                         Vote.objects.create(user=request.user, game=nomination, event=event)
-            
             elif 'remove_vote' in request.POST:
                 nomination_id = request.POST.get('nomination_id')
                 nomination = Game.objects.get(id=nomination_id)
                 if Vote.objects.filter(user=request.user, game=nomination, event=event).exists():
-                    Vote.objects.filter(user=request.user, game=nomination, event=event).delete()
+                    Vote.objects.filter(user=request.user, game=nomination, event=event).delete()       
+            elif 'join_waitlist' in request.POST:
+                nomination_id = request.POST.get('nomination_id')
+                nomination = Game.objects.get(id=nomination_id)
+                if is_attending and not Waitlist.objects.filter(nomination=nomination, user=request.user).exists():
+                    Waitlist.objects.create(nomination=nomination, user=request.user)
+            elif 'leave_waitlist' in request.POST:
+                nomination_id = request.POST.get('nomination_id')
+                nomination = Game.objects.get(id=nomination_id)
+                if Waitlist.objects.filter(nomination=nomination, user=request.user).exists():
+                    Waitlist.objects.filter(nomination=nomination, user=request.user).delete()       
             
             return redirect('event_details', event_id=event_id)
         
@@ -314,7 +339,7 @@ def event_details(request, event_id):
         'has_nomination': has_nomination,
         'post_form': post_form,
         'comment_form': comment_form,
-        'posts': posts,
+        'posts': posts
     }
 
     return render(request, 'boardgame/event_details.html', context)
