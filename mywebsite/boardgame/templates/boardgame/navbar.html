@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(to right, #a0dfee, #b9a7d1); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); padding: 10px;">
   <div class="container-fluid">
     <a class="navbar-brand" href="{% url 'home' %}">BoardGameMeet</a>
@@ -20,6 +21,18 @@
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'events' %}" style="color: white;">Events</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link position-relative" href="{% url 'notifications' %}" style="color: white;">
+            <i class="bi bi-bell-fill" style="font-size: 1.5rem; padding-right: 1rem; position: relative;"></i>
+            {% unread_notifications_count user as notifications_count %}
+            {% if notifications_count > 0 %}
+              <span class="position: absolute top-20 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ notifications_count }}
+                <span class="visually-hidden">unread notifications</span>
+              </span>
+            {% endif %}
+          </a>
         </li>
         {% if user.is_authenticated %}
         <li class="nav-item dropdown d-flex align-items-center">

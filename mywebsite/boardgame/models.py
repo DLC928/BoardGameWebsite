@@ -239,7 +239,10 @@ class Waitlist(models.Model):
 
     class Meta:
         unique_together = ('user', 'nomination')
-
+        
+    def __str__(self):
+        return f"{self.user.username} added to waitlist for {self.nomination.name}"
+    
 class GameComment(models.Model):
     nominated_game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -257,3 +260,11 @@ class Vote(models.Model):
     def __str__(self):
         return f"{self.user.username} voted for {self.game.name} in event {self.event.id}"
 
+class Notification(models.Model):
+    read = models.BooleanField(default=False)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.user.username} notified"

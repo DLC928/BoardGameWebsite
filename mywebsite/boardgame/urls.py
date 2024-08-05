@@ -23,7 +23,7 @@ urlpatterns = [
     path('group-dashboard/<slug:group_slug>/<str:section>/', views.manage_group_dashboard, name='manage_group_dashboard_with_section'),
     path('event-dashboard/event/<int:event_id>/', views.manage_event_dashboard, name='manage_event_dashboard'),
     path('event-dashboard/event/<int:event_id>/<str:section>/', views.manage_event_dashboard, name='manage_event_dashboard_with_section'),
-
+    path('notifications/', views.notifications, name='notifications'),
 ]
 
  

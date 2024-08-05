@@ -1,0 +1,22 @@
+{% extends 'boardgame/base.html' %}
+{% load static %}
+{% block content %}
+<h2>Your Notifications</h2>
+<ul>
+    {% for notification in notifications %}
+        <li>
+            <p>{{ notification.message }}</p>
+            <small>{{ notification.timestamp }}</small>
+            {% if not notification.read %}
+                <form method="post" action="{% url 'notifications' %}">
+                    <input type="hidden" name="notification_id" value="{{ notification.id }}">
+                    {% csrf_token %}
+                    <button type="submit">Mark as Read</button>
+                </form>
+            {% endif %}
+        </li>
+    {% empty %}
+        <p>You have no notifications.</p>
+    {% endfor %}
+</ul>
+{% endblock %}

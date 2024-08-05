@@ -2,7 +2,7 @@ from datetime import datetime
 from django.contrib import messages 
 from django.http import HttpResponseRedirect 
 from django.shortcuts import render, redirect
-from boardgame.models import EventPost, GroupPost, User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote, Waitlist
+from boardgame.models import EventPost, GroupPost, Notification, User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote, Waitlist
 from .forms import EventCommentForm, EventNominationSettingsForm, EventPostForm, GroupCommentForm, GroupForm, EventForm, EventLocationForm, GameDetailForm, GroupPostForm, UserProfileForm
 from .utils import fetch_place_details
 from django.db.models import Count, Q
@@ -267,7 +267,10 @@ def event_details(request, event_id):
                             GameSignup.objects.create(nomination=nomination, user=next_waitlist_entry.user)
                             waitlist_entries.first().delete()  # Delete the waitlist entry that was moved to the game
                             
-                            # Notify the user - adding logic later 
+                             # Notify the user who was added to the game
+                            notification_message = f"You have been moved off the waitlist and added to the game '{nomination.name}'."
+                            Notification.objects.create(user=next_waitlist_entry.user, message=notification_message)
+                        
                               
             elif 'post_content' in request.POST:
                 post_form = EventPostForm(request.POST)
@@ -294,6 +297,7 @@ def event_details(request, event_id):
                 nomination = Game.objects.get(id=nomination_id)
                 if nomination.nominator == request.user:
                     GameSignup.objects.filter(nomination=nomination).delete()
+                    Waitlist.objects.filter(nomination=nomination).delete()
                     nomination.delete()
             elif 'vote' in request.POST:
                 nomination_id = request.POST.get('nomination_id')
@@ -437,7 +441,11 @@ def game_details(request, event_id, game_id):
                             GameSignup.objects.create(nomination=game, user=next_waitlist_entry.user)
                             waitlist_entries.first().delete()  # Delete the waitlist entry that was moved to the game
                             
-                            # Notify the user - adding logic later     
+                            # Notify the user who was added to the game
+                            notification_message = f"You have been moved off the waitlist and added to the game '{game.name}'."
+                            Notification.objects.create(user=next_waitlist_entry.user, message=notification_message)
+                        
+                                  
         elif 'comment_content' in request.POST:
             comment_content = request.POST.get('comment_content')
             if comment_content:
@@ -847,9 +855,18 @@ def manage_event_dashboard(request, event_id, section=None):
         context.update({'attendees': attendees})
     return render(request, 'boardgame/manage_event_dashboard.html', context)
 
+def notifications(request):
+    notifications = Notification.objects.filter(user=request.user).order_by('-timestamp')
 
-
-
-
-
+    if request.method == 'POST':
+        notification_id = request.POST.get('notification_id')
+        notification = Notification.objects.get(id=notification_id, user=request.user)
+        notification.read = True
+        notification.save()
+        return redirect('notifications')  # Redirect to refresh notifications list
+    
+    context = {
+        'notifications': notifications
+    }
+    return render(request, 'boardgame/notifications.html', context)
                         
