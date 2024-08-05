@@ -361,7 +361,7 @@
                 </div>
             </div>
         </div>
-
+        {% if user.is_authenticated %}
         <!-- Display Posts -->
         <div class="mt-4">
             {% for post in posts %}
@@ -435,7 +435,7 @@
             </div>
             {% endfor %}
         </div>
-
+        {% endif %}
     </div>
         <div class="tab-pane fade" id="attendees" role="tabpanel" aria-labelledby="attendees-tab">
             <!-- Content for Attendees Tab -->
@@ -443,6 +443,7 @@
                     <div class="card-header">
                         <h4>Attendees</h4>
                     </div>
+                    {% if user.is_authenticated %}
                     <div class="card-body">
                         <p class="card-text">
                         <ul>
@@ -462,13 +463,12 @@
                         </ul>
                         </p>
                     </div>
+                    {% else %}
+                    <br/><p>You must <a href="{% url 'login' %}">login</a> to see attendees.</p>
+                    {% endif %}
                 </div>
-           
-
-
         </div>
     </div>
-
 
     <hr>
     <!-- Link back to home or group -->

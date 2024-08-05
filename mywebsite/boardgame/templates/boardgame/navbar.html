@@ -22,6 +22,7 @@
         <li class="nav-item">
           <a class="nav-link" href="{% url 'events' %}" style="color: white;">Events</a>
         </li>
+        {% if user.is_authenticated %}
         <li class="nav-item">
           <a class="nav-link position-relative" href="{% url 'notifications' %}" style="color: white;">
             <i class="bi bi-bell-fill" style="font-size: 1.5rem; padding-right: 1rem; position: relative;"></i>
@@ -34,7 +35,6 @@
             {% endif %}
           </a>
         </li>
-        {% if user.is_authenticated %}
         <li class="nav-item dropdown d-flex align-items-center">
           <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: white;">
             <img src="{% if user.userprofile.picture %}{{ user.userprofile.picture.url }}{% else %}{% static 'boardgame/images/default_profile.jpg' %}{% endif %}" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
