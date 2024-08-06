@@ -147,7 +147,7 @@ class EventLocation(models.Model):
     address = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
     sublocality = models.CharField(max_length=100, blank=True)  # neighborhoods or sublocalities
-    state = models.CharField(max_length=100, blank=True, null=True)  # Nullable state field
+    state = models.CharField(max_length=100, blank=True, null=True) 
     postcode = models.CharField(max_length=20)
     country = models.CharField(max_length=20)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)

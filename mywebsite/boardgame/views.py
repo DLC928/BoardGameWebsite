@@ -270,8 +270,7 @@ def event_details(request, event_id):
                              # Notify the user who was added to the game
                             notification_message = f"You have been moved off the waitlist and added to the game '{nomination.name}'."
                             Notification.objects.create(user=next_waitlist_entry.user, message=notification_message)
-                        
-                              
+                    
             elif 'post_content' in request.POST:
                 post_form = EventPostForm(request.POST)
                 if post_form.is_valid():
@@ -488,23 +487,21 @@ def profile_setup(request):
         if profile_form.is_valid():
             profile = profile_form.save(commit=False)
             profile.user = request.user  # Associate profile with current logged-in user
-            profile.save()
             
-            # Save ManyToMany relationships for category and tags
+            place_id = request.POST.get('place_id')
+            if place_id:
+                place_details = fetch_place_details(place_id)
+                if place_details:
+                    profile.city = place_details.get('city')
+                    profile.state = place_details.get('state')
+                    profile.country = place_details.get('country')
+                    profile.latitude = place_details.get('latitude')
+                    profile.longitude = place_details.get('longitude')
+                    
+            profile.save()
+            # Save ManyToMany for category and tags
             profile_form.save_m2m()
-
-            # Fetch place details using utility function
-            place_id = request.POST.get('place_id')  # Get selected place ID
-            place_details = fetch_place_details(place_id)
-
-            if place_details:
-                # Update location details to UserProfile model
-                profile.city = place_details['city']
-                profile.state = place_details['state']
-                profile.country = place_details['country']
-                profile.latitude = place_details['latitude']
-                profile.longitude = place_details['longitude']
-                profile.save()
+            
             messages.success(request, 'Account successfully created')    
             return redirect('home')  # Redirect to home 
     else:
@@ -543,7 +540,7 @@ def edit_profile(request):
 def update_password(request):
     if request.user.is_authenticated:
         current_user = request.user
-        
+
         if request.method == 'POST':
             form = ChangePasswordForm(current_user, request.POST)
             if form.is_valid():
@@ -559,7 +556,7 @@ def update_password(request):
             return render(request, "boardgame/update_password.html",{'form':form})
    
     return render(request, 'boardgame/update_password.html', {})
-# ---------------------------NAVBAR---------------------------
+# ---------------------------NAVBAR ITEMS---------------------------
 
 def groups(request):
     tag_name = request.GET.get('tag')
@@ -614,7 +611,7 @@ def events(request):
     # Get upcoming events
     event_list = Event.objects.filter(date_time__gte=now).order_by('title')
     
-      # Filter by search query if present
+    # Filter by search query if present
     if search_query:
         # Filter by group name or location
         event_list = event_list.filter(
@@ -652,16 +649,13 @@ def search(request):
         group_locations = GroupLocation.objects.filter(
             Q(city__icontains=searched) | Q(sublocality__icontains=searched)
         )
-
         groups = Group.objects.filter(
             Q(grouplocation__city__icontains=searched) | 
             Q(grouplocation__sublocality__icontains=searched)
         ).distinct()
-
         event_locations = EventLocation.objects.filter(
             Q(city__icontains=searched) | Q(sublocality__icontains=searched)
         )
-
         events = Event.objects.filter(
             Q(eventlocation__city__icontains=searched) | 
             Q(eventlocation__sublocality__icontains=searched)

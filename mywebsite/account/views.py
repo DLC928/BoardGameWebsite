@@ -1,10 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .forms import RegisterUserForm
-from boardgame.forms import UserProfileForm 
-
 
 def login_user(request):
     if request.method == "POST":
@@ -18,7 +15,6 @@ def login_user(request):
             messages.error(request, "Invalid login")
 
     return render(request, "registration/login.html")
-
 
 def logout_user (request):
     logout(request)
