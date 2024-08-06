@@ -5,7 +5,7 @@ from django.core.files import File
 import requests
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
-
+from django.db import transaction
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -56,12 +56,19 @@ class Group(models.Model):
     tags = models.ManyToManyField(Tag, related_name='groups', blank=True)
     
     def save(self, *args, **kwargs):
-        if not self.id:
-            super(Group, self).save(*args, **kwargs)
         if not self.slug:
-            self.slug = f"{slugify(self.name)}-{self.id}"
-            self.save()
-        super(Group, self).save(*args, **kwargs)
+            self.slug = self._generate_unique_slug()
+        super().save(*args, **kwargs)
+
+    @transaction.atomic
+    def _generate_unique_slug(self):
+        base_slug = slugify(self.name)
+        unique_slug = base_slug
+        num = 1
+        while Group.objects.filter(slug=unique_slug).exists():
+            unique_slug = f"{base_slug}-{num}"
+            num += 1
+        return unique_slug
 
     def __str__(self):
         return self.name
