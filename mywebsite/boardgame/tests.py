@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
-from .models import Event, EventAttendance, EventLocation, Game, Group, Category, GroupLocation, GroupMembers, GroupPost, GroupPostComment, Tag, UserProfile
+from .models import Event, EventAttendance, EventLocation, EventPost, EventPostComment, Game, GameSignup, Group, Category, GroupLocation, GroupMembers, GroupPost, GroupPostComment, Tag, UserProfile, Waitlist
 from django.utils import timezone
 from unittest.mock import patch
 
@@ -161,7 +161,7 @@ class GroupMembersTest(TestCase):
         self.assertEqual(member.group, self.group)
         self.assertTrue(member.is_admin)
         self.assertFalse(member.is_moderator)
-        self.assertIsNotNone(member.date_joined)  # Ensure date_joined is set
+        self.assertIsNotNone(member.date_joined)  
 
     def test_unique_constraint(self):
         GroupMembers.objects.create(
@@ -214,7 +214,7 @@ class GroupPostTest(TestCase):
         self.assertEqual(post.group, self.group)
         self.assertEqual(post.user, self.user)
         self.assertEqual(post.content, 'This is a test post')
-        self.assertIsNotNone(post.date_added)  # Ensure date_added is set
+        self.assertIsNotNone(post.date_added)  
 
     def test_date_added_auto_set(self):
         post = GroupPost.objects.create(
@@ -223,9 +223,8 @@ class GroupPostTest(TestCase):
             content='This is a test post'
         )
         self.assertIsNotNone(post.date_added)
-        self.assertTrue(post.date_added <= timezone.now())  # date_added should be less than or equal to current time
-
-
+        self.assertTrue(post.date_added <= timezone.now()) 
+        
 class GroupPostTest(TestCase):
 
     def setUp(self):
@@ -242,7 +241,7 @@ class GroupPostTest(TestCase):
         self.assertEqual(post.group, self.group)
         self.assertEqual(post.user, self.user)
         self.assertEqual(post.content, 'This is a test post')
-        self.assertIsNotNone(post.date_added)  # Ensure date_added is set
+        self.assertIsNotNone(post.date_added) 
 
     def test_date_added_auto_set(self):
         post = GroupPost.objects.create(
@@ -251,7 +250,7 @@ class GroupPostTest(TestCase):
             content='This is a test post'
         )
         self.assertIsNotNone(post.date_added)
-        self.assertTrue(post.date_added <= timezone.now())  # date_added should be less than or equal to current time
+        self.assertTrue(post.date_added <= timezone.now()) 
 
 
 class GroupPostCommentTest(TestCase):
@@ -284,8 +283,8 @@ class GroupPostCommentTest(TestCase):
             content='This is a test comment'
         )
         self.assertIsNotNone(comment.date_added)
-        self.assertTrue(comment.date_added <= timezone.now())  # date_added should be less than or equal to current time
-
+        self.assertTrue(comment.date_added <= timezone.now())  
+        
 #-------------------EVENT TESTING-------------------------------
 class EventModelTest(TestCase):
     def setUp(self):
@@ -445,31 +444,100 @@ class EventLocationTest(TestCase):
             postcode='67890',
             country='Another Country',
             state='',  # Blank field allowed for CharField with blank=True
-            sublocality='',  # Blank field allowed for CharField with blank=True
+            sublocality='', 
             latitude=None,  # Use None for DecimalField with blank=True
-            longitude=None  # Use None for DecimalField with blank=True
+            longitude=None  
         )
-
     def test_event_location_blank_fields(self):
         # Verify that blank fields are handled correctly
-        self.assertEqual(self.event_location.sublocality, '')  # Expect empty string
-        self.assertEqual(self.event_location.state, '')  # Expect empty string
-        self.assertIsNone(self.event_location.latitude)  # Should be None
-        self.assertIsNone(self.event_location.longitude)  # Should be None
+        self.assertEqual(self.event_location.sublocality, '')  
+        self.assertEqual(self.event_location.state, '')  
+        self.assertIsNone(self.event_location.latitude)  
+        self.assertIsNone(self.event_location.longitude) 
 
     def test_event_location_creation(self):
         # Verify the EventLocation instance was created correctly
         self.assertEqual(self.event_location.event, self.event)
         self.assertEqual(self.event_location.address, '789 Another St')
         self.assertEqual(self.event_location.city, 'Another City')
-        self.assertEqual(self.event_location.sublocality, '')  # Should be empty string
-        self.assertEqual(self.event_location.state, '')  # Should be empty string
+        self.assertEqual(self.event_location.sublocality, '') 
+        self.assertEqual(self.event_location.state, '') 
         self.assertEqual(self.event_location.postcode, '67890')
         self.assertEqual(self.event_location.country, 'Another Country')
-        self.assertIsNone(self.event_location.latitude)  # Should be None
-        self.assertIsNone(self.event_location.longitude)  # Should be None
+        self.assertIsNone(self.event_location.latitude) 
+        self.assertIsNone(self.event_location.longitude)  
 
-       
+
+class EventPostTest(TestCase):
+
+    def setUp(self):
+        # Create test user
+        self.user = User.objects.create_user(username='testuser', password='password')
+        
+        # Create test event
+        self.group = Group.objects.create(name='Test Group', description='Test Group Description')
+        self.event = Event.objects.create(
+            group=self.group,
+            title='Test Event',
+            date_time=timezone.now(),
+            nominations_open=False,
+            signups_open=True,
+            admin_only_nominations=True,
+            skip_nominations=True
+        )
+        # Create test post
+        self.post = EventPost.objects.create(
+            event=self.event,
+            user=self.user,
+            content='This is a test post'
+        )
+
+    def test_event_post_creation(self):
+        # Verify the EventPost instance was created correctly
+        self.assertEqual(self.post.event, self.event)
+        self.assertEqual(self.post.user, self.user)
+        self.assertEqual(self.post.content, 'This is a test post')
+        self.assertTrue(self.post.date_added <= timezone.now())  
+
+
+class EventPostCommentTest(TestCase):
+
+    def setUp(self):
+        # Create test user
+        self.user = User.objects.create_user(username='testuser', password='password')
+        
+        # Create test event
+        self.group = Group.objects.create(name='Test Group', description='Test Group Description')
+        self.event = Event.objects.create(
+            group=self.group,
+            title='Test Event',
+            date_time=timezone.now(),
+            nominations_open=False,
+            signups_open=True,
+            admin_only_nominations=True,
+            skip_nominations=True
+        )
+        # Create test post
+        self.post = EventPost.objects.create(
+            event=self.event,
+            user=self.user,
+            content='This is a test post'
+        )
+        
+        # Create test comment
+        self.comment = EventPostComment.objects.create(
+            post=self.post,
+            user=self.user,
+            content='This is a test comment'
+        )
+
+    def test_event_post_comment_creation(self):
+        # Verify the EventPostComment instance was created correctly
+        self.assertEqual(self.comment.post, self.post)
+        self.assertEqual(self.comment.user, self.user)
+        self.assertEqual(self.comment.content, 'This is a test comment')
+        self.assertTrue(self.comment.date_added <= timezone.now())  
+
 #-------------------GAME TESTING-------------------------------      
 class GameModelTest(TestCase):
     def setUp(self):
@@ -583,6 +651,110 @@ class GameModelTest(TestCase):
         self.assertLess((timezone.now() - game.date_nominated).total_seconds(), 1)
 
 
+
+class GameSignupTest(TestCase):
+
+    def setUp(self):
+        # Create test user
+        self.user = User.objects.create_user(username='testuser', password='password')
+         # Create test event
+        self.group = Group.objects.create(name='Test Group', description='Test Group Description')
+        self.event = Event.objects.create(
+            group=self.group,
+            title='Test Event',
+            date_time=timezone.now(),
+            nominations_open=False,
+            signups_open=True,
+            admin_only_nominations=True,
+            skip_nominations=True
+        )
+        # Create test game
+        self.game =  Game.objects.create(
+            event=self.event,
+            nominator=self.user,
+            name='Test Game',
+            min_players=2,
+            max_players=4,
+            min_playtime=30,
+            max_playtime=60,
+            age=12,
+            weight='Medium',
+            description='Test Game Description'
+        )
+        # Create test signup
+        self.signup = GameSignup.objects.create(
+            nomination=self.game,
+            user=self.user
+        )
+
+    def test_game_signup_creation(self):
+        # Verify the GameSignup instance was created correctly
+        self.assertEqual(self.signup.nomination, self.game)
+        self.assertEqual(self.signup.user, self.user)
+        self.assertTrue(self.signup.date_signed_up <= timezone.now())  
+
+    def test_unique_constraint(self):
+        # Verify that creating duplicate signups raises an IntegrityError
+        with self.assertRaises(Exception) as context:
+            GameSignup.objects.create(
+                nomination=self.game,
+                user=self.user
+            )
+        self.assertEqual(context.exception.__class__.__name__, 'IntegrityError')
+
+class WaitlistTest(TestCase):
+
+    def setUp(self):
+        # Create a test user
+        self.user = User.objects.create_user(username='testuser', password='password')
+        
+           # Create test event
+        self.group = Group.objects.create(name='Test Group', description='Test Group Description')
+        self.event = Event.objects.create(
+            group=self.group,
+            title='Test Event',
+            date_time=timezone.now(),
+            nominations_open=False,
+            signups_open=True,
+            admin_only_nominations=True,
+            skip_nominations=True
+        )
+        # Create test game
+        self.game =  Game.objects.create(
+            event=self.event,
+            nominator=self.user,
+            name='Test Game',
+            min_players=2,
+            max_players=4,
+            min_playtime=30,
+            max_playtime=60,
+            age=12,
+            weight='Medium',
+            description='Test Game Description'
+        )
+        # Create a test waitlist entry
+        self.waitlist = Waitlist.objects.create(
+            nomination=self.game,
+            user=self.user
+        )
+
+    def test_waitlist_creation(self):
+        # Verify the Waitlist instance was created correctly
+        self.assertEqual(self.waitlist.nomination, self.game)
+        self.assertEqual(self.waitlist.user, self.user)
+        self.assertTrue(self.waitlist.date_added <= timezone.now())  # Check that date_added is set
+
+
+    def test_unique_constraint(self):
+        # Verify that creating duplicate signups raises an IntegrityError
+        with self.assertRaises(Exception) as context:
+            Waitlist.objects.create(
+                nomination=self.game,
+                user=self.user
+            )
+        self.assertEqual(context.exception.__class__.__name__, 'IntegrityError')
+
+#-------------------USER PROFILE TESTING-------------------------------   
 class UserProfileTest(TestCase):
 
     def setUp(self):
@@ -646,4 +818,3 @@ class UserProfileTest(TestCase):
         )
         self.assertEqual(profile.latitude, 37.7749)
         self.assertEqual(profile.longitude, -122.4194)
-
