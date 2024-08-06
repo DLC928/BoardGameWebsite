@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect 
 from django.shortcuts import render, redirect
 from boardgame.models import EventPost, GroupPost, Notification, User, Category, EventLocation, GameComment, GameSignup, Group,Event, GroupLocation,GroupMembers,EventAttendance,Game, Tag, UserProfile, Vote, Waitlist
-from .forms import EventCommentForm, EventNominationSettingsForm, EventPostForm, GroupCommentForm, GroupForm, EventForm, EventLocationForm, GameDetailForm, GroupPostForm, UserProfileForm
+from .forms import EventCommentForm, EventNominationSettingsForm, EventPostForm, GroupCommentForm, GroupForm, EventForm, EventLocationForm, GameDetailForm, GroupPostForm, UserProfileForm, ChangePasswordForm
 from .utils import fetch_place_details
 from django.db.models import Count, Q
 
@@ -518,6 +518,7 @@ def edit_profile(request):
 
     if request.method == 'POST':
         profile_form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
+
         if profile_form.is_valid():
             profile = profile_form.save(commit=False)
             profile.user = request.user  # Ensure the profile is associated with the current user
@@ -544,6 +545,25 @@ def edit_profile(request):
 
     return render(request, 'boardgame/edit_profile.html', {'profile_form': profile_form})
 
+def update_password(request):
+    if request.user.is_authenticated:
+        current_user = request.user
+        
+        if request.method == 'POST':
+            form = ChangePasswordForm(current_user, request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Your password has been updated. Please login again. ")
+                return redirect('login')
+            else: 
+                for error in list(form.errors.values()):
+                    messages.error(request,error)
+                return redirect('update_password')
+        else: 
+            form = ChangePasswordForm(current_user)
+            return render(request, "boardgame/update_password.html",{'form':form})
+   
+    return render(request, 'boardgame/update_password.html', {})
 # ---------------------------NAVBAR---------------------------
 
 def groups(request):

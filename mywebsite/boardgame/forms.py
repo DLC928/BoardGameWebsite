@@ -1,7 +1,13 @@
 from django import forms 
-from .models import Category, EventPost, EventPostComment, Group,Event, EventLocation, Game, GroupPost, GroupPostComment, Tag, UserProfile
+from django.contrib.auth.forms import SetPasswordForm
+from .models import  User, EventPost, EventPostComment, Group,Event, EventLocation, Game, GroupPost, GroupPostComment, UserProfile
 
-# Create a group form
+
+class ChangePasswordForm(SetPasswordForm):
+    class Meta:
+        model = User 
+        fields = ['new_password1','new_password2']
+        
 class GroupForm(forms.ModelForm):
     class Meta:
         model = Group

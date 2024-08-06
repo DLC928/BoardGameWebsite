@@ -16,6 +16,7 @@ urlpatterns = [
     path('profile/<int:id>', views.user_profile, name='user_profile'),
     path('profile-setup/', views.profile_setup, name='profile_setup'),
     path('profile-edit/', views.edit_profile, name='profile_edit'),
+    path('update-password/', views.update_password, name='update_password'),
     path('groups/', views.groups, name='groups'),
     path('events/', views.events, name='events'),
     path('search/', views.search, name='search'),
