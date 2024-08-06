@@ -18,13 +18,14 @@
             {{ profile_form.favorite_games }}
         </div>
         <br/>
-        <!-- Input field for location with autocomplete -->
+       <!-- Input field for location with autocomplete -->
         <div class="form-group">
             <label for="user-location">Location</label>
-            <input type="text" id="user-location" class="form-control" style="width: 50%;" name="location_city" placeholder="City or town" value="{{ profile_form.location_city.value }}">
+            <input type="text" id="user-location" class="form-control" style="width: 50%;" name="city" placeholder="City or town" value="{{ profile_form.instance.city }}">
             <!-- Hidden input to store place ID -->
-            <input type="hidden" id="place-id" name="place_id" value="{{ profile_form.place_id.value }}">
+            <input type="hidden" id="place-id" name="place_id" value="{{ profile_form.instance.place_id }}">
         </div>
+
         <br/>
         <!-- Categories Multi-Select Scrollable Box -->
         <div class="form-group">
@@ -63,6 +64,8 @@
     </form>
 </div>
 <!-- JavaScript for Google Places Autocomplete -->
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&libraries=places"></script>
 <script>
     function initAutocomplete() {
         var input = document.getElementById('user-location');
@@ -82,4 +85,5 @@
     }
     google.maps.event.addDomListener(window, 'load', initAutocomplete);
 </script>
+
 {% endblock %}

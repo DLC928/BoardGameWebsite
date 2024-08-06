@@ -512,21 +512,13 @@ def profile_setup(request):
 
     return render(request, 'boardgame/profile_setup.html', {'profile_form': profile_form})
 
-
 def edit_profile(request):
     user_profile = UserProfile.objects.get(user=request.user)
-
     if request.method == 'POST':
         profile_form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
-
         if profile_form.is_valid():
             profile = profile_form.save(commit=False)
             profile.user = request.user  # Ensure the profile is associated with the current user
-            profile.save()
-            
-            # Save ManyToMany for category and tags
-            profile_form.save_m2m()
-
             # Fetch place details if location is updated
             place_id = request.POST.get('place_id')
             if place_id:
@@ -537,7 +529,10 @@ def edit_profile(request):
                     profile.country = place_details.get('country')
                     profile.latitude = place_details.get('latitude')
                     profile.longitude = place_details.get('longitude')
-                    profile.save()
+                    
+            profile.save()
+            # Save ManyToMany for category and tags
+            profile_form.save_m2m()
 
             return redirect('user_profile', id=request.user.id)
     else:
