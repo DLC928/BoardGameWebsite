@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
-from .models import Event, EventAttendance, EventLocation, EventPost, EventPostComment, Game, GameSignup, Group, Category, GroupLocation, GroupMembers, GroupPost, GroupPostComment, Tag, UserProfile, Waitlist
+from .models import Event, EventAttendance, EventLocation, EventPost, EventPostComment, Game, GameComment, GameSignup, Group, Category, GroupLocation, GroupMembers, GroupPost, GroupPostComment, Notification, Tag, UserProfile, Vote, Waitlist
 from django.utils import timezone
 from unittest.mock import patch
 
@@ -9,6 +9,7 @@ from unittest.mock import patch
 class GroupModelTest(TestCase):
     
     def setUp(self):
+        # Create object instances for testing
         self.user1 = User.objects.create_user(username='user1', password='password')
         self.user2 = User.objects.create_user(username='user2', password='password')
         self.category = Category.objects.create(name='Category1')
@@ -36,13 +37,11 @@ class GroupModelTest(TestCase):
         group.save()
         self.assertEqual(group.group_privacy, 'Public')
 
-    
     def test_group_image_upload(self):
         image = SimpleUploadedFile("test_image.jpg", b"file_content", content_type="image/jpeg")
         group = Group.objects.create(name='Image Group', group_image=image)
         self.assertTrue(group.group_image.name.startswith('group_images/'))
 
-    
     def test_group_add_members(self):
         group = Group.objects.create(
             name='Group with Members',
@@ -80,9 +79,9 @@ class GroupModelTest(TestCase):
         self.assertEqual(group3.slug, 'test-group-2')
 
 class GroupLocationTest(TestCase):
-
+    
+    # Create object instances for testing
     def setUp(self):
-        # Create a Group instance to associate with GroupLocation
         self.group = Group.objects.create(name='Test Group')  
 
     def test_create_group_location(self):
@@ -93,8 +92,8 @@ class GroupLocationTest(TestCase):
             state='Test State',
             postcode='12345',
             country='Test Country',
-            latitude=40.7128,
-            longitude=-74.0060
+            latitude=40.7728,
+            longitude=-64.0050
         )
         
         self.assertEqual(location.group, self.group)
@@ -103,8 +102,8 @@ class GroupLocationTest(TestCase):
         self.assertEqual(location.state, 'Test State')
         self.assertEqual(location.postcode, '12345')
         self.assertEqual(location.country, 'Test Country')
-        self.assertEqual(location.latitude, 40.7128)
-        self.assertEqual(location.longitude, -74.0060)
+        self.assertEqual(location.latitude, 40.7728)
+        self.assertEqual(location.longitude, -64.0050)
 
     def test_blank_fields(self):
         location = GroupLocation.objects.create(
@@ -120,16 +119,16 @@ class GroupLocationTest(TestCase):
         self.assertIsNone(location.latitude)
         self.assertIsNone(location.longitude)
 
-    def test_latitude_longitude_precision(self):
+    def test_latitude_longitude(self):
         location = GroupLocation.objects.create(
             group=self.group,
             city='Test City',
             country='Test Country',
-            latitude=37.774900,
-            longitude=-122.419400
+            latitude=27.124500,
+            longitude=-182.415400
         )
-        self.assertEqual(location.latitude, 37.774900)
-        self.assertEqual(location.longitude, -122.419400)
+        self.assertEqual(location.latitude, 27.124500)
+        self.assertEqual(location.longitude, -182.415400)
     
     def test_location_with_blank_lat_long(self):
         location = GroupLocation.objects.create(
@@ -146,7 +145,7 @@ class GroupLocationTest(TestCase):
 class GroupMembersTest(TestCase):
 
     def setUp(self):
-        # Create Group and User instances to use in tests
+        # Create object instances for testing
         self.group = Group.objects.create(name='Test Group') 
         self.user = User.objects.create_user(username='testuser', password='testpassword')
 
@@ -195,13 +194,12 @@ class GroupMembersTest(TestCase):
             group=self.group
         )
         self.assertIsNotNone(member.date_joined)
-        self.assertTrue(member.date_joined <= timezone.now())  # date_joined should be less than or equal to current time
+        self.assertTrue(member.date_joined <= timezone.now())  
 
 
 class GroupPostTest(TestCase):
 
     def setUp(self):
-        # Create Group and User instances to use in tests
         self.group = Group.objects.create(name='Test Group') 
         self.user = User.objects.create_user(username='testuser', password='testpassword')
 
@@ -228,7 +226,7 @@ class GroupPostTest(TestCase):
 class GroupPostTest(TestCase):
 
     def setUp(self):
-        # Create Group and User instances to use in tests
+        # Create object instances for testing
         self.group = Group.objects.create(name='Test Group') 
         self.user = User.objects.create_user(username='testuser', password='testpassword')
 
@@ -287,6 +285,7 @@ class GroupPostCommentTest(TestCase):
         
 #-------------------EVENT TESTING-------------------------------
 class EventModelTest(TestCase):
+    # Create object instances for testing
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.group = Group.objects.create(name='Test Group', description='Test Group Description')
@@ -380,9 +379,8 @@ class EventModelTest(TestCase):
         self.assertEqual(event.date_time, future_time)
         
 class EventAttendanceTest(TestCase):
-
+    # Create object instances for testing
     def setUp(self):
-        # Create User and Event instances to use in tests
         self.user = User.objects.create_user(username='testuser', password='testpassword')
         self.group = Group.objects.create(name='Test Group', description='Test Group Description')
         self.event = Event.objects.create(
@@ -404,13 +402,11 @@ class EventAttendanceTest(TestCase):
         self.assertIsNotNone(attendance.date_joined) 
 
     def test_unique_constraint(self):
-        # Create an EventAttendance instance
         EventAttendance.objects.create(
             user=self.user,
             event=self.event
         )
         
-        # Attempt to create another EventAttendance instance with the same user and event
         with self.assertRaises(Exception) as context:
             EventAttendance.objects.create(
                 user=self.user,
@@ -419,11 +415,9 @@ class EventAttendanceTest(TestCase):
         
         self.assertTrue('UNIQUE constraint failed' in str(context.exception))
        
-
 class EventLocationTest(TestCase):
-
+    # Create object instances for testing
     def setUp(self):
-        # Create an Event instance
         self.user = User.objects.create_user(username='testuser', password='testpassword')
         self.group = Group.objects.create(name='Test Group', description='Test Group Description')
         self.event = Event.objects.create(
@@ -445,18 +439,16 @@ class EventLocationTest(TestCase):
             country='Another Country',
             state='',  # Blank field allowed for CharField with blank=True
             sublocality='', 
-            latitude=None,  # Use None for DecimalField with blank=True
+            latitude=None,  
             longitude=None  
         )
     def test_event_location_blank_fields(self):
-        # Verify that blank fields are handled correctly
         self.assertEqual(self.event_location.sublocality, '')  
         self.assertEqual(self.event_location.state, '')  
         self.assertIsNone(self.event_location.latitude)  
         self.assertIsNone(self.event_location.longitude) 
 
     def test_event_location_creation(self):
-        # Verify the EventLocation instance was created correctly
         self.assertEqual(self.event_location.event, self.event)
         self.assertEqual(self.event_location.address, '789 Another St')
         self.assertEqual(self.event_location.city, 'Another City')
@@ -471,10 +463,8 @@ class EventLocationTest(TestCase):
 class EventPostTest(TestCase):
 
     def setUp(self):
-        # Create test user
+        # Create object instances for testing
         self.user = User.objects.create_user(username='testuser', password='password')
-        
-        # Create test event
         self.group = Group.objects.create(name='Test Group', description='Test Group Description')
         self.event = Event.objects.create(
             group=self.group,
@@ -485,7 +475,6 @@ class EventPostTest(TestCase):
             admin_only_nominations=True,
             skip_nominations=True
         )
-        # Create test post
         self.post = EventPost.objects.create(
             event=self.event,
             user=self.user,
@@ -493,7 +482,6 @@ class EventPostTest(TestCase):
         )
 
     def test_event_post_creation(self):
-        # Verify the EventPost instance was created correctly
         self.assertEqual(self.post.event, self.event)
         self.assertEqual(self.post.user, self.user)
         self.assertEqual(self.post.content, 'This is a test post')
@@ -503,10 +491,8 @@ class EventPostTest(TestCase):
 class EventPostCommentTest(TestCase):
 
     def setUp(self):
-        # Create test user
+        # Create object instances for testing
         self.user = User.objects.create_user(username='testuser', password='password')
-        
-        # Create test event
         self.group = Group.objects.create(name='Test Group', description='Test Group Description')
         self.event = Event.objects.create(
             group=self.group,
@@ -532,7 +518,6 @@ class EventPostCommentTest(TestCase):
         )
 
     def test_event_post_comment_creation(self):
-        # Verify the EventPostComment instance was created correctly
         self.assertEqual(self.comment.post, self.post)
         self.assertEqual(self.comment.user, self.user)
         self.assertEqual(self.comment.content, 'This is a test comment')
@@ -578,7 +563,7 @@ class GameModelTest(TestCase):
             Game.objects.create(
                 event=self.event,
                 nominator=self.user,
-                name="Unique Game"  # This should raise an IntegrityError
+                name="Unique Game"  
             )
     def test_game_nomination_status_choices(self):
         game = Game.objects.create(
@@ -623,15 +608,13 @@ class GameModelTest(TestCase):
         mock_response.status_code = 200
         mock_response.content = b"fake image content"
 
-        # Use a unique name for this test
         game = Game(
             event=self.event,
             nominator=self.user,
             name='Test Game for URL Download',
             thumbnail_url='http://example.com/image.jpg'
         )
-        # Save the game instance
-        game.save()  # Save it explicitly to control when it happens
+        game.save()  
 
         # Refresh the game instance from the database
         game.refresh_from_db()
@@ -651,13 +634,11 @@ class GameModelTest(TestCase):
         self.assertLess((timezone.now() - game.date_nominated).total_seconds(), 1)
 
 
-
 class GameSignupTest(TestCase):
 
     def setUp(self):
-        # Create test user
+        # Create object instances for testing
         self.user = User.objects.create_user(username='testuser', password='password')
-         # Create test event
         self.group = Group.objects.create(name='Test Group', description='Test Group Description')
         self.event = Event.objects.create(
             group=self.group,
@@ -688,13 +669,11 @@ class GameSignupTest(TestCase):
         )
 
     def test_game_signup_creation(self):
-        # Verify the GameSignup instance was created correctly
         self.assertEqual(self.signup.nomination, self.game)
         self.assertEqual(self.signup.user, self.user)
         self.assertTrue(self.signup.date_signed_up <= timezone.now())  
 
     def test_unique_constraint(self):
-        # Verify that creating duplicate signups raises an IntegrityError
         with self.assertRaises(Exception) as context:
             GameSignup.objects.create(
                 nomination=self.game,
@@ -705,10 +684,8 @@ class GameSignupTest(TestCase):
 class WaitlistTest(TestCase):
 
     def setUp(self):
-        # Create a test user
+         # Create object instances for testing
         self.user = User.objects.create_user(username='testuser', password='password')
-        
-           # Create test event
         self.group = Group.objects.create(name='Test Group', description='Test Group Description')
         self.event = Event.objects.create(
             group=self.group,
@@ -739,14 +716,12 @@ class WaitlistTest(TestCase):
         )
 
     def test_waitlist_creation(self):
-        # Verify the Waitlist instance was created correctly
         self.assertEqual(self.waitlist.nomination, self.game)
         self.assertEqual(self.waitlist.user, self.user)
-        self.assertTrue(self.waitlist.date_added <= timezone.now())  # Check that date_added is set
+        self.assertTrue(self.waitlist.date_added <= timezone.now()) 
 
 
     def test_unique_constraint(self):
-        # Verify that creating duplicate signups raises an IntegrityError
         with self.assertRaises(Exception) as context:
             Waitlist.objects.create(
                 nomination=self.game,
@@ -754,11 +729,91 @@ class WaitlistTest(TestCase):
             )
         self.assertEqual(context.exception.__class__.__name__, 'IntegrityError')
 
+class GameCommentTests(TestCase):
+
+    def setUp(self):
+        # Create object instances for testing
+        self.user = User.objects.create(username='testuser')
+        self.group = Group.objects.create(name='Test Group', description='Test Group Description')
+        self.event = Event.objects.create(
+            group=self.group,
+            title='Test Event',
+            date_time=timezone.now(),
+            nominations_open=False,
+            signups_open=True,
+            admin_only_nominations=True,
+            skip_nominations=True
+        )
+        # Create test game
+        self.game =  Game.objects.create(
+            event=self.event,
+            nominator=self.user,
+            name='Test Game',
+            min_players=2,
+            max_players=4,
+            min_playtime=30,
+            max_playtime=60,
+            age=12,
+            weight='Medium',
+            description='Test Game Description'
+        )
+        # Create a comment
+        self.comment = GameComment.objects.create(
+            nominated_game=self.game,
+            user=self.user,
+            content='This is a test comment.'
+        )
+
+    def test_game_comment_creation(self):
+        self.assertEqual(self.comment.nominated_game, self.game)
+        self.assertEqual(self.comment.user, self.user)
+        self.assertEqual(self.comment.content, 'This is a test comment.')
+        self.assertIsNotNone(self.comment.date_added) 
+
+class VoteTests(TestCase):
+
+    def setUp(self):
+        # Create object instances for testing
+        self.user = User.objects.create(username='testuser')
+        self.group = Group.objects.create(name='Test Group', description='Test Group Description')
+        self.event = Event.objects.create(
+            group=self.group,
+            title='Test Event',
+            date_time=timezone.now(),
+            nominations_open=False,
+            signups_open=True,
+            admin_only_nominations=True,
+            skip_nominations=True
+        )
+        # Create test game
+        self.game =  Game.objects.create(
+            event=self.event,
+            nominator=self.user,
+            name='Test Game',
+            min_players=2,
+            max_players=4,
+            min_playtime=30,
+            max_playtime=60,
+            age=12,
+            weight='Medium',
+            description='Test Game Description'
+        )
+        # Create a vote
+        self.vote = Vote.objects.create(
+            user=self.user,
+            game=self.game,
+            event=self.event
+        )
+    def test_vote_creation(self):
+        self.assertEqual(self.vote.user, self.user)
+        self.assertEqual(self.vote.game, self.game)
+        self.assertEqual(self.vote.event, self.event)
+      
 #-------------------USER PROFILE TESTING-------------------------------   
 class UserProfileTest(TestCase):
 
     def setUp(self):
-        # Create a user to associate with UserProfile
+         # Create object instances for testing
         self.user = User.objects.create_user(username='testuser', password='12345')
 
         # Create some categories and tags
@@ -818,3 +873,32 @@ class UserProfileTest(TestCase):
         )
         self.assertEqual(profile.latitude, 37.7749)
         self.assertEqual(profile.longitude, -122.4194)
+
+
+class NotificationTests(TestCase):
+
+    def setUp(self):
+        # Create object instances for testing
+        self.user = User.objects.create(username='testuser')
+        self.notification = Notification.objects.create(
+            read=False,
+            message='This is a test notification.',
+            user=self.user
+        )
+
+    def test_notification_creation(self):
+        self.assertEqual(self.notification.read, False)
+        self.assertEqual(self.notification.message, 'This is a test notification.')
+        self.assertIsNotNone(self.notification.timestamp) 
+        self.assertEqual(self.notification.user, self.user)
+   
+    def test_notification_read_default(self):
+        notification = Notification.objects.create(
+            message='Another test notification.',
+            user=self.user
+        )
+        self.assertFalse(notification.read)
+
+    def test_notification_user_relationship(self):
+        notification = Notification.objects.get(pk=self.notification.pk)
+        self.assertEqual(notification.user, self.user)
