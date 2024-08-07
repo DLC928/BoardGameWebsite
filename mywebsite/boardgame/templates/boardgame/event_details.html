@@ -29,7 +29,7 @@
                 <form method="post" action="">
                     {% csrf_token %}
                     {% if is_attending %}
-                    <button type="submit" class="btn btn-secondary btn-sm" name="leave">Leave Event</button>
+                    <button type="submit" class="btn btn-danger btn-sm" name="leave">Leave Event</button>
 
                     {% if event.nominations_open %}
                     {% if not has_nomination %}

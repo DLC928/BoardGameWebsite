@@ -177,7 +177,6 @@
         <button type="submit" name="nomination_settings" class="btn btn-primary btn-sm">Save Changes</button>
     </form>
     <hr>
-    <a href="{% url 'nominate_game' event.id %}" class="btn btn-secondary btn-sm">Nominate Game</a>
 </div>
 <br />
 <h3>Pending Nominations</h3>
@@ -415,7 +414,10 @@
         {% endfor %}
     </tbody>
 </table>
+
 {% endif %}
+
+<a href="{% url 'nominate_game' event.id %}" class="btn btn-secondary btn-sm">Nominate Game</a>
 {% elif section == 'attendee_management' %}
 <h2>Attendee Management</h2>
 
