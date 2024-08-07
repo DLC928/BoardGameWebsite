@@ -683,7 +683,7 @@ def manage_group_dashboard(request, group_slug, section=None):
     
     if section == 'group_setup':
         if request.method == 'POST':
-            form = GroupForm(request.POST, instance=group)
+            form = GroupForm(request.POST,  request.FILES,instance=group)
             if form.is_valid():
                 form.save()
                 # Fetch place details using utility function if place_id is provided
@@ -773,7 +773,7 @@ def manage_event_dashboard(request, event_id, section=None):
 
     if section == 'event_setup':
         if request.method == 'POST':
-            form = EventForm(request.POST, instance=event)
+            form = EventForm(request.POST, request.FILES, instance=event)
             
             if form.is_valid():
                 form.save()
