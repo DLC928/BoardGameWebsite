@@ -79,7 +79,7 @@
     <input type="hidden" name="add_location" id="add_location" value="false">
 
     <!-- Button to show/hide location form -->
-    <button type="button" class="btn btn-secondary" id="toggle-location-btn">Manually Add Location</button>
+    <button type="button" class="btn btn-secondary btn-sm" id="toggle-location-btn">Manually Add Location</button></br>
 
     <!-- Location form, initially hidden -->
     <div id="location-form" style="display: none; margin-top: 20px;">
@@ -103,9 +103,15 @@
     </div>
 
     <!-- Submit Button -->
-    <input type="submit" value="Submit" class="btn btn-secondary">
+    </br>
+    <input type="submit" value="Submit" class="btn btn-primary btn-sm">
 </form>
-
+<!-- Cancel back to group -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <a href="{% url 'group_profile' group.slug %}">Cancel</a>
+    </div>
+</div>
 <script>
     function initMap() {
         var autocomplete = new google.maps.places.Autocomplete(
@@ -158,5 +164,6 @@
         document.head.appendChild(script);
     });
 </script>
+
 {% endblock %}
 
