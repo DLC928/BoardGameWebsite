@@ -217,9 +217,9 @@
             </div>
              
             <!-- Waitlisted Games Section -->
-            <h3>Waitlisted Games</h3>
             <div class="row mt-4">
                 {% if waitlisted_games %}
+                <h3>Waitlisted Games</h3>
                     {% for item in waitlisted_games %}
                     <div class="col-md-4 mb-3">
                         <div class="card card-custom">
@@ -261,9 +261,6 @@
                     </div>
                     {% endfor %}
                 {% else %}
-                    <div class="col-12">
-                        <p>No games have reached the maximum player count yet.</p>
-                    </div>
                 {% endif %}
             </div>
             {% endif %}
