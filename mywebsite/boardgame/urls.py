@@ -4,6 +4,7 @@ from django.views.i18n import JavaScriptCatalog
 
 urlpatterns = [
     path("",views.home, name="home"),
+    path("about/",views.about, name="about"),
     path('jsi18n', JavaScriptCatalog.as_view(), name='js-catlog'),
     path('api/search-games/', api_views.search_games, name='search_games'),
     path('api/game-details/', api_views.load_game_details, name='load_game_details'),

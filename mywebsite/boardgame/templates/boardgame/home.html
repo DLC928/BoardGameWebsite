@@ -148,9 +148,9 @@
                                 <div class="card-body">
                                     <div class="group-profile">
                                         {% if group_member.group.group_image %}
-                                        <img src="{{ group_member.group.group_image.url }}" class="profile-image rounded">
+                                        <img src="{{ group_member.group.group_image.url }}" class="profile-image rounded mb-3" style="max-width: 100%;">
                                         {% else %}
-                                        <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded">
+                                        <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
                                         {% endif %}
                                         <br/><br/>
                                         {{ group_member.group.group_members.all.count }} members

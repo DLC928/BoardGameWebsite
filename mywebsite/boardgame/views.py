@@ -39,6 +39,9 @@ def home(request):
         'recommended_groups':recommended_groups,
     }
     return render(request, 'boardgame/home.html', context=context)
+
+def about(request):
+    return render(request, 'boardgame/about.html', {})
 # ---------------------------GROUPS---------------------------
 def group_profile(request, group_slug):
     group = Group.objects.get(slug=group_slug)
