@@ -105,28 +105,39 @@ def create_group(request):
     if request.method == 'POST':
         group_form = GroupForm(request.POST, request.FILES)
         if group_form.is_valid():
-            group = group_form.save(commit=False)
-            group.save()
-            group_form.save_m2m() #For tags and categories 
-            
-            # Fetch place details using utility function
-            place_id = request.POST.get('place_id')  # Get selected place ID
-            place_details = fetch_place_details(place_id)
+            try:
+                group = group_form.save(commit=False)
+                group.save()
+                group_form.save_m2m()  # For tags and categories 
 
-            if place_details:
-                # Save location details to GroupLocation model
-                GroupLocation.objects.create(
-                    group=group,
-                    city=place_details['city'],
-                    sublocality=place_details['sublocality'],
-                    state=place_details['state'],
-                    country=place_details['country'],
-                    latitude=place_details['latitude'],
-                    longitude=place_details['longitude'],
-                )
-            # Add user as a member of the group
-            GroupMembers.objects.create(user=request.user, group=group, is_admin=True)
-            return redirect('group_profile', group_slug=group.slug)
+                # Fetch place details using utility function
+                place_id = request.POST.get('place_id')  # Get selected place ID
+                place_details = fetch_place_details(place_id)
+
+                if place_details:
+                    # Save location details to GroupLocation model
+                    GroupLocation.objects.create(
+                        group=group,
+                        city=place_details['city'],
+                        sublocality=place_details['sublocality'],
+                        state=place_details['state'],
+                        country=place_details['country'],
+                        latitude=place_details['latitude'],
+                        longitude=place_details['longitude'],
+                    )
+                # Add user as a member of the group
+                GroupMembers.objects.create(user=request.user, group=group, is_admin=True)
+                return redirect('group_profile', group_slug=group.slug)
+            except Exception as e:
+                messages.error(request, "An unexpected error occurred. Please try again.")
+                return render(request, 'boardgame/create_group.html', {'form': group_form})
+        else:
+            # If form is not valid, show form errors
+            if 'group_image' in group_form.errors:
+                messages.error(request, group_form.errors['group_image'][0])
+            else:
+                messages.error(request, "There was an issue with the image file. Please upload a different image.")
+            return render(request, 'boardgame/create_group.html', {'form': group_form})
     else:
         group_form = GroupForm()
     
@@ -140,39 +151,51 @@ def create_event(request, group_slug):
 
     if request.method == 'POST':
         if event_form.is_valid():
-            event = event_form.save(commit=False)
-            event.group = group
-            event.save()
-            event_form.save_m2m()
+            try:
+                event = event_form.save(commit=False)
+                event.group = group
+                event.save()
+                event_form.save_m2m()
 
-            add_location = request.POST.get('add_location', False)
+                add_location = request.POST.get('add_location', False)
 
-            if add_location == 'true':
-                # Handle manual entry of location details
-                location_form = EventLocationForm(request.POST)
-                if location_form.is_valid():
-                    event_location = location_form.save(commit=False)
-                    event_location.event = event  # Associate event with event location
-                    event_location.save()
+                if add_location == 'true':
+                    # Handle manual entry of location details
+                    location_form = EventLocationForm(request.POST)
+                    if location_form.is_valid():
+                        event_location = location_form.save(commit=False)
+                        event_location.event = event  # Associate event with event location
+                        event_location.save()
+                else:
+                    # Handle location details from Google Places API
+                    place_id = request.POST.get('place_id', None)
+                    if place_id:
+                        place_details = fetch_place_details(place_id)
+
+                        if place_details:
+                            # Create EventLocation instance
+                            EventLocation.objects.create(
+                                event=event,
+                                address=place_details.get('formatted_address', ''),
+                                city=place_details.get('city', ''),
+                                state=place_details.get('state', ''),
+                                postcode=place_details.get('postcode', ''),
+                                country=place_details.get('country', ''),
+                                latitude=place_details.get('latitude', None),
+                                longitude=place_details.get('longitude', None),
+                            )
+                return redirect('group_profile', group_slug=group_slug)
+            except Exception as e:
+                messages.error(request, "An unexpected error occurred. Please try again.")
+                return render(request, 'boardgame/create_event.html', {'form': event_form,'location_form': location_form,'group': group,})
+        else:
+            # If form is not valid, show form errors
+            if 'event_image' in event_form.errors:
+                messages.error(request, event_form.errors['event_image'][0])
             else:
-                # Handle location details from Google Places API
-                place_id = request.POST.get('place_id', None)
-                if place_id:
-                    place_details = fetch_place_details(place_id)
+                messages.error(request, "There was an issue with the image file. Please upload a different image.")
+            return render(request, 'boardgame/create_event.html', {'form': event_form,'location_form': location_form,'group': group,})
 
-                    if place_details:
-                        # Create EventLocation instance
-                        EventLocation.objects.create(
-                            event=event,
-                            address=place_details.get('formatted_address', ''),
-                            city=place_details.get('city', ''),
-                            state=place_details.get('state', ''),
-                            postcode=place_details.get('postcode', ''),
-                            country=place_details.get('country', ''),
-                            latitude=place_details.get('latitude', None),
-                            longitude=place_details.get('longitude', None),
-                        )
-            return redirect('group_profile', group_slug=group_slug)
     context = {
         'form': event_form,
         'location_form': location_form,
@@ -689,29 +712,41 @@ def manage_group_dashboard(request, group_slug, section=None):
         if request.method == 'POST':
             form = GroupForm(request.POST,  request.FILES,instance=group)
             if form.is_valid():
-                form.save()
-                # Fetch place details using utility function if place_id is provided
-                place_id = request.POST.get('place_id')
-                if place_id:
-                    place_details = fetch_place_details(place_id)
-                    if place_details:
-                        if group_location is None:
-                            group_location = GroupLocation(group=group)
-                        group_location.city = place_details.get('city', '')
-                        group_location.sublocality = place_details.get('sublocality', '')
-                        group_location.state = place_details.get('state', '')
-                        group_location.postcode = place_details.get('postcode', '')
-                        group_location.country = place_details.get('country', '')
-                        group_location.latitude = place_details.get('latitude', None)
-                        group_location.longitude = place_details.get('longitude', None)
-                        group_location.save()
+                try:
+                    form.save()
+                    # Fetch place details using utility function if place_id is provided
+                    place_id = request.POST.get('place_id')
+                    if place_id:
+                        place_details = fetch_place_details(place_id)
+                        if place_details:
+                            if group_location is None:
+                                group_location = GroupLocation(group=group)
+                            group_location.city = place_details.get('city', '')
+                            group_location.sublocality = place_details.get('sublocality', '')
+                            group_location.state = place_details.get('state', '')
+                            group_location.postcode = place_details.get('postcode', '')
+                            group_location.country = place_details.get('country', '')
+                            group_location.latitude = place_details.get('latitude', None)
+                            group_location.longitude = place_details.get('longitude', None)
+                            group_location.save()
 
-                messages.success(request, 'Group updated successfully.')
-                return redirect('manage_group_dashboard_with_section', group_slug=group.slug, section='group_setup')
+                    messages.success(request, 'Group updated successfully.')
+                    return redirect('manage_group_dashboard_with_section', group_slug=group.slug, section='group_setup')
+                except Exception as e:
+                    messages.error(request, "An unexpected error occurred. Please try again.") 
+                    return redirect ('manage_group_dashboard_with_section', group_slug=group.slug, section='group_setup')
+            else:
+                # If form is not valid, show form errors
+                if 'group_image' in form.errors:
+                    messages.error(request, form.errors['group_image'][0])
+                else:
+                    messages.error(request, "There was an issue with the image file. Please upload a different image.")
+                return redirect ('manage_group_dashboard_with_section', group_slug=group.slug, section='group_setup')
+    
         else:
             form = GroupForm(instance=group)
             
-        context.update({'form': form,'current_location': group_location})
+        context.update({'form': form,'group_location': group_location})
 
     elif section == 'event_management':
         if request.method == 'POST':
@@ -780,24 +815,36 @@ def manage_event_dashboard(request, event_id, section=None):
             form = EventForm(request.POST, request.FILES, instance=event)
             
             if form.is_valid():
-                form.save()
-                # Fetch place details using utility function if place_id is provided
-                place_id = request.POST.get('place_id')
-                if place_id:
-                    place_details = fetch_place_details(place_id)
-                    if place_details:
-                        if event_location is None:
-                            event_location = EventLocation(event=event)
-                        event_location.address = place_details.get('formatted_address', '')
-                        event_location.city = place_details.get('city', '')
-                        event_location.state = place_details.get('state', '')
-                        event_location.postcode = place_details.get('postcode', '')
-                        event_location.country = place_details.get('country', '')
-                        event_location.latitude = place_details.get('latitude', None)
-                        event_location.longitude = place_details.get('longitude', None)
-                        event_location.save()
-                messages.success(request, 'Event updated successfully.')
+                try:
+                    form.save()
+                    # Fetch place details using utility function if place_id is provided
+                    place_id = request.POST.get('place_id')
+                    if place_id:
+                        place_details = fetch_place_details(place_id)
+                        if place_details:
+                            if event_location is None:
+                                event_location = EventLocation(event=event)
+                            event_location.address = place_details.get('formatted_address', '')
+                            event_location.city = place_details.get('city', '')
+                            event_location.state = place_details.get('state', '')
+                            event_location.postcode = place_details.get('postcode', '')
+                            event_location.country = place_details.get('country', '')
+                            event_location.latitude = place_details.get('latitude', None)
+                            event_location.longitude = place_details.get('longitude', None)
+                            event_location.save()
+                    messages.success(request, 'Event updated successfully.')
+                    return redirect('manage_event_dashboard_with_section', event_id=event.id, section='event_setup')
+                except Exception as e:
+                    messages.error(request, "An unexpected error occurred. Please try again.")
+                    return redirect('manage_event_dashboard_with_section', event_id=event.id, section='event_setup')
+            else:
+                # If form is not valid, show form errors
+                if 'event_image' in form.errors:
+                    messages.error(request, form.errors['event_image'][0])
+                else:
+                    messages.error(request, "There was an issue with the image file. Please upload a different image.")
                 return redirect('manage_event_dashboard_with_section', event_id=event.id, section='event_setup')
+
         else:
             form = EventForm(instance=event)
         

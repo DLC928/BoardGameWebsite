@@ -19,7 +19,10 @@
     {{ form.title.label_tag }} {{ form.title }} <br/>
     {{ form.description.label_tag }} {{ form.description }} <br/>
     {{ form.date_time.label_tag }} {{ form.date_time }} <br/>
-    {{ form.event_image.label_tag }} {{ form.event_image }} <br/>
+    <div class="form-group">
+        <label for="{{ form.event_image.id_for_label }}" class="form-label">Event Image</label>
+        <input type="file" id="{{ form.event_image.id_for_label }}" name="event_image" class="form-control form-control-sm" style="max-width: 400px;">
+     </div>
     </div>
     <br/>
     <!-- Categories Multi-Select Scrollable Box -->

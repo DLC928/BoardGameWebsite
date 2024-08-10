@@ -15,10 +15,10 @@
                         <div class="col-md-4">
                             {% if game.thumbnail_file %}
                             <img src="{{ game.thumbnail_file.url }}" alt="{{ game.name }} Thumbnail" class="img-fluid rounded mb-3"
-                                style="max-width: 300px; height: auto;">
+                                style="max-width: 100%; height: auto;">
                             {% else %}
                             <img src="{% static 'boardgame/images/default_thumbnail.jpg' %}" alt="Default Thumbnail"
-                                class="img-fluid rounded mb-3" style="max-width: 200px; height: auto;">
+                                class="img-fluid rounded mb-3" style="max-width: 100%; height: auto;">
                             {% endif %}
                             <br>
                             {% if user.is_authenticated and event.signups_open %}
