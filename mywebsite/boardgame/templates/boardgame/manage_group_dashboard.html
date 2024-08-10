@@ -3,7 +3,6 @@
 
 {% block content %}
 <head>
-    <h1>Group Dashboard for {{ group.name }}</h1>
     <style>
         .nav-pills .nav-link {
             background-color: #0dcaf0; 
@@ -21,6 +20,8 @@
         }
     </style>
 </head>
+<div class="container mt-4" style="max-width: 90%; margin: 0 auto; padding-bottom: 30px; padding-top: 10px;">
+<h1>Group Dashboard for {{ group.name }}</h1>
 <nav>
     <ul class="nav nav-pills">
         <li class="nav-item">
@@ -185,6 +186,7 @@
                                 <input type="hidden" name="group_id" value="{{ user.group.id }}">
                                 <button type="submit" name="action" value="set_admin" class="btn btn-success btn-sm">Set Admin</button>
                             </form>
+            
                             <form method="post" action="{% url 'manage_group_dashboard' group.slug %}?section=member_management" class="d-inline">
                                 {% csrf_token %}
                                 <input type="hidden" name="user_id" value="{{ user.user.id }}">
@@ -318,6 +320,7 @@
             <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">Back to Group</a>
         </div>
     </div>
+</div>   
 {% endblock %}
 
 

@@ -3,7 +3,7 @@
 {% block content %}
 <title>Profile</title>
 
-<div class="container mt-4">
+<div class="container mt-4" style="max-width: 90%; margin: 0 auto; padding-bottom: 30px; padding-top: 10px;">
     <!-- Profile Header -->
     <div class="card mb-4" style="background-color: #f8f9fa; border: none;">
         <div class="card-body text-center">
@@ -78,9 +78,9 @@
                                 <div class="card-body">
                                     <div class="group-profile">
                                         {% if group_member.group.group_image %}
-                                        <img src="{{ group_member.group.group_image.url }}" class="profile-image rounded">
+                                        <img src="{{ group_member.group.group_image.url }}" class="profile-image rounded mb-3" style="max-width: 100%;">
                                         {% else %}
-                                        <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded">
+                                        <img src="{% static 'boardgame/images/group_profile_default.jpg' %}"  class="profile-image rounded mb-3" style="max-width: 100%;">
                                         {% endif %}
                                         <br/><br/>
                                         {{ group_member.group.group_members.all.count }} members
@@ -115,9 +115,9 @@
                                 <div class="card-body">
                                     <div class="event-profile">
                                         {% if event_attendance.event.event_image %}
-                                        <img src="{{ event_attendance.event.event_image.url }}" class="profile-image rounded">
+                                        <img src="{{ event_attendance.event.event_image.url }}"  class="profile-image rounded mb-3" style="max-width: 100%;">
                                         {% else %}
-                                        <img src="{% static 'boardgame/images/event_profile_default.jpg' %}" class="profile-image rounded">
+                                        <img src="{% static 'boardgame/images/event_profile_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
                                         {% endif %}
                                         <br/><br/>
                                         <p><b>Location:</b> {{event_attendance.event.eventlocation.city }}{% if event_attendance.event.eventlocation.state %}, {{ event_attendance.event.eventlocation.state }}{% endif %}</p>

@@ -32,6 +32,7 @@
     </style>
 
 </head>
+<div class="container mt-4" style="max-width: 90%; margin: 0 auto; padding-bottom: 30px; padding-top: 10px;">
 <h1>Event Dashboard for {{ event.title }} </h1>
 <nav>
     <ul class="nav nav-pills">
@@ -455,5 +456,6 @@
         <a href="{% url 'group_profile' event.group.slug %}" class="btn btn-secondary btn-sm">Back to Group</a>
         <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">Back to Event</a>
     </div>
+</div>
 </div>
 {% endblock %}
