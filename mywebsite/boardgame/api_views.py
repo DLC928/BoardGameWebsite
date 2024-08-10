@@ -6,7 +6,6 @@ def search_games(request):
 
     if query:
         url = f'https://www.boardgamegeek.com/xmlapi/search?search={query}&type=boardgame'
-        response = requests.get(url)
         try:
             response = requests.get(url)
             response.raise_for_status()  
