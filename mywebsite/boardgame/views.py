@@ -10,8 +10,10 @@ from django.db.models import Count, Q
 
 def home(request):
     now = timezone.now()
-    group_list = Group.objects.all().select_related('grouplocation').order_by('name')
-    event_list = Event.objects.filter(date_time__gte=now).select_related('eventlocation').order_by('title')
+    group_list = Group.objects.all().select_related('grouplocation').annotate(num_members=Count('group_members')).order_by('-num_members')[:8]
+
+    event_list = Event.objects.filter(date_time__gte=now).select_related('eventlocation').annotate(num_attendees=Count('attendees')).order_by('-num_attendees')[:8]
+ 
     # Initialize user-related variables
     user_groups = None
     user_events = None
@@ -591,9 +593,8 @@ def groups(request):
     show_user_groups = request.GET.get('your_groups') == 'true'
     search_query = request.GET.get('search')
     
-    # Get all groups
     group_list = Group.objects.all().order_by('name')
-    
+
     # Filter by search query if present
     if search_query:
         # Filter by group name or location
@@ -618,6 +619,10 @@ def groups(request):
         user_groups = GroupMembers.objects.filter(user=user).select_related('group')
         if show_user_groups:
             group_list = group_list.filter(id__in=user_groups.values_list('group_id', flat=True))
+
+    # If feature groups are displaying, cap results to 9
+    if not (search_query or tag_name or category_name or show_user_groups):
+        group_list = group_list.annotate(num_members=Count('group_members')).order_by('-num_members')[:6]
 
     context = {
         'groups': group_list,
@@ -661,6 +666,10 @@ def events(request):
         user_events = EventAttendance.objects.filter(user=user).select_related('event')
         if show_user_events:
             event_list = event_list.filter(id__in=user_events.values_list('event_id', flat=True))
+
+    # If no filters are applied, get top 9 events with most attendees
+    if not (search_query or tag_name or category_name or show_user_events):
+        event_list = event_list.annotate(num_attendees=Count('attendees')).order_by('-num_attendees')[:9]
 
     context = {
         'events': event_list,
