@@ -5,7 +5,7 @@
 <head>
 <h3>Groups</h3>
 </head>
-<div class="container">
+<div class="container" style="padding-bottom: 30px;">
     <!-- Row for search bar and buttons -->
     <div class="row">
         <!-- Left column for search bar, buttons, and filters -->
@@ -101,12 +101,13 @@
             </div>
         </div>
     </div>
+    <!-- Link back to home -->
+    <div class="mt-3">
+        <a href="{% url 'home' %}" class="btn btn-secondary btn-sm">Back to Home</a>
+    </div>
 </div>
 
-<!-- Link back to home -->
-<div class="mt-3">
-    <a href="{% url 'home' %}" class="btn btn-secondary btn-sm">Back to Home</a>
-</div>
+
 
 <style>
     .btn-group {

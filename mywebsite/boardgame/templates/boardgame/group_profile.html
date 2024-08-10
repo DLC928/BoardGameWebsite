@@ -5,6 +5,7 @@
 <head>
     <link rel="stylesheet" href="{% static 'boardgame/group_profile_style.css' %}">
 </head>
+<div class="container mt-4" style="max-width: 90%; margin: 0 auto; padding-bottom: 30px; padding-top: 10px;">
 <div class="row">
     <div class="col-md-3">
         {% if group.group_image %}
@@ -297,5 +298,5 @@
 <div class="mt-3">
     <a href="{% url 'home' %}" class="btn btn-secondary btn-sm">Back to Home</a>
 </div>
-
+</div>
 {% endblock %}
