@@ -78,19 +78,24 @@
                 {% if groups %}
                 {% for group in groups %}
                 <div class="col-md-4 mb-3">
-                    <div class="card" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-                        <div class="card-header" style="background-color: #e9ecef;">
-                            <h4>{{ group.name }}</h4>
-                        </div>
+                    <div class="card-custom" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
                         <div class="card-body">
                             {% if group.group_image %}
-                            <img src="{{ group.group_image.url }}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                            <img src="{{ group.group_image.url }}" class="rounded" style="width: 100%; height: 150px; object-fit: cover;">
                             {% else %}
-                            <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
+                            <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="rounded" style="width: 100%; height: 150px; object-fit: cover;">
                             {% endif %}
-                            <b>Members:</b> {{ group.group_members.all.count }}
-                            <p><b>Location:</b> {{ group.grouplocation.city }}{% if group.grouplocation.state %}, {{ group.grouplocation.state }}{% endif %}</p>
-                            <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
+                            <br/>  <br/>
+                            <h5>{{ group.name }}</h5> 
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-people me-2"></i>
+                                <span> Members: {{ group.group_members.all.count }}</span>
+                            </div>
+                             <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-geo-alt me-2"></i>
+                                <span>{{ group.grouplocation.city }}{% if group.grouplocation.state %}, {{ group.grouplocation.state }}{% endif %}</span>
+                            </div>
+                             <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
                         </div>
                     </div>
                 </div>
@@ -110,24 +115,12 @@
 
 
 <style>
-    .btn-group {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
+    .card-custom {
+        border: none;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px; /* Rounded corners for cards */
+        width: 100%; /* Full width of the parent container */
     }
-
-    .btn-group .btn {
-        margin: 5px;
-    }
-
-    #group-cards {
-        overflow-x: auto;
-    }
-
-    #group-cards .card {
-        min-width: 300px;
-    }
-
     /* Styling for tags and categories */
     .tag-link, .category-link {
         text-decoration: none;
