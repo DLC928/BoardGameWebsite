@@ -9,7 +9,7 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU&libraries=places"></script>
 </head>
 
-<div class="container mt-4">
+<div class="container mt-4" style="padding-bottom: 30px;">
     <h2>Profile Setup</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -55,9 +55,9 @@
         <div class="form-group" style="display: flex; align-items: center;">
             <button type="submit" class="btn btn-primary btn-sm" style="margin-right: 15px;">Save Profile</button>
             <p style="margin: 0;">
-                <a href="{% url 'home' %}" class="text-muted">
-                    <i class="fas fa-times-circle"></i> Skip for now
-                </a>
+                <button type="submit" class="btn btn-secondary btn-sm" style="margin: 0; background: none; border: none; color: #6c757d; text-decoration: underline; cursor: pointer;">
+                Skip for now
+                </button>
             </p>
         </div>
     </form>

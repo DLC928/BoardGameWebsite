@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.utils import timezone
 from django.contrib import messages 
 from django.http import HttpResponseRedirect 
 from django.shortcuts import render, redirect
@@ -8,7 +9,7 @@ from .utils import fetch_place_details
 from django.db.models import Count, Q
 
 def home(request):
-    now = datetime.now()
+    now = timezone.now()
     group_list = Group.objects.all().select_related('grouplocation').order_by('name')
     event_list = Event.objects.filter(date_time__gte=now).select_related('eventlocation').order_by('title')
     # Initialize user-related variables
@@ -54,7 +55,7 @@ def group_profile(request, group_slug):
         is_admin = GroupMembers.objects.filter(user=request.user, group=group, is_admin=True).exists()
         is_moderator = GroupMembers.objects.filter(user=request.user, group=group, is_moderator=True).exists()
     # Fetch events associated with the group
-    now = datetime.now()
+    now = timezone.now()
     upcoming_events = Event.objects.filter(group=group, date_time__gte=now).order_by('date_time')
     past_events = Event.objects.filter(group=group, date_time__lt=now).order_by('-date_time')
     post_form = GroupPostForm()
@@ -610,7 +611,7 @@ def events(request):
     show_user_events = request.GET.get('your_events') == 'true'
     search_query = request.GET.get('search')
     
-    now = datetime.now()
+    now = timezone.now()
     # Get upcoming events
     event_list = Event.objects.filter(date_time__gte=now).order_by('title')
     
@@ -722,7 +723,7 @@ def manage_group_dashboard(request, group_slug, section=None):
                 event.delete()
                 messages.success(request, 'Group successfully deleted.')
                 return redirect('manage_group_dashboard_with_section', group_slug=group.slug, section='event_management')
-        now = datetime.now()
+        now = timezone.now()
         upcoming_events = Event.objects.filter(group=group, date_time__gte=now).order_by('date_time')
         past_events = Event.objects.filter(group=group, date_time__lt=now).order_by('-date_time')
         
