@@ -10,21 +10,24 @@
                 <div class="row">
                     {% for group in groups %}
                     <div class="col-md-4 mb-3">
-                        <div class="card" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-                            <div class="card-header" style="background-color: #e9ecef;">
-                                <h4>{{ group.name }}</h4>
-                            </div>
+                        <div class="card-custom" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
                             <div class="card-body">
-                                <div class="group-profile">
-                                    {% if group.group_image %}
-                                    <img src="{{ group.group_image.url }}" class="profile-image rounded">
-                                    {% else %}
-                                    <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="profile-image rounded">
-                                    {% endif %}
-                                    <br/><br/>
-                                    <p><b>Location:</b> {{ group.grouplocation.city }}{% if group.grouplocation.state %}, {{ group.grouplocation.state }}{% endif %}</p>
-                                    <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
+                                {% if group.group_image %}
+                                <img src="{{ group.group_image.url }}" class="rounded" style="width: 100%; height: 150px; object-fit: cover;">
+                                {% else %}
+                                <img src="{% static 'boardgame/images/group_profile_default.jpg' %}" class="rounded" style="width: 100%; height: 150px; object-fit: cover;">
+                                {% endif %}
+                                <br/>  <br/>
+                                <h5>{{ group.name }}</h5> 
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-people me-2"></i>
+                                    <span> Members: {{ group.group_members.all.count }}</span>
                                 </div>
+                                 <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-geo-alt me-2"></i>
+                                    <span>{{ group.grouplocation.city }}{% if group.grouplocation.state %}, {{ group.grouplocation.state }}{% endif %}</span>
+                                </div>
+                                 <a href="{% url 'group_profile' group.slug %}" class="btn btn-secondary btn-sm">View Group</a>
                             </div>
                         </div>
                     </div>
@@ -39,20 +42,31 @@
                 <div class="row">
                     {% for event in events %}
                     <div class="col-md-4 mb-3">
-                        <div class="card" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-                            <div class="card-header" style="background-color: #e9ecef;">
-                                <h4>{{ event.title }}</h4>
-                            </div>
+                        <div class="card-custom" style="border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
                             <div class="card-body">
-                                {% if event.event_image %}
-                                <img src="{{ event.event_image.url }}" class="profile-image rounded mb-3" style="max-width: 100%;">
-                                {% else %}
-                                <img src="{% static 'boardgame/images/event_image_default.jpg' %}" class="profile-image rounded mb-3" style="max-width: 100%;">
-                                {% endif %}
-                                <br/>
-                                <b>Date:</b> {{ event.date_time }}<br>
-                                <b>Location:</b> {{ event.eventlocation.city }}{% if event.eventlocation.state %}, {{ event.eventlocation.state }}{% endif %}<br /><br />
-                                <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event</a>
+                                <div class="text-center mb-3">
+                                    {% if event.event_image %}
+                                        <img src="{{ event.event_image.url }}" class="rounded" style="width: 100%; height: 150px; object-fit: cover;">
+                                    {% else %}
+                                        <img src="{% static 'boardgame/images/event_image_default.jpg' %}" class="rounded" style="width: 100%; height: 200px; object-fit: cover;">
+                                    {% endif %}
+                                </div>
+                                <h5>{{ event.title }}</h5>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-calendar-event me-2"></i>
+                                    <span>{{ event.date_time|date:"F j, Y" }}</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-person-circle me-2"></i>
+                                    <span>{{ event.group.name }}</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-geo-alt me-2"></i>
+                                    <span>{{ event.eventlocation.city }}{% if event.eventlocation.state %}, {{ event.eventlocation.state }}{% endif %}</span>
+                                </div>
+                                <div class="mt-3">
+                                    <a href="{% url 'event_details' event.id %}" class="btn btn-secondary btn-sm">View Event</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -73,4 +87,12 @@
     <div>
         <a href="{% url 'home' %}">Back to Home</a>
     </div>
+    <style>/* Styling for cards */
+        .card-custom {
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px; /* Rounded corners for cards */
+            width: 90%; /* Full width of the parent container */
+        }
+    </style>
 {% endblock %}

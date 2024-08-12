@@ -29,7 +29,7 @@
         <li class="nav-item">
           <a class="nav-link position-relative" href="{% url 'notifications' %}" style="color: white;">
             <i class="bi bi-bell-fill" style="font-size: 1.5rem; padding-right: 1rem; position: relative;"></i>
-            {% unread_notifications_count user as notifications_count %}
+            {% unread_notifications_count request.user as notifications_count %}
             {% if notifications_count > 0 %}
               <span class="position: absolute top-20 start-100 translate-middle badge rounded-pill bg-danger">
                 {{ notifications_count }}
@@ -40,7 +40,7 @@
         </li>
         <li class="nav-item dropdown d-flex align-items-center">
           <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: white;">
-            <img src="{% if user.userprofile.picture %}{{ user.userprofile.picture.url }}{% else %}{% static 'boardgame/images/default_profile.jpg' %}{% endif %}" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
+            <img src="{% if request.user.userprofile.picture %}{{ request.user.userprofile.picture.url }}{% else %}{% static 'boardgame/images/default_profile.jpg' %}{% endif %}" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
             Profile
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">

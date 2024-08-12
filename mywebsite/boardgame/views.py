@@ -495,13 +495,13 @@ def game_details(request, event_id, game_id):
 # ---------------------------USER PROFILES---------------------------
 
 def user_profile(request,id):
-    user = User.objects.get(id=id)
-    user_profile = UserProfile.objects.filter(user=user).first()  
-    user_groups = GroupMembers.objects.filter(user=user).select_related('group')
-    user_events = EventAttendance.objects.filter(user=user).select_related('event')
+    profile_user = User.objects.get(id=id)
+    user_profile = UserProfile.objects.filter(user=profile_user).first()  
+    user_groups = GroupMembers.objects.filter(user=profile_user).select_related('group')
+    user_events = EventAttendance.objects.filter(user=profile_user).select_related('event')
     
     context = {
-        'user': user,
+        'profile_user': profile_user,
         'user_profile': user_profile,
         'user_groups': user_groups,
         'user_events': user_events,
