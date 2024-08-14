@@ -622,7 +622,7 @@ def groups(request):
 
     # If feature groups are displaying, cap results to 9
     if not (search_query or tag_name or category_name or show_user_groups):
-        group_list = group_list.annotate(num_members=Count('group_members')).order_by('-num_members')[:6]
+        group_list = group_list.annotate(num_members=Count('group_members')).order_by('-num_members')[:9]
 
     context = {
         'groups': group_list,
