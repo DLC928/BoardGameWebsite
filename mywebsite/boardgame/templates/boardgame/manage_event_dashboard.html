@@ -275,7 +275,7 @@
         </tr>
     </thead>
     <tbody>
-        <!-- For Pending Nominations -->
+        <!-- For Approved Nominations -->
         {% for nomination in approved_nominations %}
         <tr>
             <th scope="row">{{ forloop.counter }}</th>
@@ -286,11 +286,6 @@
             <td>maximum {{ nomination.max_playtime }} mins</td>
             <td>{{ vote_counts|get_item:nomination.id }}</td>
             <td>
-                <form method="post" class="d-inline">
-                    {% csrf_token %}
-                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                </form>
                 <form method="post" class="d-inline">
                     {% csrf_token %}
                     <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
@@ -367,11 +362,6 @@
                     {% csrf_token %}
                     <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
                     <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                </form>
-                <form method="post" class="d-inline">
-                    {% csrf_token %}
-                    <input type="hidden" name="nomination_id" value="{{ nomination.id }}">
-                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
                 </form>
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal"
                     data-bs-target="#deleteModal{{ nomination.id }}">
