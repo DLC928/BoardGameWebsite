@@ -127,7 +127,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'boardgame', 'static'),
 ]
 
-GOOGLE_API_KEY = "AIzaSyDIU8Gfx-COGs_FSN2zKXyFf7PX1QPDYHU"
+GOOGLE_API_KEY = ""
 
 BASE_COUNTRY = "UK"
 
